@@ -1,4 +1,4 @@
--- Plate & Scale website schema. Run once in Supabase → SQL Editor.
+-- SnapCal website schema. Run once in Supabase → SQL Editor.
 -- Access model: one human, signed in with email/password (Supabase Auth).
 -- All tables: only authenticated users read/write; the public anon key alone
 -- can do nothing, so it is safe inside the public GitHub repo.

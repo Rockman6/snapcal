@@ -1,4 +1,4 @@
-# Plate & Scale — web app
+# SnapCal — web app
 
 Free food + body tracker: meal logging (12,095-food multilingual database),
 barcode scanning (Open Food Facts), **in-browser AI photo recognition**

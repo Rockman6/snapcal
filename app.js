@@ -1,5 +1,5 @@
 'use strict';
-/* Plate & Scale — GitHub Pages + Supabase + in-browser model.
+/* SnapCal — GitHub Pages + Supabase + in-browser model.
    Storage: Supabase (email/password login). With no config.js values it
    falls back to this-browser-only localStorage so the site still demos. */
 
