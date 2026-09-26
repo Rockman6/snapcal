@@ -6,12 +6,13 @@
 /* ---------- i18n ---------- */
 const ZH = (navigator.language || 'en').toLowerCase().startsWith('zh');
 const T = ZH ? {
-  today:'今天', photo:'拍照', scan:'扫码', weight:'体重', foods:'食物', settings:'设置',
+  today:'今天', photo:'拍照', scan:'扫码', weight:'身体', foods:'食物', settings:'设置',
   kcal:'千卡', of:'/ 目标', protein:'蛋白质', fat:'脂肪', carbs:'碳水',
   meals:'今日记录', addFood:'＋ 添加食物', quick:'快速添加：',
   week:'近 7 天摄入（千卡）', grams:'克', per100:'每100克', add:'添加', cancel:'取消',
   search:'搜索食物（中文 / English / 日本語 / 한국어）…',
-  wTitle:'今日身体数据', wKg:'体重 (kg)', wMus:'肌肉量 (kg)', wFatPct:'体脂率 (%)', save:'保存',
+  wTitle:'今日身体数据', wKg:'体重 (kg) ＊必填', wMus:'肌肉量 (kg)', wFatPct:'体脂率 (%)', save:'保存', wMore:'更多身体成分（可选）', needHeight:'请先在设置中填写身高', needWeight:'请填写体重',
+  pTitle:'个人资料', pSex:'性别', pSexM:'男', pSexF:'女', pDob:'出生日期', pHeight:'身高 (cm) ＊必填', pAge:'年龄',
   wChart:'体重趋势（近 60 天）', wEmpty:'还没有记录。今天记录第一条吧。', wRecent:'最近记录',
   legendW:'体重', legendM:'肌肉量', goal:'目标',
   sTitle:'每日目标', sKcal:'热量目标（千卡）', sPro:'蛋白质目标（克）', sGoal:'目标体重 (kg)',
@@ -26,12 +27,13 @@ const T = ZH ? {
   scanHint:'将条形码对准相机', scanNote:'扫码后自动查询 Open Food Facts。', notFound:'未找到该商品，请用搜索添加。',
   noResults:'没有找到，试试别的关键词，或添加自定义食物。',
 } : {
-  today:'Today', photo:'Photo', scan:'Scan', weight:'Weight', foods:'Foods', settings:'Settings',
+  today:'Today', photo:'Photo', scan:'Scan', weight:'Body', foods:'Foods', settings:'Settings',
   kcal:'kcal', of:'/ target', protein:'Protein', fat:'Fat', carbs:'Carbs',
   meals:'Logged today', addFood:'＋ Add food', quick:'Quick add:',
   week:'Last 7 days (kcal)', grams:'g', per100:'per 100 g', add:'Add', cancel:'Cancel',
   search:'Search foods (English / 中文 / 日本語 / 한국어)…',
-  wTitle:'Today’s body stats', wKg:'Weight (kg)', wMus:'Muscle mass (kg)', wFatPct:'Body fat (%)', save:'Save',
+  wTitle:'Today’s body stats', wKg:'Weight (kg) ＊required', wMus:'Muscle mass (kg)', wFatPct:'Body fat (%)', save:'Save', wMore:'More body composition (optional)', needHeight:'Set your height in Settings first', needWeight:'Weight is required',
+  pTitle:'Profile', pSex:'Sex', pSexM:'Male', pSexF:'Female', pDob:'Date of birth', pHeight:'Height (cm) ＊required', pAge:'Age',
   wChart:'Weight trend (last 60 days)', wEmpty:'No records yet — log your first one today.', wRecent:'Recent',
   legendW:'Weight', legendM:'Muscle', goal:'goal',
   sTitle:'Daily targets', sKcal:'Calorie target (kcal)', sPro:'Protein target (g)', sGoal:'Goal weight (kg)',
@@ -47,10 +49,36 @@ const T = ZH ? {
   noResults:'No match — try another word, or add a custom food.',
 };
 
+/* ---------- body-composition metrics (all optional, saved as JSON) ---------- */
+const METRICS = [
+  { k:'fat_kg',    zh:'体脂肪 (kg)',     en:'Body fat mass (kg)' },
+  { k:'ffm_kg',    zh:'去脂体重 (kg)',   en:'Fat-free mass (kg)' },
+  { k:'skm_kg',    zh:'骨骼肌 (kg)',     en:'Skeletal muscle (kg)' },
+  { k:'protein_kg',zh:'蛋白质 (kg)',     en:'Protein (kg)' },
+  { k:'water_kg',  zh:'总水分 (kg)',     en:'Total body water (kg)' },
+  { k:'mineral_kg',zh:'无机盐 (kg)',     en:'Minerals (kg)' },
+  { k:'icw_kg',    zh:'细胞内液 (kg)',   en:'Intracellular fluid (kg)' },
+  { k:'ecw_kg',    zh:'细胞外液 (kg)',   en:'Extracellular fluid (kg)' },
+  { k:'bmr_kcal',  zh:'基础代谢 (kcal/d)', en:'BMR (kcal/d)' },
+  { k:'whr',       zh:'腰臀比',          en:'Waist-hip ratio' },
+  { k:'visceral',  zh:'内脏脂肪等级',    en:'Visceral fat level' },
+  { k:'seg_fat_ra', zh:'脂肪·右上肢 (kg)', en:'Fat · right arm (kg)' },
+  { k:'seg_fat_la', zh:'脂肪·左上肢 (kg)', en:'Fat · left arm (kg)' },
+  { k:'seg_fat_tr', zh:'脂肪·躯干 (kg)',   en:'Fat · trunk (kg)' },
+  { k:'seg_fat_rl', zh:'脂肪·右下肢 (kg)', en:'Fat · right leg (kg)' },
+  { k:'seg_fat_ll', zh:'脂肪·左下肢 (kg)', en:'Fat · left leg (kg)' },
+  { k:'seg_mus_ra', zh:'肌肉·右上肢 (kg)', en:'Muscle · right arm (kg)' },
+  { k:'seg_mus_la', zh:'肌肉·左上肢 (kg)', en:'Muscle · left arm (kg)' },
+  { k:'seg_mus_tr', zh:'肌肉·躯干 (kg)',   en:'Muscle · trunk (kg)' },
+  { k:'seg_mus_rl', zh:'肌肉·右下肢 (kg)', en:'Muscle · right leg (kg)' },
+  { k:'seg_mus_ll', zh:'肌肉·左下肢 (kg)', en:'Muscle · left leg (kg)' },
+];
+
 /* ---------- state & utils ---------- */
 const S = {
   foods: [], custom: [], entries: [], weights: [],
   targets: { kcal: 2000, protein: 120, goal: null },
+  profile: { sex: null, dob: null, height_cm: null },
   date: todayISO(), view: 'today', sheetFood: null,
   sb: null, session: null, deviceId: null,
   ortSession: null, modelMeta: null, camStream: null, zxReader: null,
@@ -69,7 +97,7 @@ function r1(x) { return Math.round((x || 0) * 10) / 10; }
 const LOCAL = !(window.PS_CONFIG && PS_CONFIG.SUPABASE_URL && PS_CONFIG.SUPABASE_ANON_KEY);
 const LS_KEY = 'plate-scale-local';
 function lsLoad() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch { return {}; } }
-function lsSave() { try { localStorage.setItem(LS_KEY, JSON.stringify({ entries: S.entries, weights: S.weights, custom: S.custom, targets: S.targets })); } catch {} }
+function lsSave() { try { localStorage.setItem(LS_KEY, JSON.stringify({ entries: S.entries, weights: S.weights, custom: S.custom, targets: S.targets, profile: S.profile })); } catch {} }
 function deviceId() {
   if (S.deviceId) return S.deviceId;
   try {
@@ -86,19 +114,22 @@ async function loadAll() {
     const l = lsLoad();
     S.entries = l.entries || []; S.weights = l.weights || []; S.custom = l.custom || [];
     if (l.targets) S.targets = l.targets;
+    if (l.profile) S.profile = l.profile;
     return;
   }
   const sb = S.sb;
-  const [e, w, c, t] = await Promise.all([
+  const [e, w, c, t, p] = await Promise.all([
     sb.from('entries').select('*').eq('deleted', false).order('created_at', { ascending: false }).limit(2000),
     sb.from('weights').select('*').order('date', { ascending: false }).limit(400),
     sb.from('foods_custom').select('*').order('id', { ascending: false }).limit(500),
     sb.from('settings').select('*').maybeSingle(),
+    sb.from('profiles').select('*').maybeSingle(),
   ]);
   S.entries = (e.data || []).map(r => ({ ...r, _key: r.device_id + '/' + r.local_id }));
   S.weights = w.data || [];
   S.custom = c.data || [];
   if (t.data) S.targets = { kcal: t.data.kcal ?? 2000, protein: t.data.protein ?? 120, goal: t.data.goal };
+  if (p.data) S.profile = p.data;
 }
 async function addEntry(e) {
   if (LOCAL) { S.entries.unshift({ _key: 'l' + Date.now(), ...e }); lsSave(); }
@@ -136,6 +167,14 @@ async function saveTargets() {
     if (error) return toast(error.message);
   }
   toast(T.saved); renderToday(); renderWeight();
+}
+async function saveProfile() {
+  if (LOCAL) { lsSave(); }
+  else {
+    const { error } = await S.sb.from('profiles').upsert({ ...S.profile }, { onConflict: 'user_id' });
+    if (error) return toast(error.message);
+  }
+  toast(T.saved); paintProfile(); paintBmi();
 }
 async function addCustom(f) {
   if (LOCAL) { S.custom.unshift(f); lsSave(); }
@@ -187,6 +226,7 @@ async function showApp() {
   $('login').hidden = true; $('appRoot').hidden = false;
   await loadAll().catch(err => toast(err.message || 'load error'));
   $('sKcal').value = S.targets.kcal || ''; $('sPro').value = S.targets.protein || ''; $('sGoal').value = S.targets.goal || '';
+  paintProfile();
   renderToday(); renderWeight(); renderResults();
 }
 
@@ -230,12 +270,38 @@ function buildStatic() {
   $('wTitle').textContent = T.wTitle; $('wKgL').textContent = T.wKg; $('wMusL').textContent = T.wMus;
   $('wFatL').textContent = T.wFatPct; $('wSave').textContent = T.save; $('wChartTitle').textContent = T.wChart;
   $('wEmpty').textContent = T.wEmpty; $('wRecentTitle').textContent = T.wRecent;
+  $('wMoreTitle').textContent = T.wMore;
+  $('wExtra').innerHTML = METRICS.map(m =>
+    `<div class="field"><label>${ZH ? m.zh : m.en}</label><input id="mx_${m.k}" type="number" step="0.01" inputmode="decimal" placeholder="—"></div>`).join('');
+  $('wKg').addEventListener('input', paintBmi);
   $('wSave').addEventListener('click', () => {
-    const kg = parseFloat($('wKg').value); if (!(kg > 0)) return;
+    const kg = parseFloat($('wKg').value);
+    if (!(kg > 0)) { toast(T.needWeight); return; }
+    if (!(S.profile.height_cm > 0)) { toast(T.needHeight); setView('settings'); return; }
     const w = { date: todayISO(), weight: kg, created_at: Date.now() };
     const m = parseFloat($('wMus').value); if (m > 0) w.muscle = m;
     const f = parseFloat($('wFat').value); if (f > 0) w.body_fat = f;
+    const metrics = {};
+    for (const mc of METRICS) {
+      const v = parseFloat($('mx_' + mc.k).value);
+      if (v > 0) metrics[mc.k] = v;
+    }
+    const hM = S.profile.height_cm / 100;
+    metrics.bmi = Math.round(kg / (hM * hM) * 10) / 10;
+    w.metrics = metrics;
     saveWeight(w);
+  });
+  // profile card
+  $('pTitle').textContent = T.pTitle; $('pSexL').textContent = T.pSex;
+  $('pSexM').textContent = T.pSexM; $('pSexF').textContent = T.pSexF;
+  $('pDobL').textContent = T.pDob; $('pHeightL').textContent = T.pHeight;
+  $('pSave').textContent = T.save;
+  $('pDob').addEventListener('change', paintAge);
+  $('pSave').addEventListener('click', () => {
+    const h = parseFloat($('pHeight').value);
+    if (!(h > 0)) { toast(T.needHeight); return; }
+    S.profile = { ...S.profile, sex: $('pSex').value || null, dob: $('pDob').value || null, height_cm: h };
+    saveProfile();
   });
   $('q').placeholder = T.search;
   $('q').addEventListener('input', renderResults);
@@ -280,6 +346,29 @@ function setView(v) {
   stopCam();
   if (v === 'photo') startPhoto();
   if (v === 'scan') startScan();
+}
+function paintProfile() {
+  $('pSex').value = S.profile.sex || '';
+  $('pDob').value = S.profile.dob || '';
+  $('pHeight').value = S.profile.height_cm || '';
+  paintAge(); paintBmi();
+}
+function paintAge() {
+  const dob = $('pDob').value || S.profile.dob;
+  if (!dob) { $('pAge').hidden = true; return; }
+  const b = new Date(dob), now = new Date();
+  let age = now.getFullYear() - b.getFullYear();
+  if (now < new Date(now.getFullYear(), b.getMonth(), b.getDate())) age--;
+  $('pAge').hidden = false;
+  $('pAge').textContent = `${T.pAge}: ${age}`;
+}
+function paintBmi() {
+  const kg = parseFloat($('wKg').value);
+  const h = (S.profile.height_cm || 0) / 100;
+  if (kg > 0 && h > 0) {
+    $('bmiLine').hidden = false;
+    $('bmiLine').textContent = 'BMI ' + (Math.round(kg / (h * h) * 10) / 10);
+  } else $('bmiLine').hidden = true;
 }
 function shiftDate(n) {
   const d = new Date(S.date + 'T12:00:00'); d.setDate(d.getDate() + n);

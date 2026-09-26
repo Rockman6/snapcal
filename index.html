@@ -204,9 +204,14 @@ footer{margin-top:26px; color:var(--ink2); font-size:12px; text-align:center}
   <section id="view-weight" class="stack" hidden>
     <div class="card">
       <h2 style="font-size:16px" id="wTitle"></h2>
-      <div class="field"><label id="wKgL"></label><input id="wKg" type="number" step="0.1" inputmode="decimal" placeholder="0.0"></div>
+      <div class="field"><label id="wKgL"></label><input id="wKg" type="number" step="0.1" inputmode="decimal" placeholder="0.0" required></div>
+      <p class="muted small num" id="bmiLine" hidden></p>
       <div class="field"><label id="wMusL"></label><input id="wMus" type="number" step="0.1" inputmode="decimal" placeholder="—"></div>
       <div class="field"><label id="wFatL"></label><input id="wFat" type="number" step="0.1" inputmode="decimal" placeholder="—"></div>
+      <details class="custom" id="wMore">
+        <summary id="wMoreTitle"></summary>
+        <div id="wExtra"></div>
+      </details>
       <button class="primary" id="wSave"></button>
     </div>
     <div class="card">
@@ -239,6 +244,18 @@ footer{margin-top:26px; color:var(--ink2); font-size:12px; text-align:center}
   </section>
 
   <section id="view-settings" class="stack" hidden>
+    <div class="card">
+      <h2 style="font-size:16px" id="pTitle"></h2>
+      <div class="field"><label id="pSexL"></label>
+        <select id="pSex" style="font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;width:150px">
+          <option value=""></option><option value="male" id="pSexM"></option><option value="female" id="pSexF"></option>
+        </select>
+      </div>
+      <div class="field"><label id="pDobL"></label><input id="pDob" type="date"></div>
+      <p class="muted small num" id="pAge" hidden></p>
+      <div class="field"><label id="pHeightL"></label><input id="pHeight" type="number" step="0.1" inputmode="decimal" placeholder="170"></div>
+      <button class="primary" id="pSave"></button>
+    </div>
     <div class="card">
       <h2 style="font-size:16px" id="sTitle"></h2>
       <div class="field"><label id="sKcalL"></label><input id="sKcal" type="number" inputmode="numeric"></div>
