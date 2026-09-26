@@ -27,7 +27,8 @@ const T = ZH ? {
   modelReady:'模型已就绪——在设备上离线识别，照片不会上传。', camDenied:'需要相机权限。请在浏览器设置中允许。',
   scanHint:'将条形码对准相机', scanNote:'扫码后自动查询 Open Food Facts。', notFound:'未找到该商品，请用搜索添加。',
   noResults:'没有找到，试试别的关键词，或添加自定义食物。', online:'🌐 在线查找并学习',
-  onlineBusy:'在线查找中…', onlineNone:'在线也没有找到——可以手动添加自定义食物。', learned:'已学习并存入数据库 ✓',
+  onlineBusy:'在线查找中…', onlineNone:'在线没有找到。', learned:'已学习并存入公共数据库 ✓',
+  ai:'🧠 本地 AI 估算', aiLoad:'首次使用需下载本地 AI 模型（约 1GB，只下载一次，永久缓存）', aiBusy:'AI 思考中…', aiNoGpu:'此浏览器不支持 WebGPU，无法运行本地 AI（试试较新的 iPhone/Chrome/Safari）', aiTag:'AI 估算·仅供参考',
 } : {
   today:'Today', photo:'Photo', scan:'Scan', weight:'Body', foods:'Foods', settings:'Settings',
   kcal:'kcal', of:'/ target', protein:'Protein', fat:'Fat', carbs:'Carbs',
@@ -50,7 +51,8 @@ const T = ZH ? {
   modelReady:'Model ready — runs on your device, photos never leave it.', camDenied:'Camera permission needed — allow it in your browser settings.',
   scanHint:'Point the camera at a barcode', scanNote:'Barcodes are looked up in Open Food Facts.', notFound:'Product not found — add it via search.',
   noResults:'No match — try another word, or add a custom food.', online:'🌐 Search online & learn it',
-  onlineBusy:'Searching online…', onlineNone:'Nothing online either — add it as a custom food.', learned:'Learned & saved to your database ✓',
+  onlineBusy:'Searching online…', onlineNone:'Nothing found online.', learned:'Learned & saved to the shared database ✓',
+  ai:'🧠 Local AI estimate', aiLoad:'First use downloads the local AI model (~1 GB, once, cached forever)', aiBusy:'AI thinking…', aiNoGpu:'This browser lacks WebGPU — local AI unavailable (try a recent iPhone/Chrome/Safari)', aiTag:'AI estimate · approximate',
 };
 
 /* ---------- body-composition metrics (all optional, saved as JSON) ---------- */
@@ -406,10 +408,25 @@ async function ensureModel() {
   $('modelNote').textContent = T.modelLoading;
   try {
     ort.env.wasm.numThreads = 1;
-    const [meta, session] = await Promise.all([
-      fetch('model/model-meta.json').then(r => r.json()),
-      ort.InferenceSession.create('model/food.onnx', { executionProviders: ['wasm'] }),
-    ]);
+    const meta = await fetch('model/model-meta.json', { cache: 'no-cache' }).then(r => r.json());
+    // Permanent storage: the 38MB model lives in Cache Storage under its version;
+    // it re-downloads ONLY when model-meta.json announces a new version.
+    const key = 'model/food.onnx?v=' + (meta.version || '0');
+    let buf = null;
+    try {
+      const cache = await caches.open('snapcal-model');
+      let hit = await cache.match(key);
+      if (!hit) {
+        for (const k of await cache.keys()) await cache.delete(k); // drop old versions
+        const res = await fetch('model/food.onnx');
+        if (res.ok) { await cache.put(key, res.clone()); hit = res; }
+      }
+      if (hit) buf = await hit.arrayBuffer();
+      if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+    } catch {}
+    const session = buf
+      ? await ort.InferenceSession.create(buf, { executionProviders: ['wasm'] })
+      : await ort.InferenceSession.create('model/food.onnx', { executionProviders: ['wasm'] });
     S.modelMeta = meta; S.ortSession = session;
     $('modelNote').textContent = T.modelReady;
   } catch (e) {
@@ -493,6 +510,7 @@ function showGuesses(gs) {
 
 /* ---------- camera: barcode ---------- */
 async function startScan() {
+  loadCnPack();
   try {
     S.zxReader = new ZXing.BrowserMultiFormatReader();
     const cb = (result) => { if (result) onBarcode(result.getText()); };
@@ -503,11 +521,24 @@ async function startScan() {
     }
   } catch (e) { toast(T.camDenied); $('scanNote').textContent = T.scanNote + ' (' + (e.message || e) + ')'; }
 }
+let cnPack = null;
+async function loadCnPack() {
+  if (cnPack !== null) return;
+  try { cnPack = await fetch('barcodes-cn.json').then(r => r.json()); }
+  catch { cnPack = {}; }
+}
 let scanBusy = false;
 async function onBarcode(code) {
   if (scanBusy || !$('sheet').hidden) return;
   scanBusy = true;
   try {
+    const local = cnPack && cnPack[code];
+    if (local) {
+      const [name, kcal, pro, fat, carbs, serving] = local;
+      openSheet({ _name: name, kcal, protein: pro, fat, carbs,
+        portion: serving > 0 ? serving : 100, source: 'cnpack' });
+      return;
+    }
     const fields = 'product_name,product_name_zh,brands,serving_quantity,nutriments';
     const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=${fields}`);
     const j = await res.json();
@@ -688,6 +719,8 @@ async function onlineLookup(q) {
   return found.slice(0, 5);
 }
 async function learnFood(f) {
+  const dup = S.learned.find(x => x.name.toLowerCase() === f.name.toLowerCase());
+  if (dup) return;
   const row = { name: f.name, kcal: f.kcal, protein: f.protein, fat: f.fat, carbs: f.carbs,
     portion: f.portion, origin: f.origin, created_at: Date.now() };
   if (LOCAL) { S.learned.unshift(row); lsSave(); }
@@ -697,6 +730,43 @@ async function learnFood(f) {
     S.learned.unshift(row);
   }
   toast(T.learned);
+}
+
+/* ---------- local browser LLM (WebLLM · Qwen2.5-1.5B · WebGPU) ---------- */
+let llmEngine = null, llmLoading = null;
+async function ensureLLM(onProgress) {
+  if (llmEngine) return llmEngine;
+  if (!navigator.gpu) throw new Error(T.aiNoGpu);
+  if (!llmLoading) {
+    llmLoading = (async () => {
+      const webllm = await import('https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.79/+esm');
+      const engine = await webllm.CreateMLCEngine('Qwen2.5-1.5B-Instruct-q4f16_1-MLC', {
+        initProgressCallback: (p) => onProgress && onProgress(p.text || ''),
+      });
+      llmEngine = engine;
+      return engine;
+    })();
+  }
+  return llmLoading;
+}
+async function aiEstimate(q) {
+  const engine = await ensureLLM((t) => { const b = $('goAI'); if (b) b.textContent = T.aiBusy + ' ' + t.slice(0, 40); });
+  const reply = await engine.chat.completions.create({
+    messages: [
+      { role: 'system', content: 'You are a nutrition database. Answer ONLY with one compact JSON object, no prose.' },
+      { role: 'user', content: `Food or drink: "${q}". Give typical values per 100 g (or 100 ml for drinks) and a typical single-serving size in grams. JSON keys exactly: kcal, protein, fat, carbs, portion.` },
+    ],
+    temperature: 0,
+    max_tokens: 120,
+  });
+  const text = reply.choices[0].message.content;
+  const m = text.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error('no json');
+  const j = JSON.parse(m[0]);
+  const kcal = parseFloat(j.kcal);
+  if (!(kcal >= 0 && kcal < 950)) throw new Error('bad estimate');
+  return { name: q, kcal, protein: parseFloat(j.protein) || 0, fat: parseFloat(j.fat) || 0,
+    carbs: parseFloat(j.carbs) || 0, portion: parseFloat(j.portion) > 0 ? parseFloat(j.portion) : 100, origin: 'ai' };
 }
 
 /* ---------- render: search ---------- */
@@ -726,10 +796,31 @@ function renderResults() {
     </button>`).join('');
   if (!all.length) html = `<p class="muted small" style="margin-top:10px">${T.noResults}</p>`;
   if (q.length >= 3 && all.length < 4) {
-    html += `<button class="primary" id="goOnline" style="margin-top:10px">${T.online}</button><div id="onlineBox"></div>`;
+    html += `<button class="primary" id="goOnline" style="margin-top:10px">${T.online}</button>
+      <button class="primary" id="goAI" style="margin-top:8px;background:var(--chip);color:var(--ink)">${T.ai}</button>
+      <p class="muted small" id="aiHint">${T.aiLoad}</p><div id="onlineBox"></div>`;
   }
   $('results').innerHTML = html;
   $('results').querySelectorAll('.result').forEach(b => b.addEventListener('click', () => openSheet(all[+b.dataset.i])));
+  const goAI = $('goAI');
+  if (goAI) goAI.addEventListener('click', async () => {
+    goAI.disabled = true; goAI.textContent = T.aiBusy;
+    try {
+      const h = await aiEstimate(q);
+      const box = $('onlineBox');
+      box.innerHTML = `<button class="result" id="aiPick">
+        <span><span class="n">${esc(h.name)}</span> <span class="alt">${T.aiTag}</span></span>
+        <span class="k num">${Math.round(h.kcal)} ${T.kcal}/100g</span></button>` + box.innerHTML;
+      $('aiPick').addEventListener('click', async () => {
+        await learnFood(h);
+        openSheet({ ...h, _name: h.name, source: 'ai' });
+        renderResults();
+      });
+      goAI.hidden = true; const hint = $('aiHint'); if (hint) hint.hidden = true;
+    } catch (e) {
+      goAI.textContent = (e && e.message) ? e.message.slice(0, 80) : 'AI error';
+    }
+  });
   const go = $('goOnline');
   if (go) go.addEventListener('click', async () => {
     go.disabled = true; go.textContent = T.onlineBusy;
