@@ -1,9 +1,14 @@
--- SnapCal website schema. Run once in Supabase → SQL Editor.
--- Access model: one human, signed in with email/password (Supabase Auth).
--- All tables: only authenticated users read/write; the public anon key alone
--- can do nothing, so it is safe inside the public GitHub repo.
+-- SnapCal schema v2 — multi-user: anyone may register; each account sees ONLY
+-- its own rows (user_id = auth.uid()). Run once in Supabase → SQL Editor.
+-- v2 drops the v1 tables (fine while data is test-only).
 
-create table if not exists public.entries (
+drop table if exists public.entries;
+drop table if exists public.weights;
+drop table if exists public.settings;
+drop table if exists public.foods_custom;
+
+create table public.entries (
+  user_id    uuid   not null default auth.uid(),
   device_id  text   not null,
   local_id   bigint not null,
   date       text   not null,
@@ -19,23 +24,26 @@ create table if not exists public.entries (
   primary key (device_id, local_id)
 );
 
-create table if not exists public.weights (
-  date       text primary key,
+create table public.weights (
+  user_id    uuid not null default auth.uid(),
+  date       text not null,
   weight     double precision not null,
   muscle     double precision,
   body_fat   double precision,
-  created_at bigint
+  created_at bigint,
+  primary key (user_id, date)
 );
 
-create table if not exists public.settings (
-  id       int primary key,
+create table public.settings (
+  user_id  uuid primary key default auth.uid(),
   kcal     double precision,
   protein  double precision,
   goal     double precision
 );
 
-create table if not exists public.foods_custom (
+create table public.foods_custom (
   id       bigint generated always as identity primary key,
+  user_id  uuid not null default auth.uid(),
   name     text not null,
   kcal     double precision not null,
   protein  double precision default 0,
@@ -49,11 +57,7 @@ alter table public.weights      enable row level security;
 alter table public.settings     enable row level security;
 alter table public.foods_custom enable row level security;
 
-drop policy if exists "auth all" on public.entries;
-drop policy if exists "auth all" on public.weights;
-drop policy if exists "auth all" on public.settings;
-drop policy if exists "auth all" on public.foods_custom;
-create policy "auth all" on public.entries      for all to authenticated using (true) with check (true);
-create policy "auth all" on public.weights      for all to authenticated using (true) with check (true);
-create policy "auth all" on public.settings     for all to authenticated using (true) with check (true);
-create policy "auth all" on public.foods_custom for all to authenticated using (true) with check (true);
+create policy "own rows" on public.entries      for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy "own rows" on public.weights      for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy "own rows" on public.settings     for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy "own rows" on public.foods_custom for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());

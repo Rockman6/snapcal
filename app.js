@@ -18,7 +18,8 @@ const T = ZH ? {
   cfTitle:'＋ 自定义食物', cfName:'名称', cfPor:'常见份量（克）',
   saved:'已保存', added:'已添加', deleted:'已删除', del:'删除',
   online:'✓ 数据保存在你自己的 Supabase 数据库。', local:'⚠ 未配置 Supabase——数据仅保存在此浏览器。',
-  login:'登录', loginHint:'使用你在 Supabase 中创建的账号登录。', logout:'退出登录', badLogin:'邮箱或密码不正确。',
+  login:'登录', register:'注册', loginHint:'登录后你的数据会在线保存，任何设备可访问。', logout:'退出登录', badLogin:'邮箱或密码不正确。',
+  toReg:'新用户？点这里注册', toLogin:'已有账号？点这里登录', checkEmail:'注册成功——请到邮箱点击确认链接后再登录。', regFail:'注册失败：',
   photoHint:'拍摄你的餐食', shoot:'拍照识别', analyzing:'识别中…', notThese:'都不是——去搜索',
   modelIdle:'首次使用会下载识别模型（约 33MB），之后缓存在本地。', modelLoading:'正在加载模型…',
   modelReady:'模型已就绪——在设备上离线识别，照片不会上传。', camDenied:'需要相机权限。请在浏览器设置中允许。',
@@ -37,7 +38,8 @@ const T = ZH ? {
   cfTitle:'＋ Custom food', cfName:'Name', cfPor:'Typical portion (g)',
   saved:'Saved', added:'Added', deleted:'Deleted', del:'Delete',
   online:'✓ Data lives in your own Supabase database.', local:'⚠ Supabase not configured — data stays in this browser only.',
-  login:'Sign in', loginHint:'Sign in with the account you created in Supabase.', logout:'Sign out', badLogin:'Wrong email or password.',
+  login:'Sign in', register:'Create account', loginHint:'Sign in and your data is stored online, reachable from any device.', logout:'Sign out', badLogin:'Wrong email or password.',
+  toReg:'New here? Create an account', toLogin:'Have an account? Sign in', checkEmail:'Account created — click the confirmation link in your email, then sign in.', regFail:'Sign-up failed: ',
   photoHint:'Photograph your meal', shoot:'Identify', analyzing:'Analyzing…', notThese:'None of these — search instead',
   modelIdle:'First use downloads the recognition model (~33 MB); it is cached after that.', modelLoading:'Loading model…',
   modelReady:'Model ready — runs on your device, photos never leave it.', camDenied:'Camera permission needed — allow it in your browser settings.',
@@ -91,7 +93,7 @@ async function loadAll() {
     sb.from('entries').select('*').eq('deleted', false).order('created_at', { ascending: false }).limit(2000),
     sb.from('weights').select('*').order('date', { ascending: false }).limit(400),
     sb.from('foods_custom').select('*').order('id', { ascending: false }).limit(500),
-    sb.from('settings').select('*').eq('id', 1).maybeSingle(),
+    sb.from('settings').select('*').maybeSingle(),
   ]);
   S.entries = (e.data || []).map(r => ({ ...r, _key: r.device_id + '/' + r.local_id }));
   S.weights = w.data || [];
@@ -121,7 +123,7 @@ async function removeEntry(key) {
 async function saveWeight(w) {
   if (LOCAL) { S.weights = S.weights.filter(x => x.date !== w.date); S.weights.push(w); lsSave(); }
   else {
-    const { error } = await S.sb.from('weights').upsert(w, { onConflict: 'date' });
+    const { error } = await S.sb.from('weights').upsert(w, { onConflict: 'user_id,date' });
     if (error) return toast(error.message);
     S.weights = S.weights.filter(x => x.date !== w.date); S.weights.push(w);
   }
@@ -130,7 +132,7 @@ async function saveWeight(w) {
 async function saveTargets() {
   if (LOCAL) lsSave();
   else {
-    const { error } = await S.sb.from('settings').upsert({ id: 1, ...S.targets });
+    const { error } = await S.sb.from('settings').upsert({ ...S.targets }, { onConflict: 'user_id' });
     if (error) return toast(error.message);
   }
   toast(T.saved); renderToday(); renderWeight();
@@ -156,7 +158,7 @@ async function init() {
   }).catch(() => {});
   $('storageNote').textContent = LOCAL ? T.local : T.online;
   if (LOCAL) { showApp(); return; }
-  S.sb = supabase.createClient(PS_CONFIG.SUPABASE_URL, PS_CONFIG.SUPABASE_ANON_KEY);
+  S.sb = supabase.createClient(PS_CONFIG.SUPABASE_URL, PS_CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
   const { data } = await S.sb.auth.getSession();
   if (data.session) { S.session = data.session; showApp(); }
   else showLogin();
@@ -166,7 +168,15 @@ async function init() {
 }
 function showLogin() {
   $('login').hidden = false; $('appRoot').hidden = true;
-  $('loginHint').textContent = T.loginHint; $('loginBtn').textContent = T.login;
+  S.authMode = S.authMode || 'login';
+  paintAuthMode();
+}
+function paintAuthMode() {
+  $('loginHint').textContent = T.loginHint;
+  $('loginBtn').textContent = S.authMode === 'register' ? T.register : T.login;
+  $('modeToggle').textContent = S.authMode === 'register' ? T.toLogin : T.toReg;
+  $('pw').autocomplete = S.authMode === 'register' ? 'new-password' : 'current-password';
+  $('loginErr').textContent = '';
 }
 async function showApp() {
   $('login').hidden = true; $('appRoot').hidden = false;
@@ -178,10 +188,24 @@ async function showApp() {
 /* ---------- static UI ---------- */
 function buildStatic() {
   $('hdrDate').textContent = todayISO();
-  $('loginBtn').addEventListener('click', async () => {
+  try { $('email').value = localStorage.getItem('ps-email') || ''; } catch {}
+  $('modeToggle').addEventListener('click', () => {
+    S.authMode = S.authMode === 'login' ? 'register' : 'login';
+    paintAuthMode();
+  });
+  $('loginForm').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
     $('loginErr').textContent = '';
-    const { error } = await S.sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('pw').value });
-    if (error) $('loginErr').textContent = T.badLogin;
+    const email = $('email').value.trim(), password = $('pw').value;
+    try { localStorage.setItem('ps-email', email); } catch {}
+    if (S.authMode === 'register') {
+      const { data, error } = await S.sb.auth.signUp({ email, password });
+      if (error) { $('loginErr').textContent = T.regFail + error.message; return; }
+      if (!data.session) $('loginErr').textContent = T.checkEmail; // email confirmation is on
+    } else {
+      const { error } = await S.sb.auth.signInWithPassword({ email, password });
+      if (error) $('loginErr').textContent = T.badLogin;
+    }
   });
   const tabs = [['today', T.today], ['photo', T.photo], ['scan', T.scan], ['weight', T.weight], ['foods', T.foods], ['settings', T.settings]];
   $('tabs').innerHTML = tabs.map(([k, l]) => `<button role="tab" data-v="${k}" aria-selected="${k === S.view}">${l}</button>`).join('');

@@ -139,10 +139,13 @@ footer{margin-top:26px; color:var(--ink2); font-size:12px; text-align:center}
   <div class="card">
     <h2 style="font-size:20px">SnapCal</h2>
     <p class="muted small" id="loginHint"></p>
-    <input id="email" type="email" autocomplete="username" placeholder="email">
-    <input id="pw" type="password" autocomplete="current-password" placeholder="password">
-    <div class="err" id="loginErr"></div>
-    <button class="primary" id="loginBtn"></button>
+    <form id="loginForm">
+      <input id="email" type="email" autocomplete="username" placeholder="email" required>
+      <input id="pw" type="password" autocomplete="current-password" placeholder="password" minlength="6" required>
+      <div class="err" id="loginErr"></div>
+      <button class="primary" id="loginBtn" type="submit"></button>
+    </form>
+    <button id="modeToggle" style="background:none;border:none;color:var(--accent);margin-top:10px;width:100%;font-size:13px"></button>
   </div>
 </section>
 
