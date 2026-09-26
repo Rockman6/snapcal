@@ -26,7 +26,8 @@ const T = ZH ? {
   modelIdle:'首次使用会下载识别模型（约 33MB），之后缓存在本地。', modelLoading:'正在加载模型…',
   modelReady:'模型已就绪——在设备上离线识别，照片不会上传。', camDenied:'需要相机权限。请在浏览器设置中允许。',
   scanHint:'将条形码对准相机', scanNote:'扫码后自动查询 Open Food Facts。', notFound:'未找到该商品，请用搜索添加。',
-  noResults:'没有找到，试试别的关键词，或添加自定义食物。',
+  noResults:'没有找到，试试别的关键词，或添加自定义食物。', online:'🌐 在线查找并学习',
+  onlineBusy:'在线查找中…', onlineNone:'在线也没有找到——可以手动添加自定义食物。', learned:'已学习并存入数据库 ✓',
 } : {
   today:'Today', photo:'Photo', scan:'Scan', weight:'Body', foods:'Foods', settings:'Settings',
   kcal:'kcal', of:'/ target', protein:'Protein', fat:'Fat', carbs:'Carbs',
@@ -48,7 +49,8 @@ const T = ZH ? {
   modelIdle:'First use downloads the recognition model (~33 MB); it is cached after that.', modelLoading:'Loading model…',
   modelReady:'Model ready — runs on your device, photos never leave it.', camDenied:'Camera permission needed — allow it in your browser settings.',
   scanHint:'Point the camera at a barcode', scanNote:'Barcodes are looked up in Open Food Facts.', notFound:'Product not found — add it via search.',
-  noResults:'No match — try another word, or add a custom food.',
+  noResults:'No match — try another word, or add a custom food.', online:'🌐 Search online & learn it',
+  onlineBusy:'Searching online…', onlineNone:'Nothing online either — add it as a custom food.', learned:'Learned & saved to your database ✓',
 };
 
 /* ---------- body-composition metrics (all optional, saved as JSON) ---------- */
@@ -78,7 +80,7 @@ const METRICS = [
 
 /* ---------- state & utils ---------- */
 const S = {
-  foods: [], custom: [], entries: [], weights: [],
+  foods: [], custom: [], learned: [], entries: [], weights: [],
   targets: { kcal: 2000, protein: 120, goal: null },
   profile: { sex: null, dob: null, height_cm: null },
   date: todayISO(), view: 'today', sheetFood: null,
@@ -99,7 +101,7 @@ function r1(x) { return Math.round((x || 0) * 10) / 10; }
 const LOCAL = !(window.PS_CONFIG && PS_CONFIG.SUPABASE_URL && PS_CONFIG.SUPABASE_ANON_KEY);
 const LS_KEY = 'plate-scale-local';
 function lsLoad() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch { return {}; } }
-function lsSave() { try { localStorage.setItem(LS_KEY, JSON.stringify({ entries: S.entries, weights: S.weights, custom: S.custom, targets: S.targets, profile: S.profile })); } catch {} }
+function lsSave() { try { localStorage.setItem(LS_KEY, JSON.stringify({ entries: S.entries, weights: S.weights, custom: S.custom, targets: S.targets, profile: S.profile, learned: S.learned })); } catch {} }
 function deviceId() {
   if (S.deviceId) return S.deviceId;
   try {
@@ -117,21 +119,24 @@ async function loadAll() {
     S.entries = l.entries || []; S.weights = l.weights || []; S.custom = l.custom || [];
     if (l.targets) S.targets = l.targets;
     if (l.profile) S.profile = l.profile;
+    S.learned = l.learned || [];
     return;
   }
   const sb = S.sb;
-  const [e, w, c, t, p] = await Promise.all([
+  const [e, w, c, t, p, ln] = await Promise.all([
     sb.from('entries').select('*').eq('deleted', false).order('created_at', { ascending: false }).limit(2000),
     sb.from('weights').select('*').order('date', { ascending: false }).limit(400),
     sb.from('foods_custom').select('*').order('id', { ascending: false }).limit(500),
     sb.from('settings').select('*').maybeSingle(),
     sb.from('profiles').select('*').maybeSingle(),
+    sb.from('foods_learned').select('*').order('id', { ascending: false }).limit(1000),
   ]);
   S.entries = (e.data || []).map(r => ({ ...r, _key: r.device_id + '/' + r.local_id }));
   S.weights = w.data || [];
   S.custom = c.data || [];
   if (t.data) S.targets = { kcal: t.data.kcal ?? 2000, protein: t.data.protein ?? 120, goal: t.data.goal };
   if (p.data) S.profile = p.data;
+  S.learned = ln.data || [];
 }
 async function addEntry(e) {
   if (LOCAL) { S.entries.unshift({ _key: 'l' + Date.now(), ...e }); lsSave(); }
@@ -441,8 +446,17 @@ async function classifyPhoto() {
   }
 }
 function labelToTerm(label) {
-  const name = label.includes(':') ? label.split(':').slice(1).join(':') : label;
-  return name.replace(/_/g, ' ').trim();
+  let name = label.includes(':') ? label.split(':').slice(1).join(':') : label;
+  name = name.replace(/_/g, ' ').trim();
+  // "重庆酸辣粉 (Chongqing Hot and Sour Rice Noodles)" -> primary half for search
+  const m = name.match(/^(.*?)\s*\((.*)\)\s*$/);
+  return m ? m[1].trim() : name;
+}
+function labelTerms(label) {
+  let name = label.includes(':') ? label.split(':').slice(1).join(':') : label;
+  name = name.replace(/_/g, ' ').trim();
+  const m = name.match(/^(.*?)\s*\((.*)\)\s*$/);
+  return m ? [m[1].trim(), m[2].trim()] : [name];
 }
 function showGuesses(gs) {
   const box = $('guessList');
@@ -453,12 +467,27 @@ function showGuesses(gs) {
   box.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
     box.hidden = true; $('photoShoot').hidden = false;
     if (b.classList.contains('none')) { setView('foods'); $('q').focus(); return; }
-    const term = labelToTerm(gs[+b.dataset.i].label).toLowerCase();
-    const hit = S.foods.filter(f =>
-      (f.en && f.en.toLowerCase().includes(term)) || (f.zh && f.zh.includes(term)))
-      .sort((a, b) => (a.source === 'seed' ? 0 : 1) - (b.source === 'seed' ? 0 : 1) || (a.en || '').length - (b.en || '').length)[0];
+    const terms = labelTerms(gs[+b.dataset.i].label).map(t => t.toLowerCase());
+    let hit = null;
+    for (const term of terms) {
+      hit = S.foods.filter(f =>
+        (f.en && f.en.toLowerCase().includes(term)) || (f.zh && f.zh.includes(term)) ||
+        (f.ja && f.ja.toLowerCase().includes(term)) || (f.ko && f.ko.includes(term)))
+        .sort((a, b) => (a.source === 'seed' ? 0 : 1) - (b.source === 'seed' ? 0 : 1) || nameOf(a).length - nameOf(b).length)[0];
+      if (hit) break;
+    }
+    if (!hit) { // fuzzy pass over both halves
+      let best = null;
+      for (const term of terms) {
+        for (const f of S.foods) {
+          const s = Math.max(fuzzy(f.en, term), fuzzy(f.zh, term), fuzzy(f.ja, term), fuzzy(f.ko, term));
+          if (s > 0.55 && (!best || s > best.s)) best = { f, s };
+        }
+      }
+      if (best) hit = best.f;
+    }
     if (hit) openSheet({ ...hit, _name: nameOf(hit) });
-    else { setView('foods'); $('q').value = term; renderResults(); }
+    else { setView('foods'); $('q').value = terms[0]; renderResults(); }
   }));
 }
 
@@ -602,29 +631,124 @@ function renderSuggest(shuffle) {
 }
 function hash(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
 
+/* ---------- fuzzy matching (typo tolerance, works for CJK via char bigrams) ---------- */
+function bigrams(s) {
+  const out = new Set();
+  for (let i = 0; i < s.length - 1; i++) out.add(s.slice(i, i + 2));
+  return out;
+}
+function fuzzy(name, q) {
+  if (!name || !q) return 0;
+  const n = String(name).toLowerCase();
+  if (n.includes(q)) return 1 - Math.min(0.3, n.length / 400); // substring is king
+  if (q.length < 3) return 0;
+  const a = bigrams(n), b = bigrams(q);
+  if (!a.size || !b.size) return 0;
+  let inter = 0;
+  for (const g of b) if (a.has(g)) inter++;
+  return (2 * inter) / (a.size + b.size); // Dice coefficient
+}
+
+/* ---------- online food lookup (USDA FoodData Central + Open Food Facts) ---------- */
+async function onlineLookup(q) {
+  const found = [];
+  try { // USDA generic foods (English)
+    const r = await fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY&pageSize=6&dataType=Foundation,SR%20Legacy,Survey%20(FNDDS)&query=${encodeURIComponent(q)}`);
+    if (r.ok) {
+      const j = await r.json();
+      for (const f of j.foods || []) {
+        const nut = {};
+        for (const n of f.foodNutrients || []) nut[n.nutrientNumber || n.nutrientId] = n.value;
+        const kcal = nut['208'] ?? nut[1008];
+        if (typeof kcal === 'number') {
+          found.push({ name: (f.description || q).toLowerCase(), kcal,
+            protein: nut['203'] ?? nut[1003] ?? 0, fat: nut['204'] ?? nut[1004] ?? 0,
+            carbs: nut['205'] ?? nut[1005] ?? 0, portion: 100, origin: 'usda' });
+        }
+      }
+    }
+  } catch {}
+  if (found.length < 3) {
+    try { // Open Food Facts products (any language)
+      const r = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=6&fields=product_name,nutriments,serving_quantity`);
+      if (r.ok) {
+        const j = await r.json();
+        for (const p of j.products || []) {
+          const kcal = p.nutriments && p.nutriments['energy-kcal_100g'];
+          if (typeof kcal === 'number' && p.product_name) {
+            found.push({ name: p.product_name, kcal,
+              protein: p.nutriments.proteins_100g || 0, fat: p.nutriments.fat_100g || 0,
+              carbs: p.nutriments.carbohydrates_100g || 0,
+              portion: Number(p.serving_quantity) > 0 ? Number(p.serving_quantity) : 100, origin: 'off' });
+          }
+        }
+      }
+    } catch {}
+  }
+  return found.slice(0, 5);
+}
+async function learnFood(f) {
+  const row = { name: f.name, kcal: f.kcal, protein: f.protein, fat: f.fat, carbs: f.carbs,
+    portion: f.portion, origin: f.origin, created_at: Date.now() };
+  if (LOCAL) { S.learned.unshift(row); lsSave(); }
+  else {
+    const { error } = await S.sb.from('foods_learned').insert(row);
+    if (error) { toast(error.message); return; }
+    S.learned.unshift(row);
+  }
+  toast(T.learned);
+}
+
 /* ---------- render: search ---------- */
 function renderResults() {
   const q = ($('q').value || '').trim().toLowerCase();
-  const custom = S.custom
-    .filter(c => !q || c.name.toLowerCase().includes(q))
+  const mine = [...S.custom, ...S.learned]
+    .filter(c => !q || c.name.toLowerCase().includes(q) || fuzzy(c.name, q) > 0.5)
     .map(c => ({ ...c, _name: c.name, _custom: true }));
   let rows;
   if (q) {
-    rows = S.foods.filter(f =>
-      (f.en && f.en.toLowerCase().includes(q)) || (f.zh && f.zh.toLowerCase().includes(q)) ||
-      (f.ja && f.ja.toLowerCase().includes(q)) || (f.ko && f.ko.toLowerCase().includes(q)))
-      .sort((a, b) => (a.source === 'seed' ? 0 : 1) - (b.source === 'seed' ? 0 : 1) || nameOf(a).length - nameOf(b).length)
-      .slice(0, 50);
+    // typo-tolerant: substring first; if thin, fall back to fuzzy over every name
+    rows = S.foods
+      .map(f => ({ f, s: Math.max(fuzzy(f.en, q), fuzzy(f.zh, q), fuzzy(f.ja, q), fuzzy(f.ko, q)) }))
+      .filter(x => x.s > 0.45)
+      .sort((a, b) => b.s - a.s ||
+        (a.f.source === 'seed' ? 0 : 1) - (b.f.source === 'seed' ? 0 : 1) ||
+        nameOf(a.f).length - nameOf(b.f).length)
+      .slice(0, 50).map(x => x.f);
   } else {
     rows = S.foods.filter(f => f.source === 'seed').slice(0, 30);
   }
-  const all = [...custom.slice(0, 10), ...rows.map(f => ({ ...f, _name: nameOf(f) }))];
-  $('results').innerHTML = all.length ? all.map((f, i) => `
+  const all = [...mine.slice(0, 10), ...rows.map(f => ({ ...f, _name: nameOf(f) }))];
+  let html = all.map((f, i) => `
     <button class="result" data-i="${i}">
       <span><span class="n">${esc(f._name)}</span>${f._custom ? '' : ` <span class="alt">${esc(altOf(f))}</span>`}</span>
       <span class="k num">${Math.round(f.kcal)} ${T.kcal}/100g</span>
-    </button>`).join('') : `<p class="muted small" style="margin-top:10px">${T.noResults}</p>`;
+    </button>`).join('');
+  if (!all.length) html = `<p class="muted small" style="margin-top:10px">${T.noResults}</p>`;
+  if (q.length >= 3 && all.length < 4) {
+    html += `<button class="primary" id="goOnline" style="margin-top:10px">${T.online}</button><div id="onlineBox"></div>`;
+  }
+  $('results').innerHTML = html;
   $('results').querySelectorAll('.result').forEach(b => b.addEventListener('click', () => openSheet(all[+b.dataset.i])));
+  const go = $('goOnline');
+  if (go) go.addEventListener('click', async () => {
+    go.disabled = true; go.textContent = T.onlineBusy;
+    const hits = await onlineLookup(q);
+    go.hidden = true;
+    const box = $('onlineBox');
+    if (!hits.length) { box.innerHTML = `<p class="muted small" style="margin-top:8px">${T.onlineNone}</p>`; return; }
+    box.innerHTML = hits.map((h, i) => `
+      <button class="result" data-i="${i}">
+        <span><span class="n">${esc(h.name)}</span> <span class="alt">${h.origin}</span></span>
+        <span class="k num">${Math.round(h.kcal)} ${T.kcal}/100g</span>
+      </button>`).join('');
+    box.querySelectorAll('.result').forEach(b => b.addEventListener('click', async () => {
+      const h = hits[+b.dataset.i];
+      await learnFood(h);
+      openSheet({ ...h, _name: h.name, source: 'learned' });
+      renderResults();
+    }));
+  });
 }
 
 /* ---------- charts ---------- */
