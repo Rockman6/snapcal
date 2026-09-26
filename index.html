@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plate &amp; Scale</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;600;700&display=swap">
+<style>
+:root{
+  --bg:#F6F7F4; --card:#FFFFFF; --ink:#20261F; --ink2:#5C645A; --line:#E3E6DF;
+  --accent:#2F7D46; --accent-contrast:#FFFFFF; --chip:#EDF1EA; --grid:#ECEFE8;
+  --carb:#2a78d6; --fat:#eb6834; --pro:#1baf7a; --danger:#C2453A;
+  --shadow:0 1px 3px rgba(32,38,31,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141613; --card:#1D201C; --ink:#ECEFE8; --ink2:#A9B0A4; --line:#2C312B;
+    --accent:#5FAE77; --accent-contrast:#10140F; --chip:#252A24; --grid:#262B25;
+    --carb:#3987e5; --fat:#d95926; --pro:#199e70; --danger:#E06B5F;
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Public Sans",-apple-system,"PingFang SC","Hiragino Sans","Noto Sans CJK SC",sans-serif;
+  padding:env(safe-area-inset-top,0px) 16px calc(32px + env(safe-area-inset-bottom,0px));
+  max-width:560px; margin:0 auto; font-size:15px; line-height:1.45;
+}
+h1,h2,h3{font-family:Fraunces,Georgia,serif; text-wrap:balance; margin:0}
+button{font:inherit; cursor:pointer}
+input{font:inherit; color:var(--ink); background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 12px; max-width:100%}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+[hidden]{display:none!important}
+.num{font-variant-numeric:tabular-nums}
+img,video,canvas{max-width:100%}
+
+header.app{display:flex; align-items:baseline; justify-content:space-between; padding:18px 0 10px}
+header.app h1{font-size:26px; font-weight:700}
+header.app .date{color:var(--ink2); font-size:13px}
+
+nav.tabs{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; display:flex; gap:4px;
+  background:var(--bg); padding:8px 0; overflow-x:auto}
+nav.tabs button{flex:1; border:1px solid var(--line); background:var(--card); color:var(--ink2);
+  border-radius:999px; padding:8px 10px; font-weight:600; font-size:13px; white-space:nowrap}
+nav.tabs button[aria-selected="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-contrast)}
+
+.card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:var(--shadow)}
+.stack{display:flex; flex-direction:column; gap:14px; margin-top:14px}
+.row{display:flex; align-items:center; gap:10px}
+.grow{flex:1}
+.muted{color:var(--ink2)}
+.small{font-size:12.5px}
+.right{text-align:right}
+
+.datebar{display:flex; align-items:center; justify-content:center; gap:14px; padding:10px}
+.datebar button{border:1px solid var(--line); background:var(--card); border-radius:10px; width:34px; height:34px; font-size:16px; color:var(--ink)}
+.datebar .d{font-weight:600; min-width:120px; text-align:center}
+
+.kcalhero{display:flex; align-items:baseline; gap:8px}
+.kcalhero .v{font-family:Fraunces,Georgia,serif; font-size:44px; font-weight:700; line-height:1}
+.kcalhero .t{color:var(--ink2)}
+.bar{height:10px; border-radius:6px; background:var(--chip); overflow:hidden; margin-top:6px}
+.bar i{display:block; height:100%; border-radius:6px; background:var(--accent)}
+.bar i.over{background:var(--danger)}
+.macros{display:flex; gap:10px; margin-top:14px}
+.macro{flex:1; min-width:0}
+.macro .lbl{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink2)}
+.dot{width:9px; height:9px; border-radius:3px; flex:none}
+.macro .val{font-weight:700; margin-top:2px}
+.macro .bar{margin-top:5px}
+
+.entry{display:flex; align-items:center; gap:10px; padding:11px 2px; border-top:1px solid var(--line)}
+.entry:first-of-type{border-top:none}
+.entry .name{font-weight:600}
+.entry .sub{color:var(--ink2); font-size:12.5px}
+.entry .del{border:none; background:none; color:var(--danger); font-size:13px; padding:6px}
+
+.primary{width:100%; margin-top:14px; background:var(--accent); color:var(--accent-contrast);
+  border:none; border-radius:12px; padding:13px; font-weight:700; font-size:15px}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+.chips button{border:1px solid var(--line); background:var(--chip); color:var(--ink);
+  border-radius:999px; padding:7px 12px; font-size:13px}
+
+.searchrow{display:flex; gap:8px}
+.searchrow input{flex:1}
+.result{display:flex; align-items:baseline; gap:10px; padding:10px 2px; border-top:1px solid var(--line); width:100%;
+  background:none; border-left:none; border-right:none; border-bottom:none; text-align:left; color:var(--ink)}
+.result .n{font-weight:600}
+.result .alt{color:var(--ink2); font-size:12px}
+.result .k{margin-left:auto; color:var(--ink2); font-size:13px; white-space:nowrap}
+
+.field{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 0}
+.field label{color:var(--ink2)}
+.field input{width:150px; text-align:right}
+
+.camwrap{position:relative; border-radius:16px; overflow:hidden; background:#000; aspect-ratio:3/4}
+.camwrap video{width:100%; height:100%; object-fit:cover; display:block}
+.camoverlay{position:absolute; left:0; right:0; bottom:14px; display:flex; flex-direction:column; align-items:center; gap:10px; padding:0 14px}
+.camhint{color:#fff; font-size:13px; text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.shutter{background:var(--accent); color:var(--accent-contrast); border:none; border-radius:999px; padding:13px 30px; font-weight:700; font-size:15px}
+.guesses{display:flex; flex-direction:column; gap:8px; width:100%}
+.guesses button{background:rgba(255,255,255,.95); color:#173521; border:none; border-radius:12px; padding:11px; font-weight:600}
+.guesses button.none{background:rgba(255,255,255,.75); color:#444; font-weight:400; font-size:13px}
+.modelnote{color:var(--ink2); font-size:12.5px; margin-top:8px}
+
+.sheetwrap{position:fixed; inset:0; background:rgba(15,18,14,.45); display:flex; align-items:flex-end; z-index:50}
+.sheet{background:var(--card); width:100%; max-width:560px; margin:0 auto; border-radius:20px 20px 0 0;
+  padding:20px 20px calc(24px + env(safe-area-inset-bottom,0px)); border:1px solid var(--line)}
+.sheet h3{font-size:19px}
+.gramrow{display:flex; align-items:center; gap:10px; margin-top:14px}
+.gramrow input{font-size:20px; font-weight:700; width:110px; text-align:center}
+.mult{display:flex; gap:8px; margin-top:10px}
+.mult button{border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:999px; padding:6px 13px; font-size:13px}
+.sheet .add{width:100%; margin-top:16px; background:var(--accent); color:var(--accent-contrast); border:none; border-radius:12px; padding:13px; font-weight:700}
+.sheet .cancel{width:100%; margin-top:6px; background:none; border:none; color:var(--ink2); padding:10px}
+
+.legend{display:flex; gap:14px; font-size:12.5px; color:var(--ink2); margin-bottom:6px}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+svg text{font-family:"Public Sans",-apple-system,sans-serif; font-variant-numeric:tabular-nums}
+#tip{position:fixed; z-index:60; background:var(--ink); color:var(--bg); font-size:12px; padding:6px 9px;
+  border-radius:8px; pointer-events:none; white-space:pre; box-shadow:var(--shadow)}
+#toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(24px + env(safe-area-inset-bottom,0px));
+  background:var(--ink); color:var(--bg); padding:9px 16px; border-radius:999px; font-size:13px; z-index:70; box-shadow:var(--shadow)}
+details.custom{margin-top:14px}
+details.custom summary{cursor:pointer; color:var(--accent); font-weight:600}
+footer{margin-top:26px; color:var(--ink2); font-size:12px; text-align:center}
+
+#login{max-width:400px; margin:8vh auto 0}
+#login input{width:100%; margin-top:10px}
+.err{color:var(--danger); font-size:13px; margin-top:8px; min-height:1em}
+</style>
+</head>
+<body>
+
+<section id="login" hidden>
+  <div class="card">
+    <h2 style="font-size:20px">Plate &amp; Scale</h2>
+    <p class="muted small" id="loginHint"></p>
+    <input id="email" type="email" autocomplete="username" placeholder="email">
+    <input id="pw" type="password" autocomplete="current-password" placeholder="password">
+    <div class="err" id="loginErr"></div>
+    <button class="primary" id="loginBtn"></button>
+  </div>
+</section>
+
+<div id="appRoot" hidden>
+<header class="app">
+  <h1>Plate &amp; Scale</h1>
+  <span class="date num" id="hdrDate"></span>
+</header>
+
+<nav class="tabs" id="tabs"></nav>
+
+<main>
+  <section id="view-today" class="stack">
+    <div class="datebar card">
+      <button id="dPrev" aria-label="previous day">‹</button>
+      <span class="d num" id="dLabel"></span>
+      <button id="dNext" aria-label="next day">›</button>
+    </div>
+    <div class="card">
+      <div class="kcalhero"><span class="v num" id="kcalNow">0</span><span class="t" id="kcalTarget"></span></div>
+      <div class="bar"><i id="kcalBar" style="width:0%"></i></div>
+      <div class="macros" id="macroRow"></div>
+    </div>
+    <div class="card">
+      <h2 style="font-size:16px" id="weekTitle"></h2>
+      <svg id="weekChart" width="100%" height="110" role="img"></svg>
+    </div>
+    <div class="card">
+      <h2 style="font-size:16px" id="mealsTitle"></h2>
+      <div id="entryList"></div>
+      <div class="chips" id="quickChips" hidden></div>
+      <button class="primary" id="openAdd"></button>
+    </div>
+  </section>
+
+  <section id="view-photo" class="stack" hidden>
+    <div class="camwrap">
+      <video id="photoVideo" playsinline muted></video>
+      <div class="camoverlay" id="photoOverlay">
+        <span class="camhint" id="photoHint"></span>
+        <button class="shutter" id="photoShoot"></button>
+        <div class="guesses" id="guessList" hidden></div>
+      </div>
+    </div>
+    <p class="modelnote" id="modelNote"></p>
+  </section>
+
+  <section id="view-scan" class="stack" hidden>
+    <div class="camwrap">
+      <video id="scanVideo" playsinline muted></video>
+      <div class="camoverlay"><span class="camhint" id="scanHint"></span></div>
+    </div>
+    <p class="modelnote" id="scanNote"></p>
+  </section>
+
+  <section id="view-weight" class="stack" hidden>
+    <div class="card">
+      <h2 style="font-size:16px" id="wTitle"></h2>
+      <div class="field"><label id="wKgL"></label><input id="wKg" type="number" step="0.1" inputmode="decimal" placeholder="0.0"></div>
+      <div class="field"><label id="wMusL"></label><input id="wMus" type="number" step="0.1" inputmode="decimal" placeholder="—"></div>
+      <div class="field"><label id="wFatL"></label><input id="wFat" type="number" step="0.1" inputmode="decimal" placeholder="—"></div>
+      <button class="primary" id="wSave"></button>
+    </div>
+    <div class="card">
+      <h2 style="font-size:16px" id="wChartTitle"></h2>
+      <div class="legend" id="wLegend" hidden></div>
+      <svg id="wChart" width="100%" height="200" role="img"></svg>
+      <p class="muted small" id="wEmpty" hidden></p>
+    </div>
+    <div class="card" id="wRecentCard" hidden>
+      <h2 style="font-size:16px" id="wRecentTitle"></h2>
+      <div id="wRecent"></div>
+    </div>
+  </section>
+
+  <section id="view-foods" class="stack" hidden>
+    <div class="card">
+      <div class="searchrow"><input id="q" autocomplete="off"></div>
+      <div id="results"></div>
+      <details class="custom">
+        <summary id="cfTitle"></summary>
+        <div class="field"><label id="cfNameL"></label><input id="cfName" style="width:180px"></div>
+        <div class="field"><label>kcal / 100g</label><input id="cfKcal" type="number" inputmode="decimal"></div>
+        <div class="field"><label id="cfProL"></label><input id="cfPro" type="number" inputmode="decimal"></div>
+        <div class="field"><label id="cfFatL"></label><input id="cfFat" type="number" inputmode="decimal"></div>
+        <div class="field"><label id="cfCarbL"></label><input id="cfCarb" type="number" inputmode="decimal"></div>
+        <div class="field"><label id="cfPorL"></label><input id="cfPor" type="number" inputmode="decimal" value="100"></div>
+        <button class="primary" id="cfSave"></button>
+      </details>
+    </div>
+  </section>
+
+  <section id="view-settings" class="stack" hidden>
+    <div class="card">
+      <h2 style="font-size:16px" id="sTitle"></h2>
+      <div class="field"><label id="sKcalL"></label><input id="sKcal" type="number" inputmode="numeric"></div>
+      <div class="field"><label id="sProL"></label><input id="sPro" type="number" inputmode="numeric"></div>
+      <div class="field"><label id="sGoalL"></label><input id="sGoal" type="number" step="0.1" inputmode="decimal"></div>
+      <button class="primary" id="sSave"></button>
+    </div>
+    <div class="card small muted" id="storageNote"></div>
+    <button class="primary" id="logout" style="background:var(--chip);color:var(--ink)"></button>
+  </section>
+</main>
+
+<footer>Plate &amp; Scale · 12,095 foods (USDA · MEXT · 中国食物成分表 · curated) · model: MobileNetV4, 101 dishes (global model coming)</footer>
+</div>
+
+<div class="sheetwrap" id="sheet" hidden>
+  <div class="sheet">
+    <h3 id="shName"></h3>
+    <p class="muted small" id="shPer100"></p>
+    <div class="gramrow">
+      <input id="shGrams" type="number" inputmode="decimal">
+      <span class="muted" id="shGramsL"></span>
+      <span class="grow right num" style="font-weight:700" id="shKcal"></span>
+    </div>
+    <div class="mult" id="shMult"></div>
+    <button class="add" id="shAdd"></button>
+    <button class="cancel" id="shCancel"></button>
+  </div>
+</div>
+
+<div id="tip" hidden></div>
+<div id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/ort.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
