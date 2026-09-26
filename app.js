@@ -20,7 +20,8 @@ const T = ZH ? {
   saved:'已保存', added:'已添加', deleted:'已删除', del:'删除',
   online:'✓ 数据保存在你自己的 Supabase 数据库。', local:'⚠ 未配置 Supabase——数据仅保存在此浏览器。',
   login:'登录', register:'注册', loginHint:'登录后你的数据会在线保存，任何设备可访问。', logout:'退出登录', badLogin:'邮箱或密码不正确。',
-  toReg:'新用户？点这里注册', toLogin:'已有账号？点这里登录', welcome:'邮箱已确认，欢迎使用 SnapCal！', checkEmail:'注册成功——请到邮箱点击确认链接后再登录。', regFail:'注册失败：',
+  toReg:'新用户？点这里注册', toLogin:'已有账号？点这里登录', welcome:'邮箱已确认，欢迎使用 SnapCal！',
+  sgTitle:'下一餐建议', sgBtn:'换一批', sgRemain:'今日剩余', sgDone:'今天的目标已完成 🎉', sgP:'蛋白质', checkEmail:'注册成功——请到邮箱点击确认链接后再登录。', regFail:'注册失败：',
   photoHint:'拍摄你的餐食', shoot:'拍照识别', analyzing:'识别中…', notThese:'都不是——去搜索',
   modelIdle:'首次使用会下载识别模型（约 33MB），之后缓存在本地。', modelLoading:'正在加载模型…',
   modelReady:'模型已就绪——在设备上离线识别，照片不会上传。', camDenied:'需要相机权限。请在浏览器设置中允许。',
@@ -41,7 +42,8 @@ const T = ZH ? {
   saved:'Saved', added:'Added', deleted:'Deleted', del:'Delete',
   online:'✓ Data lives in your own Supabase database.', local:'⚠ Supabase not configured — data stays in this browser only.',
   login:'Sign in', register:'Create account', loginHint:'Sign in and your data is stored online, reachable from any device.', logout:'Sign out', badLogin:'Wrong email or password.',
-  toReg:'New here? Create an account', toLogin:'Have an account? Sign in', welcome:'Email confirmed — welcome to SnapCal!', checkEmail:'Account created — click the confirmation link in your email, then sign in.', regFail:'Sign-up failed: ',
+  toReg:'New here? Create an account', toLogin:'Have an account? Sign in', welcome:'Email confirmed — welcome to SnapCal!',
+  sgTitle:'Next-meal ideas', sgBtn:'Shuffle', sgRemain:'Remaining today', sgDone:'Targets met for today 🎉', sgP:'protein', checkEmail:'Account created — click the confirmation link in your email, then sign in.', regFail:'Sign-up failed: ',
   photoHint:'Photograph your meal', shoot:'Identify', analyzing:'Analyzing…', notThese:'None of these — search instead',
   modelIdle:'First use downloads the recognition model (~33 MB); it is cached after that.', modelLoading:'Loading model…',
   modelReady:'Model ready — runs on your device, photos never leave it.', camDenied:'Camera permission needed — allow it in your browser settings.',
@@ -259,6 +261,8 @@ function buildStatic() {
     setView(b.dataset.v);
   });
   $('weekTitle').textContent = T.week; $('mealsTitle').textContent = T.meals;
+  $('sgTitle').textContent = T.sgTitle; $('sgBtn').textContent = T.sgBtn;
+  $('sgBtn').addEventListener('click', () => renderSuggest(true));
   $('openAdd').textContent = T.addFood;
   $('openAdd').addEventListener('click', () => { setView('foods'); $('q').focus(); });
   $('dPrev').addEventListener('click', () => shiftDate(-1));
@@ -538,6 +542,7 @@ function renderToday() {
     </div>`).join('');
   $('entryList').querySelectorAll('.del').forEach(b => b.addEventListener('click', () => removeEntry(b.dataset.k)));
   $('quickChips').hidden = es.length > 0;
+  renderSuggest(false);
   drawWeek();
 }
 function renderQuick() {
@@ -550,6 +555,52 @@ function renderQuick() {
     const f = picks[+b.dataset.i]; openSheet({ ...f, _name: nameOf(f) });
   }));
 }
+
+/* ---------- next-meal suggestions (rule-based v1; LLM version later) ---------- */
+let sgShuffle = 0;
+function renderSuggest(shuffle) {
+  if (shuffle) sgShuffle++;
+  const es = S.entries.filter(e => e.date === S.date);
+  const eaten = es.reduce((a, e) => ({ kcal: a.kcal + e.kcal, protein: a.protein + e.protein }), { kcal: 0, protein: 0 });
+  const remK = Math.round((S.targets.kcal || 2000) - eaten.kcal);
+  const remP = Math.round((S.targets.protein || 0) - eaten.protein);
+  $('sgRemain').textContent = `${T.sgRemain}: ${Math.max(0, remK)} ${T.kcal} · ${T.sgP} ${Math.max(0, remP)}g`;
+  const list = $('sgList');
+  if (remK <= 80) { list.innerHTML = `<p class="muted small">${T.sgDone}</p>`; return; }
+  // candidate pool: curated foods with sane portions + the user's own most-logged names
+  const pool = S.foods.filter(f => f.source === 'seed' && f.portion >= 30);
+  const freq = {};
+  for (const e of S.entries) freq[e.name] = (freq[e.name] || 0) + 1;
+  const scored = pool.map(f => {
+    // scale the typical portion to fit what's left, between 0.5x and 1.5x
+    let scale = Math.min(1.5, Math.max(0.5, (remK * 0.6) / (f.kcal * f.portion / 100)));
+    const grams = Math.round(f.portion * scale / 10) * 10;
+    const kcal = f.kcal * grams / 100, pro = (f.protein || 0) * grams / 100;
+    if (kcal > remK * 1.05) return null;
+    const needP = remP > 10;
+    let score = kcal / remK; // fill what's left
+    score += needP ? Math.min(1.2, pro / Math.max(remP, 1)) * 1.2 : 0;
+    score += freq[nameOf(f)] ? 0.35 : 0; // familiar foods first
+    score += (hash(f.id + ':' + sgShuffle) % 100) / 260; // shuffle variety
+    return { f, grams, kcal, pro, score };
+  }).filter(Boolean).sort((a, b) => b.score - a.score);
+  const picks = [];
+  for (const s of scored) {
+    if (picks.length >= 3) break;
+    if (picks.some(p => p.f.id.split('-')[0] === s.f.id.split('-')[0] && Math.abs(p.kcal - s.kcal) < 60)) continue;
+    picks.push(s);
+  }
+  list.innerHTML = picks.map((p, i) => `
+    <button class="result" data-i="${i}">
+      <span><span class="n">${esc(nameOf(p.f))}</span> <span class="alt num">${p.grams}${T.grams}</span></span>
+      <span class="k num">${Math.round(p.kcal)} ${T.kcal} · ${Math.round(p.pro)}g ${T.sgP}</span>
+    </button>`).join('');
+  list.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    const p = picks[+b.dataset.i];
+    openSheet({ ...p.f, _name: nameOf(p.f), portion: p.grams });
+  }));
+}
+function hash(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
 
 /* ---------- render: search ---------- */
 function renderResults() {
