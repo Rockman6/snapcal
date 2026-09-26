@@ -521,6 +521,20 @@ async function startScan() {
     }
   } catch (e) { toast(T.camDenied); $('scanNote').textContent = T.scanNote + ' (' + (e.message || e) + ')'; }
 }
+// Worldwide barcode pack: millions of OFF products, sharded by 4-digit barcode
+// prefix — one ~30 KB fetch per prefix, then cached for the session.
+const bcShards = {};
+async function bcLookup(code) {
+  const prefix = String(code).slice(0, 4);
+  if (!/^[0-9]{4}$/.test(prefix)) return null;
+  if (!(prefix in bcShards)) {
+    try {
+      const r = await fetch('bc/' + prefix + '.json');
+      bcShards[prefix] = r.ok ? await r.json() : {};
+    } catch { bcShards[prefix] = {}; }
+  }
+  return bcShards[prefix][code] || null;
+}
 let cnPack = null;
 async function loadCnPack() {
   if (cnPack !== null) return;
@@ -532,7 +546,7 @@ async function onBarcode(code) {
   if (scanBusy || !$('sheet').hidden) return;
   scanBusy = true;
   try {
-    const local = cnPack && cnPack[code];
+    const local = (await bcLookup(code)) || (cnPack && cnPack[code]);
     if (local) {
       const [name, kcal, pro, fat, carbs, serving] = local;
       openSheet({ _name: name, kcal, protein: pro, fat, carbs,
