@@ -21,7 +21,8 @@ const T = ZH ? {
   online:'✓ 数据保存在你自己的 Supabase 数据库。', local:'⚠ 未配置 Supabase——数据仅保存在此浏览器。',
   login:'登录', register:'注册', loginHint:'登录后你的数据会在线保存，任何设备可访问。', logout:'退出登录', badLogin:'邮箱或密码不正确。',
   toReg:'新用户？点这里注册', toLogin:'已有账号？点这里登录', welcome:'邮箱已确认，欢迎使用 SnapCal！',
-  sgTitle:'下一餐建议', sgBtn:'换一批', sgRemain:'今日剩余', sgDone:'今天的目标已完成 🎉', sgP:'蛋白质', checkEmail:'注册成功——请到邮箱点击确认链接后再登录。', regFail:'注册失败：',
+  sgTitle:'下一餐建议', sgBtn:'换一批', sgRemain:'今日剩余', sgDone:'今天的目标已完成 🎉', sgP:'蛋白质',
+  eb:'能量收支', ebIn:'摄入', ebOut:'消耗', ebNet:'净值', ebEst:'消耗 = 基础代谢(按资料估算)＋手表活动', ebNoW:'（还没有手表数据——见 Apple Watch 接入指南）', ebSteps:'步数', ebSleep:'睡眠', ebRhr:'静息心率', checkEmail:'注册成功——请到邮箱点击确认链接后再登录。', regFail:'注册失败：',
   photoHint:'拍摄你的餐食', shoot:'拍照识别', analyzing:'识别中…', notThese:'都不是——去搜索',
   modelIdle:'首次使用会下载识别模型（约 33MB），之后缓存在本地。', modelLoading:'正在加载模型…',
   modelReady:'模型已就绪——在设备上离线识别，照片不会上传。', camDenied:'需要相机权限。请在浏览器设置中允许。',
@@ -45,7 +46,8 @@ const T = ZH ? {
   online:'✓ Data lives in your own Supabase database.', local:'⚠ Supabase not configured — data stays in this browser only.',
   login:'Sign in', register:'Create account', loginHint:'Sign in and your data is stored online, reachable from any device.', logout:'Sign out', badLogin:'Wrong email or password.',
   toReg:'New here? Create an account', toLogin:'Have an account? Sign in', welcome:'Email confirmed — welcome to SnapCal!',
-  sgTitle:'Next-meal ideas', sgBtn:'Shuffle', sgRemain:'Remaining today', sgDone:'Targets met for today 🎉', sgP:'protein', checkEmail:'Account created — click the confirmation link in your email, then sign in.', regFail:'Sign-up failed: ',
+  sgTitle:'Next-meal ideas', sgBtn:'Shuffle', sgRemain:'Remaining today', sgDone:'Targets met for today 🎉', sgP:'protein',
+  eb:'Energy balance', ebIn:'In', ebOut:'Out', ebNet:'Net', ebEst:'Out = BMR (from profile) + Watch activity', ebNoW:'(no Watch data yet — see the Apple Watch guide)', ebSteps:'Steps', ebSleep:'Sleep', ebRhr:'Resting HR', checkEmail:'Account created — click the confirmation link in your email, then sign in.', regFail:'Sign-up failed: ',
   photoHint:'Photograph your meal', shoot:'Identify', analyzing:'Analyzing…', notThese:'None of these — search instead',
   modelIdle:'First use downloads the recognition model (~33 MB); it is cached after that.', modelLoading:'Loading model…',
   modelReady:'Model ready — runs on your device, photos never leave it.', camDenied:'Camera permission needed — allow it in your browser settings.',
@@ -82,7 +84,7 @@ const METRICS = [
 
 /* ---------- state & utils ---------- */
 const S = {
-  foods: [], custom: [], learned: [], entries: [], weights: [],
+  foods: [], custom: [], learned: [], entries: [], weights: [], health: [],
   targets: { kcal: 2000, protein: 120, goal: null },
   profile: { sex: null, dob: null, height_cm: null },
   date: todayISO(), view: 'today', sheetFood: null,
@@ -125,13 +127,14 @@ async function loadAll() {
     return;
   }
   const sb = S.sb;
-  const [e, w, c, t, p, ln] = await Promise.all([
+  const [e, w, c, t, p, ln, hd] = await Promise.all([
     sb.from('entries').select('*').eq('deleted', false).order('created_at', { ascending: false }).limit(2000),
     sb.from('weights').select('*').order('date', { ascending: false }).limit(400),
     sb.from('foods_custom').select('*').order('id', { ascending: false }).limit(500),
     sb.from('settings').select('*').maybeSingle(),
     sb.from('profiles').select('*').maybeSingle(),
     sb.from('foods_learned').select('*').order('id', { ascending: false }).limit(1000),
+    sb.from('health_daily').select('*').order('date', { ascending: false }).limit(90),
   ]);
   S.entries = (e.data || []).map(r => ({ ...r, _key: r.device_id + '/' + r.local_id }));
   S.weights = w.data || [];
@@ -139,6 +142,7 @@ async function loadAll() {
   if (t.data) S.targets = { kcal: t.data.kcal ?? 2000, protein: t.data.protein ?? 120, goal: t.data.goal };
   if (p.data) S.profile = p.data;
   S.learned = ln.data || [];
+  S.health = hd.data || [];
 }
 async function addEntry(e) {
   if (LOCAL) { S.entries.unshift({ _key: 'l' + Date.now(), ...e }); lsSave(); }
@@ -591,6 +595,40 @@ function sheetKcal() {
   $('shKcal').textContent = Math.round(f.kcal * g / 100) + ' ' + T.kcal;
 }
 
+/* ---------- energy balance (Mifflin-St Jeor BMR + Watch activity) ---------- */
+function bmrEstimate() {
+  const p = S.profile;
+  const w = [...S.weights].sort((a, b) => a.date < b.date ? 1 : -1)[0];
+  if (!p.height_cm || !p.dob || !p.sex || !w) return null;
+  const age = Math.max(10, Math.floor((Date.now() - new Date(p.dob).getTime()) / 3.15576e10));
+  const base = 10 * w.weight + 6.25 * p.height_cm - 5 * age;
+  return Math.round(p.sex === 'male' ? base + 5 : base - 161);
+}
+function renderEnergy(eatenKcal) {
+  $('ebTitle').textContent = T.eb;
+  const hd = S.health.find(h => h.date === S.date);
+  const bmr = bmrEstimate();
+  if (!bmr) { $('ebCard').hidden = true; return; }
+  $('ebCard').hidden = false;
+  const out = bmr + (hd && hd.active_kcal ? hd.active_kcal : 0);
+  const net = Math.round(eatenKcal - out);
+  $('ebRow').innerHTML = [
+    [T.ebIn, Math.round(eatenKcal) + ' ' + T.kcal, ''],
+    [T.ebOut, Math.round(out) + ' ' + T.kcal, ''],
+    [T.ebNet, (net > 0 ? '+' : '') + net + ' ' + T.kcal, net > 0 ? 'color:var(--fat)' : 'color:var(--pro)'],
+  ].map(([l, v, style]) => `
+    <div class="macro"><div class="lbl">${l}</div><div class="val num" style="${style}">${v}</div></div>`).join('');
+  let sub = T.ebEst;
+  if (hd) {
+    const bits = [];
+    if (hd.steps) bits.push(`${T.ebSteps} ${Math.round(hd.steps).toLocaleString()}`);
+    if (hd.sleep_hours) bits.push(`${T.ebSleep} ${hd.sleep_hours.toFixed(1)}h`);
+    if (hd.resting_hr) bits.push(`${T.ebRhr} ${Math.round(hd.resting_hr)}`);
+    if (bits.length) sub += ' · ' + bits.join(' · ');
+  } else sub += ' ' + T.ebNoW;
+  $('ebSub').textContent = sub;
+}
+
 /* ---------- render: today ---------- */
 function renderToday() {
   $('dLabel').textContent = fmtDate(S.date);
@@ -616,6 +654,7 @@ function renderToday() {
     </div>`).join('');
   $('entryList').querySelectorAll('.del').forEach(b => b.addEventListener('click', () => removeEntry(b.dataset.k)));
   $('quickChips').hidden = es.length > 0;
+  renderEnergy(tot.kcal);
   renderSuggest(false);
   drawWeek();
 }
