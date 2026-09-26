@@ -19,7 +19,7 @@ const T = ZH ? {
   saved:'已保存', added:'已添加', deleted:'已删除', del:'删除',
   online:'✓ 数据保存在你自己的 Supabase 数据库。', local:'⚠ 未配置 Supabase——数据仅保存在此浏览器。',
   login:'登录', register:'注册', loginHint:'登录后你的数据会在线保存，任何设备可访问。', logout:'退出登录', badLogin:'邮箱或密码不正确。',
-  toReg:'新用户？点这里注册', toLogin:'已有账号？点这里登录', checkEmail:'注册成功——请到邮箱点击确认链接后再登录。', regFail:'注册失败：',
+  toReg:'新用户？点这里注册', toLogin:'已有账号？点这里登录', welcome:'邮箱已确认，欢迎使用 SnapCal！', checkEmail:'注册成功——请到邮箱点击确认链接后再登录。', regFail:'注册失败：',
   photoHint:'拍摄你的餐食', shoot:'拍照识别', analyzing:'识别中…', notThese:'都不是——去搜索',
   modelIdle:'首次使用会下载识别模型（约 33MB），之后缓存在本地。', modelLoading:'正在加载模型…',
   modelReady:'模型已就绪——在设备上离线识别，照片不会上传。', camDenied:'需要相机权限。请在浏览器设置中允许。',
@@ -39,7 +39,7 @@ const T = ZH ? {
   saved:'Saved', added:'Added', deleted:'Deleted', del:'Delete',
   online:'✓ Data lives in your own Supabase database.', local:'⚠ Supabase not configured — data stays in this browser only.',
   login:'Sign in', register:'Create account', loginHint:'Sign in and your data is stored online, reachable from any device.', logout:'Sign out', badLogin:'Wrong email or password.',
-  toReg:'New here? Create an account', toLogin:'Have an account? Sign in', checkEmail:'Account created — click the confirmation link in your email, then sign in.', regFail:'Sign-up failed: ',
+  toReg:'New here? Create an account', toLogin:'Have an account? Sign in', welcome:'Email confirmed — welcome to SnapCal!', checkEmail:'Account created — click the confirmation link in your email, then sign in.', regFail:'Sign-up failed: ',
   photoHint:'Photograph your meal', shoot:'Identify', analyzing:'Analyzing…', notThese:'None of these — search instead',
   modelIdle:'First use downloads the recognition model (~33 MB); it is cached after that.', modelLoading:'Loading model…',
   modelReady:'Model ready — runs on your device, photos never leave it.', camDenied:'Camera permission needed — allow it in your browser settings.',
@@ -159,7 +159,12 @@ async function init() {
   $('storageNote').textContent = LOCAL ? T.local : T.online;
   if (LOCAL) { showApp(); return; }
   S.sb = supabase.createClient(PS_CONFIG.SUPABASE_URL, PS_CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+  const fromEmail = /access_token=|type=signup/.test(location.hash);
   const { data } = await S.sb.auth.getSession();
+  if (fromEmail) {
+    history.replaceState(null, '', location.pathname + location.search);
+    setTimeout(() => { if (S.session) toast(T.welcome); }, 800);
+  }
   if (data.session) { S.session = data.session; showApp(); }
   else showLogin();
   S.sb.auth.onAuthStateChange((_ev, session) => {
@@ -199,7 +204,7 @@ function buildStatic() {
     const email = $('email').value.trim(), password = $('pw').value;
     try { localStorage.setItem('ps-email', email); } catch {}
     if (S.authMode === 'register') {
-      const { data, error } = await S.sb.auth.signUp({ email, password });
+      const { data, error } = await S.sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + location.pathname } });
       if (error) { $('loginErr').textContent = T.regFail + error.message; return; }
       if (!data.session) $('loginErr').textContent = T.checkEmail; // email confirmation is on
     } else {
