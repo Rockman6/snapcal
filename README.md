@@ -20,13 +20,13 @@ tracking with trend charts. Hosted on GitHub Pages; data in your own Supabase.
 2. `gh auth login` in the terminal (browser flow).
 3. From this folder:
    ```bash
-   gh repo create plate-scale --public --source=. --push
-   gh api repos/{owner}/plate-scale/pages -X POST -f build_type=workflow \
+   # (already deployed: https://github.com/Snapcalor/snapcalor.github.io)
+   gh api repos/Snapcalor/snapcalor.github.io/pages -X POST -f build_type=workflow \
      || echo "enable Pages in repo Settings → Pages → Source: GitHub Actions or main branch"
    ```
    Simplest UI route: repo Settings → Pages → Source: **Deploy from a branch**,
    Branch: **main / (root)** → Save. The site appears at
-   `https://<you>.github.io/plate-scale/` in ~1 minute.
+   `https://snapcalor.github.io/` in ~1 minute.
 
 Every later update: commit + push, Pages redeploys automatically.
 
