@@ -56,6 +56,11 @@ const T = ZH ? {
   edSave:'保存修改', edDelete:'删除这条记录', edConfirm:'再点一次确认删除', edit:'修改',
   sVlmCloud:'智能 · 云端（推荐，手机不耗电）', cloudReady:'智能识别（云端）已就绪 · 手机无需下载模型',
   cloudNeedsLogin:'云端识别需要先登录', cloudLimit:'今天的云端识别次数已用完，明天再来（或在设置里改用本地模式）', cloudBusy:'云端 AI 暂时繁忙，请稍后再试',
+  modeSolo:'🍽 一人食', modeShared:'👥 聚餐分摊', sharePeopleL:'几个人吃', shareMineL:'我吃了', shareLess:'少一点', shareEq:'平均', shareMore:'多一点',
+  shareHint:'拍整桌菜：AI 列出每道菜的整盘分量，只记录你的那一份（估算）。没吃的菜点 × 去掉。',
+  shareTotal:'整桌共 {t} 千卡 → 你的一份（{n} 人 · {k}）：{c} 千卡', shareLog:'记录我的一份 · {k} 千卡', shareTag:'聚餐 1/{n}',
+  ingHint:'🥬 这是食材照片——请逐项核对：识别错的取消勾选，克数不对直接改。只记录勾选的食材。', ingLog:'记录已确认的 {n} 项 · {k} 千卡',
+  pkgText:'📝 配料表（AI 抄录——请对照包装核对，可直接修改）', pkgLabel:'📊 读取这张照片里的营养成分表', pkgCopy:'复制', pkgCopied:'已复制',
   bowlL:'🥣 用的碗/盘', bowlNone:'未设置（AI 估算大小）', bowlAddOpt:'＋ 添加我的碗…',
   measureTip:'想估得更准：选一个量过的碗；或者放在厨房秤上称；或者在画面里放一双筷子/一张银行卡作参照。斜 45° 拍，让碗沿和食物表面都能看到。',
   fillL:'装了多满', fillSet:'拖动设置',
@@ -128,6 +133,11 @@ const T = ZH ? {
   edSave:'Save changes', edDelete:'Delete this entry', edConfirm:'Tap again to delete', edit:'Edit',
   sVlmCloud:'Smart · Cloud (recommended, no phone compute)', cloudReady:'Smart recognition (cloud) ready · nothing to download',
   cloudNeedsLogin:'Cloud recognition needs you to sign in', cloudLimit:'Today\'s cloud photo limit is used up — try tomorrow, or switch to an on-device mode in Settings', cloudBusy:'The cloud AI is busy — try again in a moment',
+  modeSolo:'🍽 Just me', modeShared:'👥 Shared meal', sharePeopleL:'People', shareMineL:'I ate', shareLess:'less', shareEq:'an equal share', shareMore:'more',
+  shareHint:'Photograph the whole table: the AI lists every dish at full size and only your share is logged (an estimate). Remove dishes you didn\'t eat with ×.',
+  shareTotal:'Whole table {t} kcal → your share ({n} people · {k}): {c} kcal', shareLog:'Log my share · {k} kcal', shareTag:'Shared 1/{n}',
+  ingHint:'🥬 These look like ingredients — check each line: untick anything misidentified and fix the grams. Only ticked items are logged.', ingLog:'Log {n} confirmed · {k} kcal',
+  pkgText:'📝 Ingredients list (AI transcription — check it against the pack; you can edit it)', pkgLabel:'📊 Read the nutrition table in this photo', pkgCopy:'Copy', pkgCopied:'Copied',
   bowlL:'🥣 Bowl / plate', bowlNone:'Not set (AI judges the size)', bowlAddOpt:'＋ Add my bowl…',
   measureTip:'For better grams: pick a bowl you measured, or weigh it on a kitchen scale, or keep chopsticks or a bank card in the frame. Shoot from about 45° so the rim and the food surface both show.',
   fillL:'How full', fillSet:'drag to set',
@@ -201,10 +211,14 @@ First fill "seen" with one short sentence describing what is really in the photo
 Shape (fill every <...> with your own values):
 {"seen":"<one short sentence>","meal":"<overall name in English>","meal_zh":"<中文名称>","items":[{"name":"<specific food in English>","name_zh":"<中文名>","count":<number of pieces>,"grams":<total edible grams of this item>,"kcal_100g":<calories per 100 g>}]}`;
 let vlm = null, vlmLoad = null;
+// Share of a shared table you ate (defined before init() runs at load).
+const SHARE_K = [[0.75, 'shareLess'], [1, 'shareEq'], [1.25, 'shareMore']];
 // Restaurant chains with published nutrition. mcd-cn: McDonald's China's own product pages
 // (per serving); the others: USDA lab data for the US chains (per 100 g).
 const CHAINS = [
   { id: 'mcd-cn', zh: '麦当劳（中国）', en: "McDonald's (China)", src: 'chain-mcd-cn' },
+  // KFC China: China CDC lab data per 100 g, plus USDA's KFC lab rows (same Original Recipe chicken).
+  { id: 'kfc-cn', zh: '肯德基（中国）', en: 'KFC (China)', src: 'chain-kfc-cn', prefix: 'KFC' },
   { id: 'mcd-us', zh: '麦当劳（美国）', en: "McDonald's (US)", prefix: "McDONALD'S" },
   { id: 'kfc-us', zh: '肯德基（美国）', en: 'KFC (US)', prefix: 'KFC' },
   { id: 'bk', zh: '汉堡王', en: 'Burger King', prefix: 'BURGER KING' },
@@ -465,6 +479,19 @@ function buildStatic() {
       renderResults();
     });
   }
+  loadShare();
+  for (const k of ['modeSolo', 'modeShared', 'sharePeopleL', 'shareMineL', 'shareHint']) $(k).textContent = T[k];
+  $('mealMode').addEventListener('click', (ev) => {
+    const b = ev.target.closest('button'); if (!b) return;
+    S.share.on = b.dataset.m === '1'; paintShare();
+  });
+  $('shareDec').addEventListener('click', () => { S.share.n = Math.max(2, S.share.n - 1); paintShare(); });
+  $('shareInc').addEventListener('click', () => { S.share.n = Math.min(30, S.share.n + 1); paintShare(); });
+  $('shareK').addEventListener('click', (ev) => {
+    const b = ev.target.closest('button'); if (!b) return;
+    S.share.k = parseFloat(b.dataset.k); paintShare();
+  });
+  paintShare();
   try { S.bowlSel = localStorage.getItem('ps-bowl-sel') || ''; } catch { S.bowlSel = ''; }
   $('bowlL').textContent = T.bowlL; $('measureTip').textContent = T.measureTip;
   $('plateBowl').addEventListener('change', (ev) => {
@@ -897,7 +924,8 @@ async function cloudCall(body) {
 async function cloudAnalyze(canvas, hint) {
   const b = userBowl();
   const bowl = b ? { kind: b.kind, rim_cm: b.rim, depth_cm: b.depth, ml: b.ml } : undefined;
-  return parsePlate(await cloudCall({ task: 'meal', image: canvasB64(canvas, 1024), hint: hint || '', bowl }));
+  const shared = S.share.on ? S.share.n : undefined;
+  return parsePlate(await cloudCall({ task: 'meal', image: canvasB64(canvas, 1024), hint: hint || '', bowl, shared }));
 }
 // First complete JSON object in a model reply (models sometimes add text after it).
 function firstJson(text) {
@@ -938,8 +966,8 @@ function labelTo100(j) {
   f.portion = serving > 0 ? serving : 100;
   return f;
 }
-async function readLabel(file) {
-  const canvas = await fileCanvas(file);
+async function readLabel(file) { return readLabelCanvas(await fileCanvas(file)); }
+async function readLabelCanvas(canvas) {
   const j = firstJson(await cloudCall({ task: 'label', image: canvasB64(canvas, 1600, 0.88) }));
   if (!j || !(numOrNull(j.energy_kcal) > 0 || numOrNull(j.energy_kj) > 0)) throw new Error(T.labelFail);
   return labelTo100(j);
@@ -989,7 +1017,8 @@ async function vlmAnalyze(m, canvas, hint, onText) {
   const prompt = (hint
     ? PLATE_PROMPT + `\nHint from a fast classifier that only knows single dishes (it may be wrong): "${hint}".`
     : PLATE_PROMPT) + (v ? `\nThe food is in a ${b.kind} that holds ${Math.round(v.V)} ml when full.` +
-      ` Also add "fill": how high the food reaches up its inside wall (0.5 = halfway, 1 = level with the rim).` : '');
+      ` Also add "fill": how high the food reaches up its inside wall (0.5 = halfway, 1 = level with the rim).` : '') +
+    (S.share.on ? `\nThis is the whole table of a shared meal for ${S.share.n} people: list every dish with its full served weight.` : '');
   const conversation = [{ role: 'user', content: [{ type: 'image' }, { type: 'text', text: prompt }] }];
   const text = m.processor.apply_chat_template(conversation, { add_generation_prompt: true, enable_thinking: false });
   const inputs = await m.processor(text, img);
@@ -1046,6 +1075,9 @@ function parsePlate(text) {
     meal: String(obj.meal || '').slice(0, 60),
     meal_zh: String(obj.meal_zh || '').slice(0, 40),
     scale_g: num(obj.scale_g, 1, 20000),
+    photo: ['meal', 'ingredients', 'package'].find((k) => String(obj.photo || '').toLowerCase().includes(k)) || 'meal',
+    ingredients_text: String(obj.ingredients_text || '').trim().slice(0, 2000),
+    has_nutrition: bool(obj.has_nutrition_table) === true,
     container: {
       kind: ['bowl', 'plate', 'cup', 'box'].find((k) => kind.includes(k)) || null,
       rim: num(c.rim_cm, 4, 50), depth: num(c.depth_cm, 1, 30), fill: num(c.fill ?? obj.fill, 0.05, 1.5),
@@ -1078,6 +1110,7 @@ function matchPlateFood(it) {
     q.replace(/(es|s)$/, ''), q + 's', q + 'es']))].filter((q) => q.length >= 2);
   const wantsProcessed = qs.some((q) => PROCESSED.test(q));
   const wantsDiet = qs.some((q) => DIET.test(q));
+  const wantsRaw = qs.some((q) => /\b(raw|uncooked)\b|^生(?!煎|菜|抽|日|蚝)/.test(q));
   const wantsDry = qs.some((q) => /\b(dry|dried|instant|powder|uncooked|raw|jerky)\b|即食|粉末|（干）/.test(q));
   let best = null;
   const stem = (w) => w.replace(/ies$/, 'y').replace(/(es|s)$/, '');
@@ -1093,7 +1126,8 @@ function matchPlateFood(it) {
       if (qWords.every((w) => fw.has(w))) s = 0.86 - Math.min(0.1, fw.size / 100);
     }
     for (const q of qs) {
-      s = Math.max(s, fuzzy(f.en, q, true), fuzzy(f.zh, q, true));
+      const en0 = chainItem && f.en ? f.en.replace(/^[^,]+,\s*/, '') : f.en; // "KFC China, Popcorn chicken" → "Popcorn chicken"
+      s = Math.max(s, fuzzy(en0, q, true), fuzzy(f.zh, q, true));
       const en = f.en && f.en.toLowerCase();
       if (en && en.length >= 4 && q.includes(en)) s = Math.max(s, 0.8);
       const zc = f.zh && f.zh.replace(/[（(［\[].*$/, '').trim(); // "兰州牛肉面" contains the dish "牛肉面"
@@ -1113,8 +1147,9 @@ function matchPlateFood(it) {
     if (!wantsProcessed && f.en && PROCESSED.test(f.en)) s -= 0.06;
     if (!wantsDiet && f.en && DIET.test(f.en)) s -= 0.05;
     if (f.en && /\b[A-Z]{4,}\b/.test(f.en) && !chainItem) s -= 0.07; // USDA brand names are ALL CAPS (CHOBANI, SILK…)
-    if (chainItem) s += 0.3; // you told us where you ate: that menu wins over generic foods
-    if (f.en && /\b(removed|without skin|skin not eaten|meat only)\b/i.test(f.en)
+    if (chainItem) s += rest.src && f.source === rest.src ? 0.33 : 0.3; // you told us where you ate: that menu wins
+    if (wantsRaw && f.en && /\b(cooked|fried|roasted|grilled|boiled|steamed|braised|baked)\b/i.test(f.en)) s -= 0.12;
+    if (f.en && /\b(removed|without skin|skin not eaten|meat only|skin and breading|skin only)\b/i.test(f.en)
       && !qs.some((q) => /removed|without|skinless|meat only/.test(q))) s -= 0.08; // lab-only variants nobody orders
     if (!best || s > best.s) best = { f, s };
   };
@@ -1152,6 +1187,23 @@ function buildPlateItem(it) {
     s100: food && per100(food.sugar) !== null ? food.sugar : it.sugar_g_100g ?? null,
   };
 }
+/* ---------- shared meals: photograph the whole table, log your share ---------- */
+function loadShare() {
+  let v = {};
+  try { v = JSON.parse(localStorage.getItem('ps-share') || '{}') || {}; } catch {}
+  S.share = { on: !!v.on, n: Math.min(30, Math.max(2, Math.round(v.n) || 4)), k: SHARE_K.some(([k]) => k === v.k) ? v.k : 1 };
+}
+function shareLabel() { return T[(SHARE_K.find(([k]) => k === S.share.k) || SHARE_K[1])[1]]; }
+function paintShare() {
+  $('modeSolo').setAttribute('aria-pressed', String(!S.share.on));
+  $('modeShared').setAttribute('aria-pressed', String(S.share.on));
+  $('shareRow').hidden = !S.share.on; $('shareHint').hidden = !S.share.on;
+  $('shareN').textContent = S.share.n;
+  $('shareK').innerHTML = SHARE_K.map(([k, key]) => `<button data-k="${k}" aria-pressed="${k === S.share.k}">${T[key]}</button>`).join('');
+  try { localStorage.setItem('ps-share', JSON.stringify(S.share)); } catch {}
+  if (S.plate) renderPlateBody();
+}
+
 /* ---------- portion measuring: your bowls, fill level, kitchen scale ---------- */
 // k = base width / rim width, a = depth / rim width (used when only some sizes are known).
 const VESSEL = { bowl: { k: 0.5, a: 0.45 }, cup: { k: 0.8, a: 1.1 }, box: { k: 0.9, a: 0.4 } };
@@ -1377,12 +1429,13 @@ async function runSmart(canvas, quick) {
   }
   const real = merged.filter((it) => !GENERIC.test(it.name.trim()));
   S.plate = { meal: res.meal, meal_zh: res.meal_zh, items: (real.length ? real : res.items).map(buildPlateItem),
-    cont: res.container || null, scaleSeen: res.scale_g != null, m: { fill: null, weighed: null, subTare: true, info: '' } };
+    cont: res.container || null, scaleSeen: res.scale_g != null, m: { fill: null, weighed: null, subTare: true, info: '' },
+    kind: res.photo, ingText: res.ingredients_text, hasNut: res.has_nutrition, canvas };
   applyMeasure();
   renderPlate();
 }
 function plateTotals(items) {
-  return items.reduce((a, it) => {
+  return items.filter((it) => !it.off).reduce((a, it) => {
     const f = it.grams / 100;
     return { k: a.k + (it.k100 || 0) * f, p: a.p + it.p100 * f, fa: a.fa + it.f100 * f, c: a.c + it.c100 * f, g: a.g + it.grams,
       na: a.na + (it.na100 || 0) * f, su: a.su + (it.s100 || 0) * f, hasNa: a.hasNa || it.na100 != null, hasSu: a.hasSu || it.s100 != null };
@@ -1392,8 +1445,31 @@ function plateMealName(P) { return (ZH ? (P.meal_zh || P.meal) : (P.meal || P.me
 function renderPlate() {
   const P = S.plate; if (!P) return;
   $('plateTitle').textContent = plateMealName(P);
+  renderIng();
   renderMeasure();
   renderPlateBody();
+}
+function renderIng() {
+  const P = S.plate, box = $('plateIng');
+  let html = P.kind === 'ingredients' ? `<p class="small" style="margin:10px 0 0">${T.ingHint}</p>` : '';
+  if (P.ingText || P.hasNut) {
+    html += `<div class="ingbox">` + (P.ingText ? `<div class="small">${T.pkgText}</div><textarea id="ingText">${esc(P.ingText)}</textarea>` : '') +
+      `<div class="row">` + (P.ingText ? `<button id="ingCopy">${T.pkgCopy}</button>` : '') +
+      (P.hasNut ? `<button id="ingLabel">${T.pkgLabel}</button>` : '') + `</div></div>`;
+  }
+  box.innerHTML = html; box.hidden = !html;
+  if ($('ingText')) $('ingText').addEventListener('input', (ev) => { P.ingText = ev.target.value; });
+  if ($('ingCopy')) $('ingCopy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(P.ingText); toast(T.pkgCopied); } catch { $('ingText').select(); }
+  });
+  if ($('ingLabel')) $('ingLabel').addEventListener('click', async (ev) => {
+    const b = ev.target; b.disabled = true; b.textContent = T.labelBusy;
+    try {
+      const f = await readLabelCanvas(P.canvas);
+      openSheet({ ...f, _name: f.name || plateMealName(P), source: 'label' });
+    } catch (e) { toast(String((e && e.message) || e).slice(0, 90)); }
+    b.disabled = false; b.textContent = T.pkgLabel;
+  });
 }
 function renderPlateBody() {
   const P = S.plate; if (!P) return;
@@ -1404,8 +1480,9 @@ function renderPlateBody() {
     const kcal = it.k100 != null ? Math.round(it.k100 * it.grams / 100) : null;
     const src = (it.measured ? `${tags[it.measured]} · ` : it.usual ? `${T.usual} · ` : '') +
       (it.food ? `${T.matched}: ${esc(nameOf(it.food))}` : (it.k100 != null ? T.aiKcal : T.noMatch));
-    return `<div class="plate-row" data-i="${i}">
-      <div class="name">${esc(nm)}${alt && alt !== nm ? ` <span class="muted small">${esc(alt)}</span>` : ''}</div>
+    const tick = P.kind === 'ingredients' ? `<input type="checkbox" data-a="ok" ${it.off ? '' : 'checked'} aria-label="confirm">` : '';
+    return `<div class="plate-row${it.off ? ' off' : ''}" data-i="${i}">
+      <div class="name">${tick}${esc(nm)}${alt && alt !== nm ? ` <span class="muted small">${esc(alt)}</span>` : ''}</div>
       <div class="muted small">${src}${it.k100 != null ? ` · ${Math.round(it.k100)} ${T.kcal}/100g` : ''}</div>
       <div class="plate-ctl">
         <span class="stepper"><button data-a="dec" aria-label="fewer">−</button><span class="num">${it.count}</span><button data-a="inc" aria-label="more">＋</button></span>
@@ -1426,6 +1503,8 @@ function renderPlateBody() {
       if (g > 0) { it.grams = Math.round(g); it.per = g / it.count; it.edited = true; }
       applyMeasure(); renderPlate();
     };
+    const ok = row.querySelector('[data-a="ok"]');
+    if (ok) ok.onchange = () => { it.off = !ok.checked; renderPlateBody(); };
     row.querySelector('[data-a="rm"]').onclick = () => { P.items.splice(P.items.indexOf(it), 1); applyMeasure(); renderPlate(); };
   });
   const tot = plateTotals(P.items);
@@ -1434,21 +1513,33 @@ function renderPlateBody() {
     ['fat', T.fat, Math.round(tot.fa) + 'g'], ['carb', T.carbs, Math.round(tot.c) + 'g'],
   ].map(([c, l, v]) => `<div class="macro"><div class="lbl">${c ? `<span class="dot" style="background:var(--${c})"></span>` : ''}${l}</div><div class="val num">${v}</div></div>`).join('');
   $('plateAddRow').hidden = false;
-  $('plateLog').hidden = !P.items.length;
-  $('plateLog').textContent = T.plateLog.replace('{k}', Math.round(tot.k));
+  const on = P.items.filter((it) => !it.off);
+  $('plateLog').hidden = !on.length;
+  const sh = S.share.on ? S.share.k / S.share.n : 1;
+  $('shareLine').hidden = !S.share.on;
+  if (S.share.on) {
+    $('shareLine').textContent = T.shareTotal.replace('{t}', Math.round(tot.k)).replace('{n}', S.share.n)
+      .replace('{k}', shareLabel()).replace('{c}', Math.round(tot.k * sh));
+  }
+  $('plateLog').textContent = S.share.on ? T.shareLog.replace('{k}', Math.round(tot.k * sh))
+    : P.kind === 'ingredients' ? T.ingLog.replace('{n}', on.length).replace('{k}', Math.round(tot.k))
+      : T.plateLog.replace('{k}', Math.round(tot.k));
 }
 function logPlate() {
-  const P = S.plate; if (!P || !P.items.length) return;
-  const parts = P.items.map((it) => {
+  const P = S.plate; if (!P || !P.items.some((it) => !it.off)) return;
+  const sh = S.share.on ? S.share.k / S.share.n : 1;
+  const parts = P.items.filter((it) => !it.off).map((it) => {
     const nm = ZH ? (it.name_zh || it.name) : it.name;
     return it.count > 1 ? `${nm}×${it.count}` : nm;
   });
   const tot = plateTotals(P.items);
+  const tag = S.share.on ? `${T.shareTag.replace('{n}', S.share.n)} · ` : '';
   addEntry({
-    date: S.date, name: `${plateMealName(P)}: ${parts.join(', ')}`.slice(0, 140), grams: Math.round(tot.g),
-    kcal: tot.k, protein: tot.p, fat: tot.fa, carbs: tot.c, source: 'vlm', created_at: Date.now(),
-    sodium_mg: tot.hasNa ? Math.round(tot.na) : null, sugar_g: tot.hasSu ? r1(tot.su) : null,
+    date: S.date, name: `${tag}${plateMealName(P)}: ${parts.join(', ')}`.slice(0, 140), grams: Math.round(tot.g * sh),
+    kcal: tot.k * sh, protein: tot.p * sh, fat: tot.fa * sh, carbs: tot.c * sh, source: 'vlm', created_at: Date.now(),
+    sodium_mg: tot.hasNa ? Math.round(tot.na * sh) : null, sugar_g: tot.hasSu ? r1(tot.su * sh) : null,
   });
+  if (S.share.on) { S.plate = null; $('plateCard').hidden = true; setView('today'); return; } // table-sized dishes: not your usual portion
   // Weighed or hand-corrected portions are real: remember them for next time.
   for (const it of P.items) if (it.edited || it.measured === 'scale') rememberPortion('piece:' + it.name, it.per);
   S.plate = null; $('plateCard').hidden = true;
@@ -1659,7 +1750,8 @@ function resetSheetAdd() {
 function chainById(id) { return CHAINS.find((c) => c.id === id) || null; }
 function inChain(f, c) {
   if (!c || !f) return false;
-  if (c.src) return f.source === c.src;
+  if (c.src && f.source === c.src) return true;
+  if (!c.prefix || (f.source && f.source.startsWith('chain-'))) return false;
   const up = f.en ? f.en.toUpperCase() : '', p = c.prefix.toUpperCase();
   return up.startsWith(p) && /[ ,]/.test(up.charAt(p.length)); // "PIZZA HUT, …" or "PIZZA HUT 14\" …"
 }

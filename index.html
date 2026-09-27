@@ -147,6 +147,17 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
 .progress{height:6px; border-radius:4px; background:var(--chip); overflow:hidden; margin-top:8px}
 .progress i{display:block; height:100%; background:var(--accent); width:0}
 .bar.water i{background:var(--carb)}
+.seg{display:flex; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card)}
+.seg button{flex:1; border:none; background:none; color:var(--ink2); padding:10px 6px; font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-contrast)}
+.sharerow{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.chips button[aria-pressed="true"]{background:var(--accent); color:var(--accent-contrast); border-color:var(--accent)}
+.ingbox{background:var(--chip); border-radius:12px; padding:10px 12px; margin-top:10px}
+.ingbox textarea{width:100%; min-height:84px; font:inherit; font-size:13px; color:var(--ink); background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px; margin-top:6px; resize:vertical}
+.ingbox .row{margin-top:8px; flex-wrap:wrap}
+.ingbox button{border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:10px; padding:7px 11px; font-size:13px}
+.plate-row .name input[type=checkbox]{accent-color:var(--accent); width:18px; height:18px; vertical-align:-3px; margin:0 6px 0 0; padding:0}
+.plate-row.off{opacity:.45}
 .measure{background:var(--chip); border-radius:12px; padding:10px 12px; margin-top:10px; display:flex; flex-direction:column; gap:8px}
 .fillrow{display:flex; align-items:center; gap:10px}
 .fillrow input[type=range]{flex:1; min-width:0; accent-color:var(--accent); padding:0; border:none; background:none}
@@ -255,6 +266,14 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
         <div class="guesses" id="guessList" hidden></div>
       </div>
     </div>
+    <div class="seg" id="mealMode" role="group"><button data-m="0" id="modeSolo"></button><button data-m="1" id="modeShared"></button></div>
+    <div class="sharerow" id="shareRow" hidden>
+      <span class="small" id="sharePeopleL"></span>
+      <span class="stepper"><button id="shareDec" aria-label="fewer people">−</button><span class="num" id="shareN">4</span><button id="shareInc" aria-label="more people">＋</button></span>
+      <span class="small" id="shareMineL"></span>
+      <span class="chips" id="shareK" style="margin-top:0"></span>
+    </div>
+    <p class="muted small" id="shareHint" style="margin:0" hidden></p>
     <div class="field" style="padding:0"><label id="restL"></label><select id="plateRest" style="font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 10px;max-width:46%;max-width:60%"></select></div>
     <div class="field" style="padding:0"><label id="bowlL" for="plateBowl"></label><select id="plateBowl" style="font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 10px;max-width:60%"></select></div>
     <p class="muted small" id="measureTip" style="margin:0"></p>
@@ -271,6 +290,7 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
       <h2 style="font-size:17px" id="plateTitle"></h2>
       <p class="muted small" id="plateStatus"></p>
       <pre class="think" id="plateThink" hidden></pre>
+      <div id="plateIng" hidden></div>
       <div class="measure" id="plateMeasure" hidden></div>
       <div id="plateItems"></div>
       <div class="row" id="plateAddRow" style="gap:8px;margin-top:10px" hidden>
@@ -278,6 +298,7 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
         <button id="plateAddBtn" style="border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:10px;width:44px;height:40px;font-size:20px">＋</button>
       </div>
       <div class="macros" id="plateTotals"></div>
+      <p class="small num" id="shareLine" style="margin:10px 0 0" hidden></p>
       <button class="primary" id="plateLog" hidden></button>
     </div>
   </section>
