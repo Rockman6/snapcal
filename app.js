@@ -37,6 +37,10 @@ const T = ZH ? {
   tdee:'实测维持热量：约 {t} 千卡/天（基于 {d} 天饮食记录、{w} 次称重）', tdeeNeed:'再记录 {d} 天饮食、称重 {w} 次（跨度 ≥10 天），即可算出你真实的维持热量。',
   tdeeUse:'把目标设为 {t} 千卡（{why}）', whyCut:'减脂：维持热量 −500', whyGain:'增重：维持热量 +250', whyKeep:'维持体重',
   sEat:'运动消耗是否加回热量目标', sEat0:'不加', sEat50:'加一半', sEat100:'全部加回', wFromHealth:'{h} 毫升来自 Apple 健康', ebWorkout:'运动',
+  remTitle:'🔔 提醒', remWaterL:'喝水提醒（9:00–21:00 每 2 小时，没喝够时）', remMealsL:'三餐记录提醒（没记录时）',
+  remOn:'开启提醒', remOff:'关闭提醒', remActive:'提醒已开启 ✓', remDenied:'通知权限被拒绝——请在浏览器/系统设置中允许 SnapCal 通知',
+  remIOS:'iPhone：先用 Safari「分享 → 添加到主屏幕」，再从主屏幕图标打开 SnapCal，才能开启提醒（iOS 16.4+）。',
+  remUnsupported:'这个浏览器不支持推送提醒', remFail:'开启失败：',
   dataTitle:'你的数据', exportJson:'⬇️ 下载我的全部数据（JSON）', exportCsv:'⬇️ 下载饮食记录（CSV，可用 Excel 打开）', delOpen:'删除我的账户…',
   delWarn:'这会永久删除你的全部记录和账户，无法恢复。你贡献到公共食物库和条码库的条目会保留（不含个人信息）。输入 DELETE 确认：',
   delGo:'永久删除账户', delDone:'账户已删除', delFail:'删除失败，请稍后再试',
@@ -91,6 +95,10 @@ const T = ZH ? {
   tdee:'Measured maintenance: about {t} kcal/day (from {d} logged days and {w} weigh-ins)', tdeeNeed:'Log food on {d} more days and weigh in {w} more times (over 10+ days) to measure your real maintenance calories.',
   tdeeUse:'Set target to {t} kcal ({why})', whyCut:'lose fat: maintenance −500', whyGain:'gain: maintenance +250', whyKeep:'maintain',
   sEat:'Add exercise calories to the target', sEat0:'No', sEat50:'Half', sEat100:'All', wFromHealth:'{h} ml from Apple Health', ebWorkout:'Workout',
+  remTitle:'🔔 Reminders', remWaterL:'Water (every 2 h, 9:00–21:00, only when behind)', remMealsL:'Meal logging (only when a meal is missing)',
+  remOn:'Turn on reminders', remOff:'Turn off reminders', remActive:'Reminders are on ✓', remDenied:'Notifications are blocked — allow them for SnapCal in your browser or system settings',
+  remIOS:'iPhone: first add SnapCal to your Home Screen (Safari → Share → Add to Home Screen) and open it from that icon; then reminders can be turned on (iOS 16.4+).',
+  remUnsupported:'This browser does not support push reminders', remFail:'Could not turn on reminders: ',
   dataTitle:'Your data', exportJson:'⬇️ Download all my data (JSON)', exportCsv:'⬇️ Download my meal log (CSV, opens in Excel)', delOpen:'Delete my account…',
   delWarn:'This permanently deletes all your records and your account; it cannot be undone. Items you contributed to the shared food and barcode catalogs stay (they hold no personal info). Type DELETE to confirm:',
   delGo:'Delete my account permanently', delDone:'Account deleted', delFail:'Delete failed, please try again later',
@@ -399,6 +407,12 @@ function buildStatic() {
   });
   $('weekTitle').textContent = T.week; $('mealsTitle').textContent = T.meals;
   $('mealsHint').textContent = T.mealsHint;
+  $('remTitle').textContent = T.remTitle; $('remWaterL').textContent = T.remWaterL; $('remMealsL').textContent = T.remMealsL;
+  try { const rp = JSON.parse(localStorage.getItem('ps-rem') || '{}'); $('remWater').checked = rp.water !== false; $('remMeals').checked = rp.meals !== false; } catch {}
+  $('remBtn').addEventListener('click', toggleReminders);
+  $('remWater').addEventListener('change', onRemPrefChange);
+  $('remMeals').addEventListener('change', onRemPrefChange);
+  paintReminders();
   $('dataTitle').textContent = T.dataTitle; $('exportJson').textContent = T.exportJson; $('exportCsv').textContent = T.exportCsv;
   $('delOpen').textContent = T.delOpen; $('delWarn').textContent = T.delWarn; $('delGo').textContent = T.delGo;
   $('exportJson').addEventListener('click', exportJson);
@@ -1584,6 +1598,57 @@ async function runCoach() {
     try { localStorage.setItem('ps-coach', JSON.stringify({ day: todayISO(), text })); } catch {}
   } catch (e) { toast(String((e && e.message) || e).slice(0, 90)); }
   $('wkCoach').disabled = false; $('wkCoach').textContent = T.wkCoach;
+}
+
+/* ---------- reminders (web push) ---------- */
+function b64ToBytes(b64) {
+  const s = (b64 + '='.repeat((4 - b64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/');
+  return Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+}
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+}
+async function currentPushSub() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+  const reg = await navigator.serviceWorker.getRegistration();
+  return reg ? reg.pushManager.getSubscription() : null;
+}
+function remPrefs() { return { water: $('remWater').checked, meals: $('remMeals').checked, lang: ZH ? 'zh' : 'en' }; }
+async function saveRemPrefs(sub) {
+  const row = { endpoint: sub.endpoint, sub: sub.toJSON(), prefs: remPrefs(), tz_offset: new Date().getTimezoneOffset(), created_at: Date.now() };
+  return S.sb.from('push_subs').upsert(row, { onConflict: 'endpoint' });
+}
+async function paintReminders() {
+  const ios = /iPhone|iPad/.test(navigator.userAgent);
+  const supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  const sub = supported ? await currentPushSub().catch(() => null) : null;
+  $('remBtn').textContent = sub ? T.remOff : T.remOn;
+  $('remBtn').hidden = LOCAL || !supported;
+  $('remNote').textContent = sub ? T.remActive : (!supported ? (ios && !isStandalone() ? T.remIOS : T.remUnsupported) : (ios && !isStandalone() ? T.remIOS : ''));
+}
+async function toggleReminders() {
+  try {
+    const existing = await currentPushSub();
+    if (existing) {
+      await S.sb.from('push_subs').delete().eq('endpoint', existing.endpoint);
+      await existing.unsubscribe();
+      return paintReminders();
+    }
+    if (!$('remWater').checked && !$('remMeals').checked) { $('remWater').checked = true; $('remMeals').checked = true; }
+    const reg = await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    if ((await Notification.requestPermission()) !== 'granted') { $('remNote').textContent = T.remDenied; return; }
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(PS_CONFIG.VAPID_PUBLIC) });
+    const { error } = await saveRemPrefs(sub);
+    if (error) throw new Error(error.message);
+    try { localStorage.setItem('ps-rem', JSON.stringify(remPrefs())); } catch {}
+  } catch (e) { $('remNote').textContent = T.remFail + String((e && e.message) || e).slice(0, 80); return; }
+  paintReminders();
+}
+async function onRemPrefChange() {
+  try { localStorage.setItem('ps-rem', JSON.stringify(remPrefs())); } catch {}
+  const sub = await currentPushSub().catch(() => null);
+  if (sub) await saveRemPrefs(sub);
 }
 
 /* ---------- export & account deletion ---------- */
