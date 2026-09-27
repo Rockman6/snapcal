@@ -26,7 +26,8 @@ const T = ZH ? {
   photoHint:'拍摄你的餐食', shoot:'拍照识别', analyzing:'识别中…', notThese:'都不是——去搜索',
   modelIdle:'首次使用会下载识别模型（约 33MB），之后缓存在本地。', modelLoading:'正在加载模型…',
   modelReady:'模型已就绪——在设备上离线识别，照片不会上传。', camDenied:'需要相机权限。请在浏览器设置中允许。',
-  scanHint:'将条形码对准相机', scanNote:'扫码后自动查询 Open Food Facts。', notFound:'未找到该商品，请用搜索添加。',
+  scanHint:'将条形码对准相机', scanNote:'先查本地全球库，再查在线，最后可自己补充。', notFound:'未找到该商品，请用搜索添加。',
+  teach:'没有找到——教会它！', teachName:'商品名称', teachSave:'保存到公共条码库', taught:'已保存！所有用户扫这个条码都能直接用了 🎉', teachAI:'🧠 让 AI 按名称估算',
   noResults:'没有找到，试试别的关键词，或添加自定义食物。', online:'🌐 在线查找并学习',
   onlineBusy:'在线查找中…', onlineNone:'在线没有找到。', learned:'已学习并存入公共数据库 ✓',
   ai:'🧠 本地 AI 估算', aiLoad:'首次使用需下载本地 AI 模型（约 1GB，只下载一次，永久缓存）', aiBusy:'AI 思考中…', aiNoGpu:'此浏览器不支持 WebGPU，无法运行本地 AI（试试较新的 iPhone/Chrome/Safari）', aiTag:'AI 估算·仅供参考',
@@ -51,7 +52,8 @@ const T = ZH ? {
   photoHint:'Photograph your meal', shoot:'Identify', analyzing:'Analyzing…', notThese:'None of these — search instead',
   modelIdle:'First use downloads the recognition model (~33 MB); it is cached after that.', modelLoading:'Loading model…',
   modelReady:'Model ready — runs on your device, photos never leave it.', camDenied:'Camera permission needed — allow it in your browser settings.',
-  scanHint:'Point the camera at a barcode', scanNote:'Barcodes are looked up in Open Food Facts.', notFound:'Product not found — add it via search.',
+  scanHint:'Point the camera at a barcode', scanNote:'Checked against the local worldwide pack, then online, then you can teach it.', notFound:'Product not found — add it via search.',
+  teach:'Not found — teach it!', teachName:'Product name', teachSave:'Save to the shared barcode base', taught:'Saved — every user scanning this code gets it now 🎉', teachAI:'🧠 AI estimate from the name',
   noResults:'No match — try another word, or add a custom food.', online:'🌐 Search online & learn it',
   onlineBusy:'Searching online…', onlineNone:'Nothing found online.', learned:'Learned & saved to the shared database ✓',
   ai:'🧠 Local AI estimate', aiLoad:'First use downloads the local AI model (~1 GB, once, cached forever)', aiBusy:'AI thinking…', aiNoGpu:'This browser lacks WebGPU — local AI unavailable (try a recent iPhone/Chrome/Safari)', aiTag:'AI estimate · approximate',
@@ -514,7 +516,7 @@ function showGuesses(gs) {
 
 /* ---------- camera: barcode ---------- */
 async function startScan() {
-  loadCnPack();
+  loadCnPack(); loadBcLearned();
   try {
     S.zxReader = new ZXing.BrowserMultiFormatReader();
     const cb = (result) => { if (result) onBarcode(result.getText()); };
@@ -539,6 +541,23 @@ async function bcLookup(code) {
   }
   return bcShards[prefix][code] || null;
 }
+let bcLearned = null;
+async function loadBcLearned() {
+  if (bcLearned !== null || LOCAL) { bcLearned = bcLearned || {}; return; }
+  bcLearned = {};
+  try {
+    const { data } = await S.sb.from('barcodes_learned').select('*').limit(5000);
+    for (const r of data || []) bcLearned[r.code] = [r.name, r.kcal, r.protein, r.fat, r.carbs, r.portion];
+  } catch {}
+}
+async function teachBarcode(code, f) {
+  if (LOCAL) return;
+  const row = { code, name: f.name, kcal: f.kcal, protein: f.protein || 0, fat: f.fat || 0,
+    carbs: f.carbs || 0, portion: f.portion || 100, origin: f.origin || 'user', created_at: Date.now() };
+  const { error } = await S.sb.from('barcodes_learned').insert(row);
+  if (!error) { bcLearned[code] = [row.name, row.kcal, row.protein, row.fat, row.carbs, row.portion]; toast(T.taught); }
+  else toast(error.message);
+}
 let cnPack = null;
 async function loadCnPack() {
   if (cnPack !== null) return;
@@ -550,7 +569,7 @@ async function onBarcode(code) {
   if (scanBusy || !$('sheet').hidden) return;
   scanBusy = true;
   try {
-    const local = (await bcLookup(code)) || (cnPack && cnPack[code]);
+    const local = (await bcLookup(code)) || (bcLearned && bcLearned[code]) || (cnPack && cnPack[code]);
     if (local) {
       const [name, kcal, pro, fat, carbs, serving] = local;
       openSheet({ _name: name, kcal, protein: pro, fat, carbs,
@@ -562,7 +581,7 @@ async function onBarcode(code) {
     const j = await res.json();
     const p = j.product;
     const kcal = p && p.nutriments && p.nutriments['energy-kcal_100g'];
-    if (j.status !== 1 || typeof kcal !== 'number') { toast(T.notFound); return; }
+    if (j.status !== 1 || typeof kcal !== 'number') { openTeach(code); return; }
     const name = (ZH && p.product_name_zh) || p.product_name || code;
     openSheet({
       _name: name + (p.brands ? ` (${p.brands})` : ''),
@@ -571,8 +590,64 @@ async function onBarcode(code) {
       portion: Number(p.serving_quantity) > 0 ? Number(p.serving_quantity) : 100,
       source: 'off',
     });
-  } catch { toast(T.notFound); }
+  } catch { openTeach(code); }
   finally { setTimeout(() => scanBusy = false, 1500); }
+}
+
+/* ---------- teach-a-barcode sheet ---------- */
+function openTeach(code) {
+  if (LOCAL) { toast(T.notFound); return; }
+  const wrap = $('sheet');
+  S.sheetFood = null;
+  $('shName').textContent = T.teach + '  ·  ' + code;
+  $('shPer100').innerHTML = `<input id="tName" placeholder="${T.teachName}" style="width:100%;margin-top:6px">
+    <div class="row" style="margin-top:8px;gap:6px;flex-wrap:wrap">
+      <input id="tK" type="number" inputmode="decimal" placeholder="kcal/100g" style="width:110px">
+      <input id="tP" type="number" inputmode="decimal" placeholder="${T.protein}g" style="width:90px">
+      <input id="tF" type="number" inputmode="decimal" placeholder="${T.fat}g" style="width:90px">
+      <input id="tC" type="number" inputmode="decimal" placeholder="${T.carbs}g" style="width:90px">
+    </div>
+    <button class="primary" id="tAI" style="margin-top:8px;background:var(--chip);color:var(--ink)">${T.teachAI}</button>`;
+  $('shGrams').value = 100; sheetTeachMode(code);
+  wrap.hidden = false;
+  $('tAI').addEventListener('click', async () => {
+    const name = $('tName').value.trim(); if (!name) return;
+    $('tAI').disabled = true; $('tAI').textContent = T.aiBusy;
+    try {
+      const h = await aiEstimate(name);
+      $('tK').value = h.kcal; $('tP').value = h.protein; $('tF').value = h.fat; $('tC').value = h.carbs;
+      $('shGrams').value = h.portion;
+    } catch (e) { toast((e && e.message || 'AI error').slice(0, 60)); }
+    $('tAI').disabled = false; $('tAI').textContent = T.teachAI;
+  });
+}
+function sheetTeachMode(code) {
+  const add = $('shAdd');
+  add.textContent = T.teachSave;
+  const fresh = add.cloneNode(true); add.replaceWith(fresh); // drop old listeners
+  fresh.addEventListener('click', async () => {
+    const name = $('tName').value.trim(); const kcal = parseFloat($('tK').value);
+    if (!name || !(kcal >= 0)) return;
+    const f = { name, kcal, protein: parseFloat($('tP').value) || 0, fat: parseFloat($('tF').value) || 0,
+      carbs: parseFloat($('tC').value) || 0, portion: parseFloat($('shGrams').value) || 100, origin: 'user' };
+    await teachBarcode(code, f);
+    $('sheet').hidden = true;
+    openSheet({ ...f, _name: name, source: 'user' });
+    resetSheetAdd();
+  });
+}
+function resetSheetAdd() {
+  const add = $('shAdd');
+  const fresh = add.cloneNode(true); add.replaceWith(fresh);
+  fresh.textContent = T.add;
+  fresh.addEventListener('click', () => {
+    const f = S.sheetFood; const g = parseFloat($('shGrams').value);
+    if (!f || !(g > 0)) return;
+    addEntry({ date: S.date, name: f._name, grams: g,
+      kcal: f.kcal * g / 100, protein: (f.protein || 0) * g / 100, fat: (f.fat || 0) * g / 100,
+      carbs: (f.carbs || 0) * g / 100, source: f.source || 'custom', created_at: Date.now() });
+    closeSheet(); setView('today');
+  });
 }
 
 /* ---------- add sheet ---------- */
@@ -588,7 +663,7 @@ function openSheet(f) {
   sheetKcal();
   $('sheet').hidden = false;
 }
-function closeSheet() { $('sheet').hidden = true; }
+function closeSheet() { $('sheet').hidden = true; resetSheetAdd(); }
 function sheetKcal() {
   const f = S.sheetFood; if (!f) return;
   const g = parseFloat($('shGrams').value) || 0;
