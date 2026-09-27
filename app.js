@@ -32,6 +32,11 @@ const T = ZH ? {
   vlmFail:'AI 没能给出清楚的结果——可以换个角度再拍，或用搜索添加。', quickGuess:'快速分类器猜测', meal:'这一餐',
   matched:'数据库', aiKcal:'AI 估算热量', noMatch:'数据库里没有——可改名或删除', total:'合计', noItems:'没有识别到食物',
   plateLog:'记录这一餐 · {k} 千卡', plateAdd:'漏了什么？输入名称添加（如：酸奶）',
+  wkTitle:'📊 近 7 天', wkKcal:'平均热量', wkPro:'平均蛋白质', wkOn:'达标天数', wkWeight:'体重变化', wkWater:'平均饮水',
+  wkNa:'平均钠', wkSleep:'平均睡眠', wkNoData:'记录几天后这里会出现你的每周总结。', wkCoach:'🧠 AI 教练点评', wkCoachBusy:'AI 教练思考中…',
+  tdee:'实测维持热量：约 {t} 千卡/天（基于 {d} 天饮食记录、{w} 次称重）', tdeeNeed:'再记录 {d} 天饮食、称重 {w} 次（跨度 ≥10 天），即可算出你真实的维持热量。',
+  tdeeUse:'把目标设为 {t} 千卡（{why}）', whyCut:'减脂：维持热量 −500', whyGain:'增重：维持热量 +250', whyKeep:'维持体重',
+  sEat:'运动消耗是否加回热量目标', sEat0:'不加', sEat50:'加一半', sEat100:'全部加回', wFromHealth:'{h} 毫升来自 Apple 健康', ebWorkout:'运动',
   sodium:'钠', sugar:'糖', usual:'你的常用份量', readLabel:'📷 拍营养成分表读取', labelBusy:'正在读取营养成分表…',
   labelFail:'没读出能量数值——请拍清楚整个营养成分表', labelFood:'扫描的标签', teachLabel:'📷 拍营养成分表自动填写',
   readScale:'📷 从体脂秤截图读取（可多选）', scaleBusy:'正在读取第 {i}/{n} 张截图…', scaleDone:'已填入 {n} 项——核对无误后点保存',
@@ -78,6 +83,11 @@ const T = ZH ? {
   vlmFail:'The AI could not give a clear answer — try another angle, or add it via search.', quickGuess:'Quick classifier guess', meal:'Meal',
   matched:'database', aiKcal:'AI calorie estimate', noMatch:'not in the database — rename or remove', total:'Total', noItems:'No food items found',
   plateLog:'Log this meal · {k} kcal', plateAdd:'Missed something? Type a name to add (e.g. yogurt)',
+  wkTitle:'📊 Last 7 days', wkKcal:'Avg calories', wkPro:'Avg protein', wkOn:'Days on target', wkWeight:'Weight change', wkWater:'Avg water',
+  wkNa:'Avg sodium', wkSleep:'Avg sleep', wkNoData:'Log a few days and your weekly summary appears here.', wkCoach:'🧠 AI coach review', wkCoachBusy:'The AI coach is thinking…',
+  tdee:'Measured maintenance: about {t} kcal/day (from {d} logged days and {w} weigh-ins)', tdeeNeed:'Log food on {d} more days and weigh in {w} more times (over 10+ days) to measure your real maintenance calories.',
+  tdeeUse:'Set target to {t} kcal ({why})', whyCut:'lose fat: maintenance −500', whyGain:'gain: maintenance +250', whyKeep:'maintain',
+  sEat:'Add exercise calories to the target', sEat0:'No', sEat50:'Half', sEat100:'All', wFromHealth:'{h} ml from Apple Health', ebWorkout:'Workout',
   sodium:'Sodium', sugar:'Sugar', usual:'your usual portion', readLabel:'📷 Read a nutrition label', labelBusy:'Reading the label…',
   labelFail:'Could not read the energy value — photograph the whole nutrition panel clearly', labelFood:'Scanned label', teachLabel:'📷 Fill in from a photo of the label',
   readScale:'📷 Read from scale screenshots (pick several)', scaleBusy:'Reading screenshot {i} of {n}…', scaleDone:'Filled {n} values — check them, then Save',
@@ -347,6 +357,8 @@ async function showApp() {
   await loadAll().catch(err => toast(err.message || 'load error'));
   $('sKcal').value = S.targets.kcal || ''; $('sPro').value = S.targets.protein || ''; $('sGoal').value = S.targets.goal || '';
   $('sWater').value = S.targets.water_ml || '';
+  $('sEat').value = String(S.targets.eat_back || 0);
+  paintTDEE();
   paintProfile();
   renderToday(); renderWeight(); renderResults();
 }
@@ -381,6 +393,8 @@ function buildStatic() {
   });
   $('weekTitle').textContent = T.week; $('mealsTitle').textContent = T.meals;
   $('mealsHint').textContent = T.mealsHint;
+  $('wkCoach').addEventListener('click', runCoach);
+  $('sEatL').textContent = T.sEat; $('sEat0').textContent = T.sEat0; $('sEat50').textContent = T.sEat50; $('sEat100').textContent = T.sEat100;
   $('labelPickL').textContent = T.readLabel;
   $('labelFile').addEventListener('change', async (ev) => {
     const file = ev.target.files && ev.target.files[0]; ev.target.value = '';
@@ -505,7 +519,7 @@ function buildStatic() {
   $('sTitle').textContent = T.sTitle; $('sKcalL').textContent = T.sKcal;
   $('sProL').textContent = T.sPro; $('sGoalL').textContent = T.sGoal; $('sSave').textContent = T.save;
   $('sSave').addEventListener('click', () => {
-    S.targets = { water_ml: parseFloat($('sWater').value) || null,
+    S.targets = { water_ml: parseFloat($('sWater').value) || null, eat_back: parseFloat($('sEat').value) || 0,
       kcal: parseFloat($('sKcal').value) || 2000, protein: parseFloat($('sPro').value) || 0,
       goal: parseFloat($('sGoal').value) || null };
     saveTargets();
@@ -1367,6 +1381,14 @@ function sheetKcal() {
   $('shKcal').textContent = Math.round(f.kcal * g / 100) + ' ' + T.kcal;
 }
 
+/* ---------- daily calorie target (+ optional exercise eat-back from Apple Watch) ---------- */
+function dayTarget(date) {
+  const base = S.targets.kcal || 2000;
+  const hd = S.health.find((h) => h.date === date);
+  const back = parseFloat(S.targets.eat_back) || 0;
+  return Math.round(base + (hd && hd.active_kcal ? hd.active_kcal * back : 0));
+}
+
 /* ---------- energy balance (Mifflin-St Jeor BMR + Watch activity) ---------- */
 function bmrEstimate() {
   const p = S.profile;
@@ -1396,6 +1418,7 @@ function renderEnergy(eatenKcal) {
     if (hd.steps) bits.push(`${T.ebSteps} ${Math.round(hd.steps).toLocaleString()}`);
     if (hd.sleep_hours) bits.push(`${T.ebSleep} ${hd.sleep_hours.toFixed(1)}h`);
     if (hd.resting_hr) bits.push(`${T.ebRhr} ${Math.round(hd.resting_hr)}`);
+    if (hd.workout_min) bits.push(`${T.ebWorkout} ${Math.round(hd.workout_min)} min`);
     if (bits.length) sub += ' · ' + bits.join(' · ');
   } else sub += ' ' + T.ebNoW;
   $('ebSub').textContent = sub;
@@ -1408,9 +1431,10 @@ function renderToday() {
   const tot = es.reduce((a, e) => ({ kcal: a.kcal + e.kcal, protein: a.protein + e.protein, fat: a.fat + e.fat, carbs: a.carbs + e.carbs }),
     { kcal: 0, protein: 0, fat: 0, carbs: 0 });
   $('kcalNow').textContent = Math.round(tot.kcal);
-  $('kcalTarget').textContent = `${T.of} ${Math.round(S.targets.kcal)} ${T.kcal}`;
-  const pct = Math.min(100, tot.kcal / (S.targets.kcal || 1) * 100);
-  const bar = $('kcalBar'); bar.style.width = pct + '%'; bar.className = tot.kcal > S.targets.kcal ? 'over' : '';
+  const target = dayTarget(S.date);
+  $('kcalTarget').textContent = `${T.of} ${target} ${T.kcal}`;
+  const pct = Math.min(100, tot.kcal / (target || 1) * 100);
+  const bar = $('kcalBar'); bar.style.width = pct + '%'; bar.className = tot.kcal > target ? 'over' : '';
   const mt = [['pro', T.protein, tot.protein, S.targets.protein], ['fat', T.fat, tot.fat, null], ['carb', T.carbs, tot.carbs, null]];
   $('macroRow').innerHTML = mt.map(([c, l, v, tgt]) => `
     <div class="macro">
@@ -1444,9 +1468,110 @@ function renderToday() {
   $('quickChips').hidden = meals.length > 0;
   renderWater(es);
   renderEnergy(tot.kcal);
+  renderWeek();
   renderSuggest(false);
   drawWeek();
 }
+/* ---------- adaptive maintenance calories (intake vs. weight trend) ---------- */
+function lastDays(n) { return [...Array(n)].map((_, i) => todayISO(i - n + 1)); }
+function dayKcal(date) {
+  return S.entries.filter((e) => e.date === date && e.source !== 'water').reduce((a, e) => a + e.kcal, 0);
+}
+function adaptiveTDEE() {
+  const days = lastDays(28);
+  const logged = days.map((d) => dayKcal(d)).filter((k) => k >= 800); // skip days that clearly weren't fully logged
+  const ws = S.weights.filter((w) => days.includes(w.date)).map((w) => ({ x: days.indexOf(w.date), y: w.weight }));
+  const span = ws.length ? Math.max(...ws.map((w) => w.x)) - Math.min(...ws.map((w) => w.x)) : 0;
+  if (logged.length < 10 || ws.length < 3 || span < 10) {
+    return { ok: false, needDays: Math.max(0, 10 - logged.length), needWeighs: Math.max(0, 3 - ws.length) };
+  }
+  const mx = ws.reduce((a, w) => a + w.x, 0) / ws.length, my = ws.reduce((a, w) => a + w.y, 0) / ws.length;
+  const slope = ws.reduce((a, w) => a + (w.x - mx) * (w.y - my), 0) / ws.reduce((a, w) => a + (w.x - mx) ** 2, 0); // kg/day
+  const avg = logged.reduce((a, k) => a + k, 0) / logged.length;
+  const tdee = Math.min(4500, Math.max(1200, Math.round((avg - slope * 7700) / 10) * 10)); // ~7,700 kcal per kg of body weight
+  const latest = [...S.weights].sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+  const goal = S.targets.goal;
+  let suggested = tdee, why = T.whyKeep;
+  if (goal && latest && goal < latest.weight - 0.5) { suggested = Math.max(1200, tdee - 500); why = T.whyCut; }
+  else if (goal && latest && goal > latest.weight + 0.5) { suggested = tdee + 250; why = T.whyGain; }
+  return { ok: true, tdee, days: logged.length, weighs: ws.length, suggested, why };
+}
+function paintTDEE() {
+  const r = adaptiveTDEE();
+  if (!r.ok) {
+    $('tdeeNote').textContent = T.tdeeNeed.replace('{d}', r.needDays).replace('{w}', r.needWeighs);
+    $('tdeeUse').hidden = true; return;
+  }
+  $('tdeeNote').textContent = T.tdee.replace('{t}', r.tdee.toLocaleString()).replace('{d}', r.days).replace('{w}', r.weighs);
+  $('tdeeUse').hidden = Math.abs(r.suggested - (S.targets.kcal || 0)) < 50;
+  $('tdeeUse').textContent = T.tdeeUse.replace('{t}', r.suggested.toLocaleString()).replace('{why}', r.why);
+  $('tdeeUse').onclick = () => { S.targets.kcal = r.suggested; $('sKcal').value = r.suggested; saveTargets(); paintTDEE(); };
+}
+
+/* ---------- weekly report ---------- */
+function weekStats() {
+  const days = lastDays(7);
+  const logged = days.filter((d) => dayKcal(d) >= 500);
+  if (!logged.length) return null;
+  const sum = (arr) => arr.reduce((a, v) => a + v, 0);
+  const meals = (d) => S.entries.filter((e) => e.date === d && e.source !== 'water');
+  const avgK = sum(logged.map(dayKcal)) / logged.length;
+  const avgP = sum(logged.map((d) => sum(meals(d).map((e) => e.protein)))) / logged.length;
+  const onTarget = logged.filter((d) => Math.abs(dayKcal(d) - dayTarget(d)) <= dayTarget(d) * 0.1).length;
+  const ws = S.weights.filter((w) => days.includes(w.date)).sort((a, b) => (a.date < b.date ? -1 : 1));
+  const dW = ws.length >= 2 ? ws[ws.length - 1].weight - ws[0].weight : null;
+  const water = days.map((d) => {
+    const es = S.entries.filter((e) => e.date === d);
+    const hd = S.health.find((h) => h.date === d);
+    return sum(es.filter((e) => e.source === 'water').map((e) => e.grams)) + sum(es.filter(isDrinkEntry).map((e) => e.grams))
+      + (hd && hd.water_ml > 0 ? hd.water_ml : 0);
+  }).filter((v) => v > 0);
+  const naDays = logged.map((d) => meals(d).filter((e) => e.sodium_mg != null)).filter((a) => a.length);
+  const sleep = S.health.filter((h) => days.includes(h.date) && h.sleep_hours > 0).map((h) => h.sleep_hours);
+  return {
+    days_logged: logged.length, avg_kcal: Math.round(avgK), kcal_target: S.targets.kcal || 2000,
+    avg_protein_g: Math.round(avgP), protein_target_g: S.targets.protein || null, days_on_target: onTarget,
+    weight_change_kg: dW === null ? null : Math.round(dW * 10) / 10,
+    avg_water_ml: water.length ? Math.round(sum(water) / water.length) : null, water_target_ml: waterTarget(),
+    avg_sodium_mg: naDays.length ? Math.round(sum(naDays.map((a) => sum(a.map((e) => e.sodium_mg)))) / naDays.length) : null,
+    avg_sleep_h: sleep.length ? Math.round(sum(sleep) / sleep.length * 10) / 10 : null,
+    maintenance_kcal: adaptiveTDEE().tdee || null, goal_weight_kg: S.targets.goal || null,
+  };
+}
+function renderWeek() {
+  const st = weekStats();
+  $('wkTitle').textContent = T.wkTitle;
+  const cell = (l, v) => `<div class="macro"><div class="lbl">${l}</div><div class="val num">${v}</div></div>`;
+  if (!st) {
+    $('wkRow1').innerHTML = ''; $('wkRow2').innerHTML = '';
+    $('wkMore').textContent = T.wkNoData; $('wkCoach').hidden = true; $('wkCoachText').hidden = true; return;
+  }
+  $('wkRow1').innerHTML = cell(T.wkKcal, `${st.avg_kcal.toLocaleString()}`) + cell(T.wkPro, `${st.avg_protein_g}g`)
+    + cell(T.wkOn, `${st.days_on_target}/${st.days_logged}`);
+  $('wkRow2').innerHTML = cell(T.wkWeight, st.weight_change_kg === null ? '—' : `${st.weight_change_kg > 0 ? '+' : ''}${st.weight_change_kg} kg`)
+    + cell(T.wkWater, st.avg_water_ml === null ? '—' : `${st.avg_water_ml.toLocaleString()} ml`)
+    + cell(st.avg_sleep_h !== null ? T.wkSleep : T.wkNa,
+      st.avg_sleep_h !== null ? `${st.avg_sleep_h} h` : (st.avg_sodium_mg === null ? '—' : `${st.avg_sodium_mg.toLocaleString()} mg`));
+  const r = adaptiveTDEE();
+  $('wkMore').textContent = r.ok ? T.tdee.replace('{t}', r.tdee.toLocaleString()).replace('{d}', r.days).replace('{w}', r.weighs) : '';
+  $('wkCoach').hidden = LOCAL;
+  $('wkCoach').textContent = T.wkCoach;
+  try {
+    const c = JSON.parse(localStorage.getItem('ps-coach') || 'null');
+    if (c && c.day === todayISO()) { $('wkCoachText').hidden = false; $('wkCoachText').textContent = c.text; }
+  } catch {}
+}
+async function runCoach() {
+  const st = weekStats(); if (!st) return;
+  $('wkCoach').disabled = true; $('wkCoach').textContent = T.wkCoachBusy;
+  try {
+    const text = (await cloudCall({ task: 'coach', lang: ZH ? 'zh' : 'en', stats: st })).trim();
+    $('wkCoachText').hidden = false; $('wkCoachText').textContent = text;
+    try { localStorage.setItem('ps-coach', JSON.stringify({ day: todayISO(), text })); } catch {}
+  } catch (e) { toast(String((e && e.message) || e).slice(0, 90)); }
+  $('wkCoach').disabled = false; $('wkCoach').textContent = T.wkCoach;
+}
+
 /* ---------- water ---------- */
 function waterTarget() {
   if (S.targets.water_ml > 0) return S.targets.water_ml;
@@ -1461,12 +1586,15 @@ function isDrinkEntry(e) {
 }
 function renderWater(es) {
   const plain = es.filter((e) => e.source === 'water').reduce((a, e) => a + (e.grams || 0), 0);
+  const hdw = S.health.find((h) => h.date === (es[0] ? es[0].date : S.date));
+  const health = hdw && hdw.water_ml > 0 ? hdw.water_ml : 0;
   const drinks = es.filter(isDrinkEntry).reduce((a, e) => a + (e.grams || 0), 0);
-  const total = Math.round(plain + drinks), target = waterTarget();
+  const total = Math.round(plain + drinks + health), target = waterTarget();
   $('waterNow').textContent = `${total.toLocaleString()} / ${target.toLocaleString()} ml`;
   $('waterBar').style.width = Math.min(100, total / target * 100) + '%';
   const bits = [total >= target ? T.wDone : T.wLeft.replace('{r}', (target - total).toLocaleString())];
   if (drinks > 0) bits.push(T.wFromDrinks.replace('{d}', Math.round(drinks).toLocaleString()));
+  if (health > 0) bits.push(T.wFromHealth.replace('{h}', Math.round(health).toLocaleString()));
   $('waterSub').textContent = bits.join(' · ');
   $('wUndo').hidden = plain <= 0;
 }
@@ -1536,7 +1664,7 @@ function renderSuggest(shuffle) {
   if (shuffle) sgShuffle++;
   const es = S.entries.filter(e => e.date === S.date);
   const eaten = es.reduce((a, e) => ({ kcal: a.kcal + e.kcal, protein: a.protein + e.protein }), { kcal: 0, protein: 0 });
-  const remK = Math.round((S.targets.kcal || 2000) - eaten.kcal);
+  const remK = Math.round(dayTarget(S.date) - eaten.kcal);
   const remP = Math.round((S.targets.protein || 0) - eaten.protein);
   $('sgRemain').textContent = `${T.sgRemain}: ${Math.max(0, remK)} ${T.kcal} · ${T.sgP} ${Math.max(0, remP)}g`;
   const list = $('sgList');

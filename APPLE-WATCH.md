@@ -16,16 +16,21 @@ Add actions in this order (search each by name):
 4. **Find Health Samples** — Type: `Sleep Analysis`, where `Value is Asleep`,
    Start Date: `is in the last 18 hours`; **Calculate Statistics** → `Sum` of
    Duration → **Calculate** ÷ 60 (minutes→hours) if the sum is in minutes.
-5. **Get Contents of URL** (the login):
+5. **Find Health Samples** — Type: `Dietary Water`, Start Date: `is today`; then
+   **Calculate Statistics** → `Sum` (set the unit to **mL** if asked). Water logged in
+   Apple Health by any app (including the Watch) then counts toward SnapCal's water card.
+6. **Find Health Samples** — Type: `Apple Exercise Time`, Start Date: `is today`;
+   **Calculate Statistics** → `Sum` (minutes). SnapCal shows it as workout minutes.
+7. **Get Contents of URL** (the login):
    - URL: `https://rlpbwgecbqtuwzspzisp.supabase.co/auth/v1/token?grant_type=password`
    - Method: POST · Request Body: JSON with `email` = your login email,
      `password` = your password
    - Headers: `apikey` = the anon key from `config.js` ·
      `Content-Type` = `application/json`
-6. **Get Dictionary from Input**, then **Get Dictionary Value** → key
+8. **Get Dictionary from Input**, then **Get Dictionary Value** → key
    `access_token`.
-7. **Format Date** → Current Date, custom format `yyyy-MM-dd`.
-8. **Get Contents of URL** (the upload):
+9. **Format Date** → Current Date, custom format `yyyy-MM-dd`.
+10. **Get Contents of URL** (the upload):
    - URL: `https://rlpbwgecbqtuwzspzisp.supabase.co/rest/v1/health_daily?on_conflict=user_id,date`
    - Method: POST
    - Headers: `apikey` = anon key · `Authorization` = `Bearer ` + the
@@ -34,7 +39,8 @@ Add actions in this order (search each by name):
    - Request Body (JSON):
      `date` = Formatted Date · `active_kcal` = result of step 1 ·
      `steps` = result of step 2 · `resting_hr` = result of step 3 ·
-     `sleep_hours` = result of step 4
+     `sleep_hours` = result of step 4 · `water_ml` = result of step 5 ·
+     `workout_min` = result of step 6
 
 Run it once by hand — Shortcuts will ask permission for each Health type
 (allow), and the row appears in Supabase → Table Editor → `health_daily`.
@@ -46,6 +52,9 @@ Run Immediately → choose "SnapCal Health". Done: every night your day's
 activity, steps, resting HR and last night's sleep sync themselves.
 
 ## What the site does with it
+
+Settings → **Add exercise calories to the target** (No / Half / All) lets a hard
+training day raise that day's calorie target by the Watch's active calories.
 
 The Today tab's **Energy balance** card turns your profile (sex, age, height)
 plus latest weight into a BMR estimate (Mifflin-St Jeor), adds the Watch's
