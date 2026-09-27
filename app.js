@@ -24,7 +24,16 @@ const T = ZH ? {
   sgTitle:'下一餐建议', sgBtn:'换一批', sgRemain:'今日剩余', sgDone:'今天的目标已完成 🎉', sgP:'蛋白质',
   eb:'能量收支', ebIn:'摄入', ebOut:'消耗', ebNet:'净值', ebEst:'消耗 = 基础代谢(按资料估算)＋手表活动', ebNoW:'（还没有手表数据——见 Apple Watch 接入指南）', ebSteps:'步数', ebSleep:'睡眠', ebRhr:'静息心率', checkEmail:'注册成功——请到邮箱点击确认链接后再登录。', regFail:'注册失败：',
   photoHint:'拍摄你的餐食', shoot:'拍照识别', analyzing:'识别中…', notThese:'都不是——去搜索',
-  modelIdle:'首次使用会下载识别模型（约 33MB），之后缓存在本地。', modelLoading:'正在加载模型…',
+  modelIdle:'首次使用会下载识别模型（约 38MB），之后缓存在本地。', modelLoading:'正在加载模型…',
+  pick:'📁 从相册选一张照片', vlmIntroTitle:'智能识别（推荐开启）',
+  vlmIntroText:'本地视觉 AI 会像人一样看照片：找出每一样食物、数清个数、估算克数，热量再按营养数据库计算。完全在你的设备上运行，免费，照片不上传。首次需下载约 {size}（建议 Wi-Fi），之后永久缓存。',
+  vlmEnable:'开启智能识别', vlmLoading:'正在加载视觉 AI…', vlmReady:'智能识别已就绪 · 照片不会离开你的设备',
+  vlmDl:'正在下载视觉 AI：{p}%（{l}/{t} MB）· 仅此一次', vlmThinking:'AI 正在仔细看这张照片…',
+  vlmFail:'AI 没能给出清楚的结果——可以换个角度再拍，或用搜索添加。', quick:'快速分类器猜测', meal:'这一餐',
+  matched:'数据库', aiKcal:'AI 估算热量', noMatch:'数据库里没有——可改名或删除', total:'合计', noItems:'没有识别到食物',
+  plateLog:'记录这一餐 · {k} 千卡', plateAdd:'漏了什么？输入名称添加（如：酸奶）',
+  sVlmTitle:'拍照 AI', sVlmL:'识别模式', sVlmOff:'快速（仅分类器）', sVlmLite:'智能 Lite · 约 0.85 GB（手机）', sVlmPro:'智能 Pro · 约 1.8 GB（电脑，更准）',
+  sVlmNote:'智能模式在设备上运行视觉语言模型（Qwen3.5 / Qwen3-VL）：逐项识别、计数、估算克数，热量来自营养数据库。',
   modelReady:'模型已就绪——在设备上离线识别，照片不会上传。', camDenied:'需要相机权限。请在浏览器设置中允许。',
   scanHint:'将条形码对准相机', scanNote:'先查本地全球库，再查在线，最后可自己补充。', notFound:'未找到该商品，请用搜索添加。',
   teach:'没有找到——教会它！', teachName:'商品名称', teachSave:'保存到公共条码库', taught:'已保存！所有用户扫这个条码都能直接用了 🎉', teachAI:'🧠 让 AI 按名称估算', gs1:'🔎 到 GS1 官网查此条码（自动填名）',
@@ -50,7 +59,16 @@ const T = ZH ? {
   sgTitle:'Next-meal ideas', sgBtn:'Shuffle', sgRemain:'Remaining today', sgDone:'Targets met for today 🎉', sgP:'protein',
   eb:'Energy balance', ebIn:'In', ebOut:'Out', ebNet:'Net', ebEst:'Out = BMR (from profile) + Watch activity', ebNoW:'(no Watch data yet — see the Apple Watch guide)', ebSteps:'Steps', ebSleep:'Sleep', ebRhr:'Resting HR', checkEmail:'Account created — click the confirmation link in your email, then sign in.', regFail:'Sign-up failed: ',
   photoHint:'Photograph your meal', shoot:'Identify', analyzing:'Analyzing…', notThese:'None of these — search instead',
-  modelIdle:'First use downloads the recognition model (~33 MB); it is cached after that.', modelLoading:'Loading model…',
+  modelIdle:'First use downloads the recognition model (~38 MB); it is cached after that.', modelLoading:'Loading model…',
+  pick:'📁 Choose a photo from your library', vlmIntroTitle:'Smart recognition (recommended)',
+  vlmIntroText:'A local vision AI looks at the photo like a person: finds every item, counts pieces and estimates grams — calories then come from the nutrition database. Runs entirely on your device, free, photos never uploaded. One-time download of about {size} (Wi-Fi recommended), cached after that.',
+  vlmEnable:'Turn on smart recognition', vlmLoading:'Loading vision AI…', vlmReady:'Smart recognition ready · photos never leave your device',
+  vlmDl:'Downloading vision AI: {p}% ({l}/{t} MB) · one time only', vlmThinking:'AI is looking closely at the photo…',
+  vlmFail:'The AI could not give a clear answer — try another angle, or add it via search.', quick:'Quick classifier guess', meal:'Meal',
+  matched:'database', aiKcal:'AI calorie estimate', noMatch:'not in the database — rename or remove', total:'Total', noItems:'No food items found',
+  plateLog:'Log this meal · {k} kcal', plateAdd:'Missed something? Type a name to add (e.g. yogurt)',
+  sVlmTitle:'Photo AI', sVlmL:'Mode', sVlmOff:'Fast (classifier only)', sVlmLite:'Smart Lite · ~0.85 GB (phones)', sVlmPro:'Smart Pro · ~1.8 GB (computers, more accurate)',
+  sVlmNote:'Smart modes run a vision-language model (Qwen3.5 / Qwen3-VL) on your device: itemizes, counts and estimates grams; calories come from the nutrition database.',
   modelReady:'Model ready — runs on your device, photos never leave it.', camDenied:'Camera permission needed — allow it in your browser settings.',
   scanHint:'Point the camera at a barcode', scanNote:'Checked against the local worldwide pack, then online, then you can teach it.', notFound:'Product not found — add it via search.',
   teach:'Not found — teach it!', teachName:'Product name', teachSave:'Save to the shared barcode base', taught:'Saved — every user scanning this code gets it now 🎉', teachAI:'🧠 AI estimate from the name',
@@ -83,6 +101,29 @@ const METRICS = [
   { k:'seg_mus_rl', zh:'肌肉·右下肢 (kg)', en:'Muscle · right leg (kg)' },
   { k:'seg_mus_ll', zh:'肌肉·左下肢 (kg)', en:'Muscle · left leg (kg)' },
 ];
+
+/* ---------- smart photo AI config (must precede init()) ---------- */
+const TJS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.0.0-next.11/+esm';
+const VLM_TIERS = {
+  lite: { id: 'onnx-community/Qwen3.5-0.8B-ONNX', cls: 'Qwen3_5ForConditionalGeneration', gb: '0.85', side: 448 },
+  pro: { id: 'onnx-community/Qwen3-VL-2B-Instruct-ONNX', cls: 'Qwen3VLForConditionalGeneration', gb: '1.8', side: 560 },
+};
+const IS_MOBILE = /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);
+// Typical edible weight of ONE piece, used to sanity-check the AI's gram guesses.
+const UNIT_G = {
+  grape: 5, strawberry: 12, cherry: 8, blueberry: 1.5, 'cherry tomato': 15, lychee: 20, longan: 10,
+  peach: 150, apple: 180, banana: 118, orange: 130, mandarin: 80, tangerine: 80, mango: 200, kiwi: 75,
+  pear: 180, plum: 60, apricot: 35, persimmon: 150, fig: 50, egg: 50, dumpling: 25, gyoza: 25,
+  xiaolongbao: 30, bun: 90, baozi: 100, shumai: 20, sushi: 30, nigiri: 30, nugget: 17, cookie: 12,
+  'chicken wing': 45, meatball: 25, shrimp: 12, prawn: 15, 'spring roll': 50, walnut: 5, almond: 1.2,
+  macaron: 12, 'slice of bread': 30, 'slice of pizza': 110, 'rice ball': 110, onigiri: 110,
+};
+const PLATE_PROMPT = `Look at this food photo carefully.
+Step 1: write ONE line that starts with "Seen:" listing every separate food or drink and how many pieces you count (for example "Seen: 1 peach, 8 grapes and 1 mango on a plate").
+Step 2: output ONLY this JSON:
+{"meal":"overall name in English, e.g. fruit plate","meal_zh":"中文名称","items":[{"name":"English name","name_zh":"中文名","count":1,"grams":150,"kcal_100g":60}]}
+Rules: every distinct food is its own item. count = number of pieces. grams = total edible weight of that item (a dinner plate is about 26 cm wide, a rice bowl about 12 cm, a cup about 350 ml). kcal_100g = calories per 100 g.`;
+let vlm = null, vlmLoad = null;
 
 /* ---------- state & utils ---------- */
 const S = {
@@ -283,6 +324,33 @@ function buildStatic() {
   $('photoHint').textContent = T.photoHint; $('photoShoot').textContent = T.shoot;
   $('modelNote').textContent = T.modelIdle;
   $('photoShoot').addEventListener('click', classifyPhoto);
+  $('photoPickL').textContent = T.pick;
+  $('photoFile').addEventListener('change', async (ev) => {
+    const file = ev.target.files && ev.target.files[0];
+    ev.target.value = '';
+    if (!file) return;
+    try {
+      const bmp = await createImageBitmap(file);
+      await analyzeCanvas(frameFrom(bmp, bmp.width, bmp.height));
+    } catch (e) { toast(String((e && e.message) || e).slice(0, 80)); }
+  });
+  $('vlmIntroTitle').textContent = T.vlmIntroTitle; $('vlmEnable').textContent = T.vlmEnable;
+  $('vlmEnable').addEventListener('click', () => {
+    setVlmTier(IS_MOBILE ? 'lite' : 'pro'); $('sVlm').value = vlmTier();
+    paintVlmIntro(); warmVLM();
+  });
+  $('plateAddName').placeholder = T.plateAdd;
+  $('plateAddBtn').addEventListener('click', addPlateItem);
+  $('plateAddName').addEventListener('keydown', (e) => { if (e.key === 'Enter') addPlateItem(); });
+  $('plateLog').addEventListener('click', logPlate);
+  $('sVlmTitle').textContent = T.sVlmTitle; $('sVlmL').textContent = T.sVlmL;
+  $('sVlmOff').textContent = T.sVlmOff; $('sVlmLite').textContent = T.sVlmLite; $('sVlmPro').textContent = T.sVlmPro;
+  $('sVlmNote').textContent = T.sVlmNote;
+  $('sVlm').value = vlmTier();
+  $('sVlm').addEventListener('change', () => {
+    setVlmTier($('sVlm').value); paintVlmIntro();
+    if (vlmTier() === 'off') $('modelNote').textContent = S.ortSession ? T.modelReady : T.modelIdle;
+  });
   $('scanHint').textContent = T.scanHint; $('scanNote').textContent = T.scanNote;
   $('wTitle').textContent = T.wTitle; $('wKgL').textContent = T.wKg; $('wMusL').textContent = T.wMus;
   $('wFatL').textContent = T.wFatPct; $('wSave').textContent = T.save; $('wChartTitle').textContent = T.wChart;
@@ -407,11 +475,16 @@ function stopCam() {
   $('photoVideo').srcObject = null; $('scanVideo').srcObject = null;
   $('guessList').hidden = true; $('photoShoot').hidden = false;
 }
-async function startPhoto() { await startCam($('photoVideo')); ensureModel(); }
+async function startPhoto() {
+  paintVlmIntro();
+  await startCam($('photoVideo'));
+  ensureModel();
+  if (vlmTier() !== 'off') warmVLM();
+}
 async function ensureModel() {
   if (S.ortSession || ensureModel._loading) return;
   ensureModel._loading = true;
-  $('modelNote').textContent = T.modelLoading;
+  if (vlmTier() === 'off') $('modelNote').textContent = T.modelLoading;
   try {
     ort.env.wasm.numThreads = 1;
     const meta = await fetch('model/model-meta.json', { cache: 'no-cache' }).then(r => r.json());
@@ -434,39 +507,338 @@ async function ensureModel() {
       ? await ort.InferenceSession.create(buf, { executionProviders: ['wasm'] })
       : await ort.InferenceSession.create('model/food.onnx', { executionProviders: ['wasm'] });
     S.modelMeta = meta; S.ortSession = session;
-    $('modelNote').textContent = T.modelReady;
+    if (vlmTier() === 'off') $('modelNote').textContent = T.modelReady;
   } catch (e) {
     $('modelNote').textContent = 'model load failed: ' + (e.message || e);
   }
   ensureModel._loading = false;
 }
+function frameFrom(source, w, h) {
+  const s = Math.min(1, 1024 / Math.max(w, h));
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(w * s)); c.height = Math.max(1, Math.round(h * s));
+  c.getContext('2d').drawImage(source, 0, 0, c.width, c.height);
+  return c;
+}
+async function classifyCanvas(src) {
+  await ensureModel();
+  if (!S.ortSession) return [];
+  const size = S.modelMeta.inputSize, mean = S.modelMeta.mean, std = S.modelMeta.std;
+  const c = document.createElement('canvas'); c.width = size; c.height = size;
+  const g = c.getContext('2d');
+  const side = Math.min(src.width, src.height);
+  g.drawImage(src, (src.width - side) / 2, (src.height - side) / 2, side, side, 0, 0, size, size);
+  const px = g.getImageData(0, 0, size, size).data;
+  const n = size * size;
+  const data = new Float32Array(3 * n);
+  for (let i = 0; i < n; i++) {
+    data[i] = (px[i * 4] / 255 - mean[0]) / std[0];
+    data[n + i] = (px[i * 4 + 1] / 255 - mean[1]) / std[1];
+    data[2 * n + i] = (px[i * 4 + 2] / 255 - mean[2]) / std[2];
+  }
+  const out = await S.ortSession.run({ image: new ort.Tensor('float32', data, [1, 3, size, size]) });
+  const probs = out.probs.data;
+  const idx = [...probs.keys()].sort((a, b) => probs[b] - probs[a]).slice(0, 3);
+  return idx.map(i => ({ label: S.modelMeta.classes[i], prob: probs[i] }));
+}
 async function classifyPhoto() {
   const video = $('photoVideo');
   if (!video.videoWidth) return;
-  await ensureModel();
-  if (!S.ortSession) return;
+  await analyzeCanvas(frameFrom(video, video.videoWidth, video.videoHeight));
+}
+async function analyzeCanvas(canvas) {
   $('photoShoot').textContent = T.analyzing;
   try {
-    const size = S.modelMeta.inputSize, mean = S.modelMeta.mean, std = S.modelMeta.std;
-    const c = document.createElement('canvas'); c.width = size; c.height = size;
-    const g = c.getContext('2d');
-    const vw = video.videoWidth, vh = video.videoHeight, side = Math.min(vw, vh);
-    g.drawImage(video, (vw - side) / 2, (vh - side) / 2, side, side, 0, 0, size, size);
-    const px = g.getImageData(0, 0, size, size).data;
-    const n = size * size;
-    const data = new Float32Array(3 * n);
-    for (let i = 0; i < n; i++) {
-      data[i] = (px[i * 4] / 255 - mean[0]) / std[0];
-      data[n + i] = (px[i * 4 + 1] / 255 - mean[1]) / std[1];
-      data[2 * n + i] = (px[i * 4 + 2] / 255 - mean[2]) / std[2];
-    }
-    const out = await S.ortSession.run({ image: new ort.Tensor('float32', data, [1, 3, size, size]) });
-    const probs = out.probs.data;
-    const idx = [...probs.keys()].sort((a, b) => probs[b] - probs[a]).slice(0, 3);
-    showGuesses(idx.map(i => ({ label: S.modelMeta.classes[i], prob: probs[i] })));
+    const quick = await classifyCanvas(canvas);
+    if (vlmTier() === 'off') { if (quick.length) showGuesses(quick); return; }
+    await runSmart(canvas, quick);
   } finally {
     $('photoShoot').textContent = T.shoot;
   }
+}
+
+/* ---------- smart photo AI: local vision-language model ---------- */
+function vlmChoice() {
+  try { const v = localStorage.getItem('ps-vlm'); return v === 'off' || v === 'lite' || v === 'pro' ? v : null; }
+  catch { return null; }
+}
+function vlmTier() { return vlmChoice() || 'off'; }
+function setVlmTier(v) {
+  try { localStorage.setItem('ps-vlm', v); } catch {}
+  if (vlm && vlm.tier !== v) {
+    try { vlm.model.dispose && vlm.model.dispose(); } catch {}
+    vlm = null;
+  }
+}
+function vlmDtype(tier, f16) {
+  if (!f16) return { embed_tokens: 'q4', vision_encoder: 'q4', decoder_model_merged: 'q4' };
+  return tier === 'lite'
+    ? { embed_tokens: 'q4', vision_encoder: 'fp16', decoder_model_merged: 'q4' }
+    : { embed_tokens: 'q4f16', vision_encoder: 'fp16', decoder_model_merged: 'q4f16' };
+}
+function paintVlmIntro() {
+  const show = vlmChoice() === null;
+  $('vlmIntro').hidden = !show;
+  if (show) {
+    const tier = IS_MOBILE ? 'lite' : 'pro';
+    $('vlmIntroText').textContent = T.vlmIntroText.replace('{size}', VLM_TIERS[tier].gb + ' GB');
+  }
+}
+function vlmProgress(loaded, total) {
+  const pct = Math.min(100, Math.round(loaded / total * 100));
+  $('vlmProg').hidden = pct >= 100;
+  $('vlmProgBar').style.width = pct + '%';
+  $('modelNote').textContent = T.vlmDl.replace('{p}', pct)
+    .replace('{l}', Math.round(loaded / 1e6)).replace('{t}', Math.round(total / 1e6));
+}
+async function ensureVLM() {
+  const tier = vlmTier();
+  if (tier === 'off') throw new Error('off');
+  if (vlm && vlm.tier === tier) return vlm;
+  if (!navigator.gpu) throw new Error(T.aiNoGpu);
+  if (vlmLoad && vlmLoad.tier === tier) return vlmLoad.p;
+  const p = (async () => {
+    const tjs = await import(TJS_URL);
+    let f16 = false;
+    try { const ad = await navigator.gpu.requestAdapter(); f16 = !!(ad && ad.features.has('shader-f16')); } catch {}
+    const cfg = VLM_TIERS[tier];
+    const files = {};
+    const progress_callback = (e) => {
+      if (!e || e.status !== 'progress' || !e.file || !e.total) return;
+      files[e.file] = [e.loaded || 0, e.total];
+      let l = 0, t = 0;
+      for (const [a, b] of Object.values(files)) { l += a; t += b; }
+      vlmProgress(l, t);
+    };
+    const processor = await tjs.AutoProcessor.from_pretrained(cfg.id, { progress_callback });
+    const model = await tjs[cfg.cls].from_pretrained(cfg.id, {
+      dtype: vlmDtype(tier, f16), device: 'webgpu', progress_callback,
+    });
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+    return { tier, tjs, processor, model };
+  })();
+  vlmLoad = { tier, p };
+  try { vlm = await p; return vlm; }
+  finally { vlmLoad = null; $('vlmProg').hidden = true; }
+}
+async function warmVLM() {
+  if (vlmTier() === 'off') return;
+  if (!navigator.gpu) { $('modelNote').textContent = T.aiNoGpu; return; }
+  if (vlm && vlm.tier === vlmTier()) { $('modelNote').textContent = T.vlmReady; return; }
+  $('modelNote').textContent = T.vlmLoading;
+  try {
+    await ensureVLM();
+    $('modelNote').textContent = T.vlmReady;
+  } catch (e) {
+    $('modelNote').textContent = String((e && e.message) || e).slice(0, 160);
+  }
+}
+async function vlmAnalyze(m, canvas, hint, onText) {
+  const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.92));
+  let img = await m.tjs.RawImage.fromBlob(blob);
+  const s = VLM_TIERS[m.tier].side / Math.max(img.width, img.height);
+  const r28 = (v) => Math.max(56, Math.round(v * s / 28) * 28);
+  img = await img.resize(r28(img.width), r28(img.height));
+  const prompt = hint
+    ? PLATE_PROMPT + `\nHint from a fast classifier that only knows single dishes (it may be wrong): "${hint}".`
+    : PLATE_PROMPT;
+  const conversation = [{ role: 'user', content: [{ type: 'image' }, { type: 'text', text: prompt }] }];
+  const text = m.processor.apply_chat_template(conversation, { add_generation_prompt: true, enable_thinking: false });
+  const inputs = await m.processor(text, img);
+  let streamed = '';
+  const streamer = new m.tjs.TextStreamer(m.processor.tokenizer, {
+    skip_prompt: true, skip_special_tokens: true,
+    callback_function: (t) => { streamed += t; if (onText) onText(streamed); },
+  });
+  const out = await m.model.generate({ ...inputs, max_new_tokens: 450, do_sample: false, streamer });
+  let decoded = streamed;
+  try {
+    decoded = m.processor.batch_decode(out.slice(null, [inputs.input_ids.dims.at(-1), null]),
+      { skip_special_tokens: true })[0] || streamed;
+  } catch {}
+  return parsePlate(decoded);
+}
+function parsePlate(text) {
+  const t = String(text || '').replace(/<\/?think>/g, '');
+  let start = t.search(/\{\s*"meal"/);
+  if (start < 0) start = t.indexOf('{');
+  if (start < 0) return null;
+  let depth = 0, inStr = false, escp = false, end = -1;
+  for (let j = start; j < t.length; j++) {
+    const ch = t[j];
+    if (inStr) { if (escp) escp = false; else if (ch === '\\') escp = true; else if (ch === '"') inStr = false; continue; }
+    if (ch === '"') inStr = true;
+    else if (ch === '{') depth++;
+    else if (ch === '}' && --depth === 0) { end = j; break; }
+  }
+  const tryParse = (x) => { try { return JSON.parse(x.replace(/,\s*([}\]])/g, '$1')); } catch { return null; } };
+  let obj = end > 0 ? tryParse(t.slice(start, end + 1)) : null;
+  if (!obj) { // output cut off mid-way: keep the complete items only
+    const cut = t.slice(start, t.lastIndexOf('}') + 1);
+    obj = tryParse(cut + ']}') || tryParse(cut + '}');
+  }
+  if (!obj) return null;
+  const num = (v, lo, hi) => { const n = parseFloat(v); return Number.isFinite(n) && n >= lo && n <= hi ? n : null; };
+  const items = (Array.isArray(obj.items) ? obj.items : []).map((it) => ({
+    name: String(it.name || it.name_zh || '').trim().slice(0, 60),
+    name_zh: String(it.name_zh || '').trim().slice(0, 40),
+    count: Math.round(num(it.count, 1, 200) || 1),
+    grams: num(it.grams, 1, 3000),
+    kcal_100g: num(it.kcal_100g, 0, 900),
+  })).filter((it) => it.name);
+  return {
+    meal: String(obj.meal || '').slice(0, 60),
+    meal_zh: String(obj.meal_zh || '').slice(0, 40),
+    items,
+    reasoning: t.slice(0, start).replace(/```(json)?/g, '').trim(),
+  };
+}
+function unitWeight(name) {
+  const n = String(name || '').toLowerCase().replace(/\(.*?\)/g, '').trim();
+  let best = null;
+  for (const k in UNIT_G) {
+    const forms = [k, k + 's', k + 'es', k.replace(/y$/, 'ies')];
+    if (forms.some((f) => n === f || n.endsWith(' ' + f)) && (!best || k.length > best.length)) best = k;
+  }
+  return best ? UNIT_G[best] : null;
+}
+const PROCESSED = /\b(juice|nectar|syrup|canned|pie|babyfood|dried|frozen|jam|jelly|sauce|drink|flavou?red|candied)\b/i;
+function matchPlateFood(it) {
+  const qs = [it.name, it.name_zh].filter(Boolean).map((s) => s.toLowerCase().trim());
+  const wantsProcessed = qs.some((q) => PROCESSED.test(q));
+  let best = null;
+  const consider = (f, bonus) => {
+    let s = 0;
+    for (const q of qs) {
+      s = Math.max(s, fuzzy(f.en, q), fuzzy(f.zh, q));
+      const en = f.en && f.en.toLowerCase();
+      if (en && en.length >= 4 && q.includes(en)) s = Math.max(s, 0.8);
+    }
+    if (s < 0.6) return;
+    s += bonus;
+    if (f.source === 'seed') s += 0.06;
+    if (f.en && /\braw\b/i.test(f.en)) s += 0.05;
+    if (!wantsProcessed && f.en && PROCESSED.test(f.en)) s -= 0.06;
+    if (!best || s > best.s) best = { f, s };
+  };
+  for (const f of S.foods) consider(f, 0);
+  for (const c of [...S.learned, ...S.custom]) {
+    consider({ en: c.name, kcal: c.kcal, protein: c.protein, fat: c.fat, carbs: c.carbs, portion: c.portion, source: 'learned' }, 0.02);
+  }
+  return best ? best.f : null;
+}
+function buildPlateItem(it) {
+  const unit = unitWeight(it.name);
+  let g = it.grams;
+  if (unit) {
+    const est = unit * it.count;
+    if (!g || g > est * 3 || g < est / 3) g = est;
+  }
+  const food = matchPlateFood(it);
+  if (!g && food && food.portion) g = food.portion * it.count;
+  g = Math.round(g || 100);
+  return {
+    ...it, grams: g, per: g / Math.max(1, it.count), food,
+    k100: food ? food.kcal : it.kcal_100g,
+    p100: food ? (food.protein || 0) : 0, f100: food ? (food.fat || 0) : 0, c100: food ? (food.carbs || 0) : 0,
+  };
+}
+async function runSmart(canvas, quick) {
+  $('guessList').hidden = true; $('photoShoot').hidden = false;
+  const card = $('plateCard'); card.hidden = false;
+  $('plateTitle').textContent = T.vlmThinking;
+  $('plateItems').innerHTML = ''; $('plateTotals').innerHTML = '';
+  $('plateLog').hidden = true; $('plateAddRow').hidden = true;
+  const top = quick && quick[0];
+  $('plateStatus').textContent = top ? `${T.quick}: ${labelToTerm(top.label)} · ${Math.round(top.prob * 100)}%` : '';
+  const think = $('plateThink'); think.hidden = false; think.textContent = '…';
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  let res = null, err = null;
+  try {
+    const m = await ensureVLM();
+    $('modelNote').textContent = T.vlmReady;
+    res = await vlmAnalyze(m, canvas, top && top.prob >= 0.5 ? labelToTerm(top.label) : null,
+      (txt) => { think.textContent = txt; });
+  } catch (e) { err = e; }
+  if (!res || !res.items.length) {
+    $('plateTitle').textContent = T.vlmFail;
+    if (err) think.textContent = String((err && err.message) || err).slice(0, 300);
+    if (quick && quick.length) showGuesses(quick);
+    return;
+  }
+  think.textContent = res.reasoning || think.textContent;
+  S.plate = { meal: res.meal, meal_zh: res.meal_zh, items: res.items.map(buildPlateItem) };
+  renderPlate();
+}
+function plateTotals(items) {
+  return items.reduce((a, it) => {
+    const f = it.grams / 100;
+    return { k: a.k + (it.k100 || 0) * f, p: a.p + it.p100 * f, fa: a.fa + it.f100 * f, c: a.c + it.c100 * f, g: a.g + it.grams };
+  }, { k: 0, p: 0, fa: 0, c: 0, g: 0 });
+}
+function plateMealName(P) { return (ZH ? (P.meal_zh || P.meal) : (P.meal || P.meal_zh)) || T.meal; }
+function renderPlate() {
+  const P = S.plate; if (!P) return;
+  $('plateTitle').textContent = plateMealName(P);
+  $('plateItems').innerHTML = P.items.map((it, i) => {
+    const nm = ZH ? (it.name_zh || it.name) : it.name;
+    const alt = ZH ? it.name : it.name_zh;
+    const kcal = it.k100 != null ? Math.round(it.k100 * it.grams / 100) : null;
+    const src = it.food ? `${T.matched}: ${esc(nameOf(it.food))}` : (it.k100 != null ? T.aiKcal : T.noMatch);
+    return `<div class="plate-row" data-i="${i}">
+      <div class="name">${esc(nm)}${alt && alt !== nm ? ` <span class="muted small">${esc(alt)}</span>` : ''}</div>
+      <div class="muted small">${src}${it.k100 != null ? ` · ${Math.round(it.k100)} ${T.kcal}/100g` : ''}</div>
+      <div class="plate-ctl">
+        <span class="stepper"><button data-a="dec" aria-label="fewer">−</button><span class="num">${it.count}</span><button data-a="inc" aria-label="more">＋</button></span>
+        <input data-a="g" type="number" inputmode="decimal" value="${it.grams}" aria-label="grams"><span class="muted small">${T.grams}</span>
+        <span class="plate-kcal num">${kcal != null ? kcal + ' ' + T.kcal : '?'}</span>
+        <button class="plate-x" data-a="rm" aria-label="remove">×</button>
+      </div>
+    </div>`;
+  }).join('') || `<p class="muted small">${T.noItems}</p>`;
+  $('plateItems').querySelectorAll('.plate-row').forEach((row) => {
+    const it = P.items[+row.dataset.i];
+    row.querySelector('[data-a="dec"]').onclick = () => {
+      if (it.count > 1) { it.count--; it.grams = Math.round(it.per * it.count); renderPlate(); }
+    };
+    row.querySelector('[data-a="inc"]').onclick = () => { it.count++; it.grams = Math.round(it.per * it.count); renderPlate(); };
+    row.querySelector('[data-a="g"]').onchange = (e) => {
+      const g = parseFloat(e.target.value);
+      if (g > 0) { it.grams = Math.round(g); it.per = g / it.count; }
+      renderPlate();
+    };
+    row.querySelector('[data-a="rm"]').onclick = () => { P.items.splice(P.items.indexOf(it), 1); renderPlate(); };
+  });
+  const tot = plateTotals(P.items);
+  $('plateTotals').innerHTML = [
+    ['', T.total, Math.round(tot.k) + ' ' + T.kcal], ['pro', T.protein, Math.round(tot.p) + 'g'],
+    ['fat', T.fat, Math.round(tot.fa) + 'g'], ['carb', T.carbs, Math.round(tot.c) + 'g'],
+  ].map(([c, l, v]) => `<div class="macro"><div class="lbl">${c ? `<span class="dot" style="background:var(--${c})"></span>` : ''}${l}</div><div class="val num">${v}</div></div>`).join('');
+  $('plateAddRow').hidden = false;
+  $('plateLog').hidden = !P.items.length;
+  $('plateLog').textContent = T.plateLog.replace('{k}', Math.round(tot.k));
+}
+function logPlate() {
+  const P = S.plate; if (!P || !P.items.length) return;
+  const parts = P.items.map((it) => {
+    const nm = ZH ? (it.name_zh || it.name) : it.name;
+    return it.count > 1 ? `${nm}×${it.count}` : nm;
+  });
+  const tot = plateTotals(P.items);
+  addEntry({
+    date: S.date, name: `${plateMealName(P)}: ${parts.join(', ')}`.slice(0, 140), grams: Math.round(tot.g),
+    kcal: tot.k, protein: tot.p, fat: tot.fa, carbs: tot.c, source: 'vlm', created_at: Date.now(),
+  });
+  S.plate = null; $('plateCard').hidden = true;
+  setView('today');
+}
+function addPlateItem() {
+  const name = $('plateAddName').value.trim();
+  if (!name || !S.plate) return;
+  const it = buildPlateItem({ name, name_zh: '', count: 1, grams: null, kcal_100g: null });
+  S.plate.items.push(it);
+  $('plateAddName').value = '';
+  renderPlate();
 }
 function labelToTerm(label) {
   let name = label.includes(':') ? label.split(':').slice(1).join(':') : label;
