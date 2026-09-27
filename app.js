@@ -610,15 +610,6 @@ function openTeach(code) {
     <button class="primary" id="tAI" style="margin-top:8px;background:var(--chip);color:var(--ink)">${T.teachAI}</button>
     <a href="https://www.gds.org.cn/#/barcodeList/index?type=barcode&keyword=${encodeURIComponent(code)}" target="_blank" rel="noopener"
        style="display:block;text-align:center;margin-top:8px;color:var(--accent);font-size:13px">${T.gs1}</a>`;
-  // optional relay (Supabase Edge Function, if deployed): auto-prefill the product name
-  if (!LOCAL) {
-    fetch(PS_CONFIG.SUPABASE_URL + '/functions/v1/gtin?code=' + encodeURIComponent(code), {
-      headers: { Authorization: 'Bearer ' + PS_CONFIG.SUPABASE_ANON_KEY, apikey: PS_CONFIG.SUPABASE_ANON_KEY },
-    }).then(r => r.ok ? r.json() : null).then(j => {
-      const el = $('tName');
-      if (j && j.name && el && !el.value) el.value = j.name + (j.brand ? ` (${j.brand})` : '');
-    }).catch(() => {});
-  }
   $('shGrams').value = 100; sheetTeachMode(code);
   wrap.hidden = false;
   $('tAI').addEventListener('click', async () => {
