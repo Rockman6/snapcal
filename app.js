@@ -32,6 +32,10 @@ const T = ZH ? {
   vlmFail:'AI 没能给出清楚的结果——可以换个角度再拍，或用搜索添加。', quickGuess:'快速分类器猜测', meal:'这一餐',
   matched:'数据库', aiKcal:'AI 估算热量', noMatch:'数据库里没有——可改名或删除', total:'合计', noItems:'没有识别到食物',
   plateLog:'记录这一餐 · {k} 千卡', plateAdd:'漏了什么？输入名称添加（如：酸奶）',
+  sodium:'钠', sugar:'糖', usual:'你的常用份量', readLabel:'📷 拍营养成分表读取', labelBusy:'正在读取营养成分表…',
+  labelFail:'没读出能量数值——请拍清楚整个营养成分表', labelFood:'扫描的标签', teachLabel:'📷 拍营养成分表自动填写',
+  readScale:'📷 从体脂秤截图读取（可多选）', scaleBusy:'正在读取第 {i}/{n} 张截图…', scaleDone:'已填入 {n} 项——核对无误后点保存',
+  scaleNone:'没有读到数据——请用体脂秤 App 的原始截图', naLimit:'钠 · 上限 2000 毫克', sugarLimit:'糖 · 建议 ≤50 克',
   water:'💧 饮水', w250:'＋250 毫升 · 一杯', w500:'＋500 毫升 · 一瓶', wCustom:'自定义', wUndo:'撤销上一次',
   wFromDrinks:'其中 {d} 毫升来自饮品', wLeft:'还差 {r} 毫升', wDone:'今日饮水目标已完成 🎉', wName:'水', wAdded:'已记录 💧',
   sWater:'饮水目标（毫升，留空 = 按体重自动）', mealsHint:'点一条记录可修改或删除',
@@ -43,7 +47,7 @@ const T = ZH ? {
   sVlmNote:'云端：由第三方 AI（智谱 GLM 或 Google Gemini）在服务器识别，最准、手机零负担（免费版服务商可能用提交内容改进模型）。本地 Lite/Pro：在设备上运行 Qwen 视觉模型，照片完全不离开手机，但需下载模型、耗电、准确度较低。',
   modelReady:'模型已就绪——在设备上离线识别，照片不会上传。', camDenied:'需要相机权限。请在浏览器设置中允许。',
   scanHint:'将条形码对准相机', scanNote:'先查本地全球库，再查在线，最后可自己补充。', notFound:'未找到该商品，请用搜索添加。',
-  teach:'没有找到——教会它！', teachName:'商品名称', teachSave:'保存到公共条码库', taught:'已保存！所有用户扫这个条码都能直接用了 🎉', teachAI:'🧠 让 AI 按名称估算', gs1:'🔎 到 GS1 官网查此条码（自动填名）',
+  teach:'没有找到——教会它！', teachName:'商品名称', teachSave:'保存到公共条码库', taught:'已保存！所有用户扫这个条码都能直接用了 🎉', teachAI:'🧠 让 AI 按名称估算', gs1:'🔎 到 GS1 官网查此条码',
   noResults:'没有找到，试试别的关键词，或添加自定义食物。', online:'🌐 在线查找并学习',
   onlineBusy:'在线查找中…', onlineNone:'在线没有找到。', learned:'已学习并存入公共数据库 ✓',
   ai:'🧠 本地 AI 估算', aiLoad:'首次使用需下载本地 AI 模型（约 1GB，只下载一次，永久缓存）', aiBusy:'AI 思考中…', aiNoGpu:'此浏览器不支持 WebGPU，无法运行本地 AI（试试较新的 iPhone/Chrome/Safari）', aiTag:'AI 估算·仅供参考',
@@ -74,6 +78,10 @@ const T = ZH ? {
   vlmFail:'The AI could not give a clear answer — try another angle, or add it via search.', quickGuess:'Quick classifier guess', meal:'Meal',
   matched:'database', aiKcal:'AI calorie estimate', noMatch:'not in the database — rename or remove', total:'Total', noItems:'No food items found',
   plateLog:'Log this meal · {k} kcal', plateAdd:'Missed something? Type a name to add (e.g. yogurt)',
+  sodium:'Sodium', sugar:'Sugar', usual:'your usual portion', readLabel:'📷 Read a nutrition label', labelBusy:'Reading the label…',
+  labelFail:'Could not read the energy value — photograph the whole nutrition panel clearly', labelFood:'Scanned label', teachLabel:'📷 Fill in from a photo of the label',
+  readScale:'📷 Read from scale screenshots (pick several)', scaleBusy:'Reading screenshot {i} of {n}…', scaleDone:'Filled {n} values — check them, then Save',
+  scaleNone:'No values found — use original screenshots from the scale app', naLimit:'Sodium · limit 2,000 mg', sugarLimit:'Sugar · aim ≤50 g',
   water:'💧 Water', w250:'+250 ml · cup', w500:'+500 ml · bottle', wCustom:'Custom', wUndo:'Undo last',
   wFromDrinks:'{d} ml of it from drinks', wLeft:'{r} ml to go', wDone:'Daily water goal reached 🎉', wName:'Water', wAdded:'Logged 💧',
   sWater:'Water target (ml, blank = auto from weight)', mealsHint:'Tap an entry to edit or delete it',
@@ -85,7 +93,7 @@ const T = ZH ? {
   sVlmNote:'Cloud: a third-party AI (Zhipu GLM or Google Gemini) recognizes the photo on the server — most accurate, zero load on the phone (free-tier providers may use submissions to improve their models). On-device Lite/Pro: a Qwen vision model runs on your device, photos never leave it, but it downloads a model, uses battery and is less accurate.',
   modelReady:'Model ready — runs on your device, photos never leave it.', camDenied:'Camera permission needed — allow it in your browser settings.',
   scanHint:'Point the camera at a barcode', scanNote:'Checked against the local worldwide pack, then online, then you can teach it.', notFound:'Product not found — add it via search.',
-  teach:'Not found — teach it!', teachName:'Product name', teachSave:'Save to the shared barcode base', taught:'Saved — every user scanning this code gets it now 🎉', teachAI:'🧠 AI estimate from the name',
+  teach:'Not found — teach it!', teachName:'Product name', teachSave:'Save to the shared barcode base', taught:'Saved — every user scanning this code gets it now 🎉', teachAI:'🧠 AI estimate from the name', gs1:'🔎 Look up this code on GS1 China',
   noResults:'No match — try another word, or add a custom food.', online:'🌐 Search online & learn it',
   onlineBusy:'Searching online…', onlineNone:'Nothing found online.', learned:'Learned & saved to the shared database ✓',
   ai:'🧠 Local AI estimate', aiLoad:'First use downloads the local AI model (~1 GB, once, cached forever)', aiBusy:'AI thinking…', aiNoGpu:'This browser lacks WebGPU — local AI unavailable (try a recent iPhone/Chrome/Safari)', aiTag:'AI estimate · approximate',
@@ -147,7 +155,7 @@ const NOT_DRINK_RE = /watermelon|chestnut|tea ?cake|milk ?chocolate|奶酪|茶�
 
 /* ---------- state & utils ---------- */
 const S = {
-  foods: [], custom: [], learned: [], entries: [], weights: [], health: [],
+  foods: [], custom: [], learned: [], entries: [], weights: [], health: [], portions: {},
   targets: { kcal: 2000, protein: 120, goal: null },
   profile: { sex: null, dob: null, height_cm: null },
   date: todayISO(), view: 'today', sheetFood: null,
@@ -190,7 +198,7 @@ async function loadAll() {
     return;
   }
   const sb = S.sb;
-  const [e, w, c, t, p, ln, hd] = await Promise.all([
+  const [e, w, c, t, p, ln, hd, pm] = await Promise.all([
     sb.from('entries').select('*').eq('deleted', false).order('created_at', { ascending: false }).limit(2000),
     sb.from('weights').select('*').order('date', { ascending: false }).limit(400),
     sb.from('foods_custom').select('*').order('id', { ascending: false }).limit(500),
@@ -198,6 +206,7 @@ async function loadAll() {
     sb.from('profiles').select('*').maybeSingle(),
     sb.from('foods_learned').select('*').order('id', { ascending: false }).limit(1000),
     sb.from('health_daily').select('*').order('date', { ascending: false }).limit(90),
+    sb.from('portion_memory').select('*').limit(2000),
   ]);
   S.entries = (e.data || []).map(r => ({ ...r, _key: r.device_id + '/' + r.local_id }));
   S.weights = w.data || [];
@@ -207,12 +216,30 @@ async function loadAll() {
   if (p.data) S.profile = p.data;
   S.learned = ln.data || [];
   S.health = hd.data || [];
+  S.portions = {};
+  for (const r of pm.data || []) S.portions[r.key] = { grams: r.grams, n: r.n };
+  if (pm.error) S.portions = lsPortions(); // table not created yet: device-only memory
+  if (t.data) S.targets.eat_back = t.data.eat_back ?? null;
+}
+// Writes that survive an older database schema: a column the database doesn't have yet
+// (e.g. v10 SQL not run) is dropped and the write retried, instead of the save failing.
+async function sbSafe(op, row) {
+  let r = { ...row };
+  for (let i = 0; i < 5; i++) {
+    const res = await op(r);
+    if (!res.error) return { error: null, row: r };
+    const m = /'([a-z_]+)' column|column "?([a-z_]+)"? (?:of relation|does not exist)/i.exec(res.error.message || '');
+    const col = m && (m[1] || m[2]);
+    if (!col || !(col in r)) return { error: res.error };
+    delete r[col];
+  }
+  return { error: { message: 'schema mismatch' } };
 }
 async function addEntry(e) {
   if (LOCAL) { S.entries.unshift({ _key: 'l' + Date.now(), ...e }); lsSave(); }
   else {
     const row = { device_id: deviceId(), local_id: Date.now(), deleted: false, ...e };
-    const { error } = await S.sb.from('entries').insert(row);
+    const { error } = await sbSafe((r) => S.sb.from('entries').insert(r), row);
     if (error) return toast(error.message);
     S.entries.unshift({ ...row, _key: row.device_id + '/' + row.local_id });
   }
@@ -234,7 +261,7 @@ async function updateEntry(key, patch) {
   if (LOCAL) { Object.assign(e, patch); lsSave(); }
   else {
     const [d, l] = key.split('/');
-    const { error } = await S.sb.from('entries').update(patch).eq('device_id', d).eq('local_id', +l);
+    const { error } = await sbSafe((r) => S.sb.from('entries').update(r).eq('device_id', d).eq('local_id', +l), patch);
     if (error) return toast(error.message);
     Object.assign(e, patch);
   }
@@ -256,11 +283,7 @@ async function saveTargets() {
   try { localStorage.setItem('ps-water-target', S.targets.water_ml || ''); } catch {}
   if (LOCAL) lsSave();
   else {
-    let { error } = await S.sb.from('settings').upsert({ ...S.targets }, { onConflict: 'user_id' });
-    if (error && /water_ml/.test(error.message)) { // column not added yet (v9 SQL): keep the target on this device
-      const { water_ml, ...rest } = S.targets;
-      ({ error } = await S.sb.from('settings').upsert(rest, { onConflict: 'user_id' }));
-    }
+    const { error } = await sbSafe((r) => S.sb.from('settings').upsert(r, { onConflict: 'user_id' }), { ...S.targets });
     if (error) return toast(error.message);
   }
   toast(T.saved); renderToday(); renderWeight();
@@ -358,6 +381,24 @@ function buildStatic() {
   });
   $('weekTitle').textContent = T.week; $('mealsTitle').textContent = T.meals;
   $('mealsHint').textContent = T.mealsHint;
+  $('labelPickL').textContent = T.readLabel;
+  $('labelFile').addEventListener('change', async (ev) => {
+    const file = ev.target.files && ev.target.files[0]; ev.target.value = '';
+    if (!file) return;
+    $('labelPickL').textContent = T.labelBusy;
+    try {
+      const f = await readLabel(file);
+      const name = f.name || T.labelFood;
+      openSheet({ ...f, _name: name, source: 'label' });
+      if (f.name) learnFood({ name: f.name, kcal: f.kcal, protein: f.protein, fat: f.fat, carbs: f.carbs, portion: f.portion, origin: 'label' });
+    } catch (e) { toast(String((e && e.message) || e).slice(0, 90)); }
+    $('labelPickL').textContent = T.readLabel;
+  });
+  $('scalePickL').textContent = T.readScale;
+  $('scaleFiles').addEventListener('change', async (ev) => {
+    const files = [...(ev.target.files || [])]; ev.target.value = '';
+    if (files.length) await readScaleShots(files.slice(0, 12));
+  });
   $('waterTitle').textContent = T.water; $('w250').textContent = T.w250; $('w500').textContent = T.w500;
   $('wCustomBtn').textContent = T.wCustom; $('wUndo').textContent = T.wUndo;
   $('w250').addEventListener('click', () => addWater(250));
@@ -476,14 +517,7 @@ function buildStatic() {
   $('shCancel').addEventListener('click', closeSheet);
   $('sheet').addEventListener('click', ev => { if (ev.target === $('sheet')) closeSheet(); });
   $('shGrams').addEventListener('input', sheetKcal);
-  $('shAdd').addEventListener('click', () => {
-    const f = S.sheetFood; const g = parseFloat($('shGrams').value);
-    if (!f || !(g > 0)) return;
-    addEntry({ date: S.date, name: f._name, grams: g,
-      kcal: f.kcal * g / 100, protein: (f.protein || 0) * g / 100, fat: (f.fat || 0) * g / 100,
-      carbs: (f.carbs || 0) * g / 100, source: f.source || 'custom', created_at: Date.now() });
-    closeSheet(); setView('today');
-  });
+  $('shAdd').addEventListener('click', logFromSheet);
 }
 function setView(v) {
   S.view = v;
@@ -714,23 +748,25 @@ async function warmVLM() {
     $('modelNote').textContent = String((e && e.message) || e).slice(0, 160);
   }
 }
-async function cloudAnalyze(canvas, hint) {
+function canvasB64(canvas, maxSide, quality) {
+  const k = Math.min(1, maxSide / Math.max(canvas.width, canvas.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(canvas.width * k); c.height = Math.round(canvas.height * k);
+  c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', quality || 0.85).split(',')[1];
+}
+async function cloudCall(body) {
   if (LOCAL || !S.sb) throw new Error(T.cloudNeedsLogin);
   const { data } = await S.sb.auth.getSession();
   const token = data && data.session && data.session.access_token;
   if (!token) throw new Error(T.cloudNeedsLogin);
-  const s = Math.min(1, 768 / Math.max(canvas.width, canvas.height));
-  const c = document.createElement('canvas');
-  c.width = Math.round(canvas.width * s); c.height = Math.round(canvas.height * s);
-  c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
-  const image = c.toDataURL('image/jpeg', 0.85).split(',')[1];
   const r = await fetch(PS_CONFIG.SUPABASE_URL + '/functions/v1/analyze-meal', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json', Authorization: 'Bearer ' + token,
       apikey: PS_CONFIG.SUPABASE_ANON_KEY, 'x-region': 'ap-northeast-1', // Tokyo: next to the database and close to Zhipu's servers
     },
-    body: JSON.stringify({ image, hint: hint || '' }),
+    body: JSON.stringify(body),
   });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) {
@@ -738,8 +774,91 @@ async function cloudAnalyze(canvas, hint) {
     if (j.error === 'sign_in_required') throw new Error(T.cloudNeedsLogin);
     throw new Error(T.cloudBusy + (j.error ? ` (${j.error})` : ''));
   }
-  return parsePlate(j.text);
+  return String(j.text || '');
 }
+async function cloudAnalyze(canvas, hint) {
+  return parsePlate(await cloudCall({ task: 'meal', image: canvasB64(canvas, 768), hint: hint || '' }));
+}
+// First complete JSON object in a model reply (models sometimes add text after it).
+function firstJson(text) {
+  const t = String(text || '');
+  const i = t.indexOf('{');
+  if (i < 0) return null;
+  let depth = 0, inStr = false, escp = false;
+  for (let k = i; k < t.length; k++) {
+    const ch = t[k];
+    if (inStr) { if (escp) escp = false; else if (ch === '\\') escp = true; else if (ch === '"') inStr = false; continue; }
+    if (ch === '"') inStr = true;
+    else if (ch === '{') depth++;
+    else if (ch === '}' && --depth === 0) {
+      try { return JSON.parse(t.slice(i, k + 1).replace(/,\s*([}\]])/g, '$1')); } catch { return null; }
+    }
+  }
+  return null;
+}
+function numOrNull(v) { const n = parseFloat(v); return Number.isFinite(n) ? n : null; }
+async function fileCanvas(file) {
+  const bmp = await createImageBitmap(file);
+  return frameFrom(bmp, bmp.width, bmp.height);
+}
+
+/* ---------- nutrition label reading (cloud) ---------- */
+function labelTo100(j) {
+  const n = (v) => { const x = numOrNull(v); return x !== null && x >= 0 ? x : 0; };
+  const kcal = n(j.energy_kcal) || n(j.energy_kj) / 4.184;
+  const f = { name: String(j.name || '').trim(), kcal, protein: n(j.protein), fat: n(j.fat), carbs: n(j.carbs),
+    sugar: n(j.sugar), na: n(j.sodium_mg) || (n(j.salt_g) ? n(j.salt_g) / 2.54 * 1000 : 0) };
+  const serving = n(j.serving_g);
+  if (String(j.basis || '').toLowerCase() === 'serving' && serving > 0) {
+    const k = 100 / serving;
+    for (const key of ['kcal', 'protein', 'fat', 'carbs', 'sugar', 'na']) f[key] *= k;
+  }
+  for (const key of ['kcal', 'protein', 'fat', 'carbs', 'sugar']) f[key] = r1(f[key]);
+  f.na = Math.round(f.na);
+  f.portion = serving > 0 ? serving : 100;
+  return f;
+}
+async function readLabel(file) {
+  const canvas = await fileCanvas(file);
+  const j = firstJson(await cloudCall({ task: 'label', image: canvasB64(canvas, 1600, 0.88) }));
+  if (!j || !(numOrNull(j.energy_kcal) > 0 || numOrNull(j.energy_kj) > 0)) throw new Error(T.labelFail);
+  return labelTo100(j);
+}
+
+/* ---------- scale screenshot reading (cloud) ---------- */
+const SCALE_TO_FIELD = {
+  weight_kg: 'wKg', body_fat_pct: 'wFat', muscle_kg: 'wMus',
+  fat_kg: 'mx_fat_kg', ffm_kg: 'mx_ffm_kg', skm_kg: 'mx_skm_kg', protein_kg: 'mx_protein_kg', water_kg: 'mx_water_kg',
+  mineral_kg: 'mx_mineral_kg', icw_kg: 'mx_icw_kg', ecw_kg: 'mx_ecw_kg', bmr_kcal: 'mx_bmr_kcal', whr: 'mx_whr', visceral: 'mx_visceral',
+};
+async function readScaleShots(files) {
+  let filled = 0;
+  for (let i = 0; i < files.length; i++) {
+    $('scaleNote').textContent = T.scaleBusy.replace('{i}', i + 1).replace('{n}', files.length);
+    let j = null;
+    try { j = firstJson(await cloudCall({ task: 'scale', image: canvasB64(await fileCanvas(files[i]), 1600, 0.88) })); }
+    catch (e) { toast(String((e && e.message) || e).slice(0, 90)); }
+    if (!j) continue;
+    for (const [k, id] of Object.entries(SCALE_TO_FIELD)) {
+      const v = numOrNull(j[k]);
+      if (v !== null && v > 0 && $(id)) { $(id).value = v; filled++; }
+    }
+    const seg = ['ra', 'la', 'tr', 'rl', 'll'].map((p) => numOrNull(j['seg_' + p]));
+    if (seg.some((v) => v !== null && v > 0)) {
+      // Which table is it? An adult's trunk muscle is ~15-35 kg; trunk fat is far lower.
+      const tr = seg[2];
+      let table = String(j.seg_table || '').toLowerCase().includes('mus') ? 'mus' : 'fat';
+      if (tr !== null && tr >= 14) table = 'mus';
+      else if (tr !== null && tr < 12) table = 'fat';
+      ['ra', 'la', 'tr', 'rl', 'll'].forEach((p, idx) => {
+        if (seg[idx] !== null && seg[idx] > 0 && $(`mx_seg_${table}_${p}`)) { $(`mx_seg_${table}_${p}`).value = seg[idx]; filled++; }
+      });
+    }
+  }
+  $('wMore').open = true; paintBmi();
+  $('scaleNote').textContent = filled ? T.scaleDone.replace('{n}', filled) : T.scaleNone;
+}
+
 async function vlmAnalyze(m, canvas, hint, onText) {
   const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.92));
   let img = await m.tjs.RawImage.fromBlob(blob);
@@ -792,6 +911,8 @@ function parsePlate(text) {
     count: Math.round(num(it.count, 1, 200) || 1),
     grams: num(it.grams, 1, 3000),
     kcal_100g: num(it.kcal_100g, 0, 900),
+    sodium_mg_100g: num(it.sodium_mg_100g, 0, 10000),
+    sugar_g_100g: num(it.sugar_g_100g, 0, 100),
   })).filter((it) => it.name);
   return {
     meal: String(obj.meal || '').slice(0, 60),
@@ -853,7 +974,9 @@ function matchPlateFood(it) {
 function buildPlateItem(it) {
   const unit = unitWeight(it.name);
   let g = it.grams;
-  if (unit) {
+  const usual = usualPortion('piece', it.name);
+  if (usual) { g = usual * it.count; it.usual = true; } // your remembered portion beats the AI's guess
+  if (unit && !it.usual) {
     const est = unit * it.count;
     if (!g || g > est * 3 || g < est / 3) g = est;
   }
@@ -866,6 +989,8 @@ function buildPlateItem(it) {
     ...it, grams: g, per: g / Math.max(1, it.count), food,
     k100: food ? food.kcal : it.kcal_100g,
     p100: food ? (food.protein || 0) : 0, f100: food ? (food.fat || 0) : 0, c100: food ? (food.carbs || 0) : 0,
+    na100: food && per100(food.na) !== null ? food.na : it.sodium_mg_100g ?? null,
+    s100: food && per100(food.sugar) !== null ? food.sugar : it.sugar_g_100g ?? null,
   };
 }
 async function runSmart(canvas, quick) {
@@ -909,8 +1034,9 @@ async function runSmart(canvas, quick) {
 function plateTotals(items) {
   return items.reduce((a, it) => {
     const f = it.grams / 100;
-    return { k: a.k + (it.k100 || 0) * f, p: a.p + it.p100 * f, fa: a.fa + it.f100 * f, c: a.c + it.c100 * f, g: a.g + it.grams };
-  }, { k: 0, p: 0, fa: 0, c: 0, g: 0 });
+    return { k: a.k + (it.k100 || 0) * f, p: a.p + it.p100 * f, fa: a.fa + it.f100 * f, c: a.c + it.c100 * f, g: a.g + it.grams,
+      na: a.na + (it.na100 || 0) * f, su: a.su + (it.s100 || 0) * f, hasNa: a.hasNa || it.na100 != null, hasSu: a.hasSu || it.s100 != null };
+  }, { k: 0, p: 0, fa: 0, c: 0, g: 0, na: 0, su: 0, hasNa: false, hasSu: false });
 }
 function plateMealName(P) { return (ZH ? (P.meal_zh || P.meal) : (P.meal || P.meal_zh)) || T.meal; }
 function renderPlate() {
@@ -920,7 +1046,7 @@ function renderPlate() {
     const nm = ZH ? (it.name_zh || it.name) : it.name;
     const alt = ZH ? it.name : it.name_zh;
     const kcal = it.k100 != null ? Math.round(it.k100 * it.grams / 100) : null;
-    const src = it.food ? `${T.matched}: ${esc(nameOf(it.food))}` : (it.k100 != null ? T.aiKcal : T.noMatch);
+    const src = (it.usual ? `${T.usual} · ` : '') + (it.food ? `${T.matched}: ${esc(nameOf(it.food))}` : (it.k100 != null ? T.aiKcal : T.noMatch));
     return `<div class="plate-row" data-i="${i}">
       <div class="name">${esc(nm)}${alt && alt !== nm ? ` <span class="muted small">${esc(alt)}</span>` : ''}</div>
       <div class="muted small">${src}${it.k100 != null ? ` · ${Math.round(it.k100)} ${T.kcal}/100g` : ''}</div>
@@ -935,12 +1061,12 @@ function renderPlate() {
   $('plateItems').querySelectorAll('.plate-row').forEach((row) => {
     const it = P.items[+row.dataset.i];
     row.querySelector('[data-a="dec"]').onclick = () => {
-      if (it.count > 1) { it.count--; it.grams = Math.round(it.per * it.count); renderPlate(); }
+      if (it.count > 1) { it.count--; it.grams = Math.round(it.per * it.count); it.edited = true; renderPlate(); }
     };
-    row.querySelector('[data-a="inc"]').onclick = () => { it.count++; it.grams = Math.round(it.per * it.count); renderPlate(); };
+    row.querySelector('[data-a="inc"]').onclick = () => { it.count++; it.grams = Math.round(it.per * it.count); it.edited = true; renderPlate(); };
     row.querySelector('[data-a="g"]').onchange = (e) => {
       const g = parseFloat(e.target.value);
-      if (g > 0) { it.grams = Math.round(g); it.per = g / it.count; }
+      if (g > 0) { it.grams = Math.round(g); it.per = g / it.count; it.edited = true; }
       renderPlate();
     };
     row.querySelector('[data-a="rm"]').onclick = () => { P.items.splice(P.items.indexOf(it), 1); renderPlate(); };
@@ -964,7 +1090,9 @@ function logPlate() {
   addEntry({
     date: S.date, name: `${plateMealName(P)}: ${parts.join(', ')}`.slice(0, 140), grams: Math.round(tot.g),
     kcal: tot.k, protein: tot.p, fat: tot.fa, carbs: tot.c, source: 'vlm', created_at: Date.now(),
+    sodium_mg: tot.hasNa ? Math.round(tot.na) : null, sugar_g: tot.hasSu ? r1(tot.su) : null,
   });
+  for (const it of P.items) if (it.edited) rememberPortion('piece:' + it.name, it.per);
   S.plate = null; $('plateCard').hidden = true;
   setView('today');
 }
@@ -1078,9 +1206,9 @@ async function onBarcode(code) {
   try {
     const local = (await bcLookup(code)) || (bcLearned && bcLearned[code]) || (cnPack && cnPack[code]);
     if (local) {
-      const [name, kcal, pro, fat, carbs, serving] = local;
-      openSheet({ _name: name, kcal, protein: pro, fat, carbs,
-        portion: serving > 0 ? serving : 100, source: 'cnpack' });
+      const [name, kcal, pro, fat, carbs, serving, na, sugar] = local;
+      openSheet({ _name: name, kcal, protein: pro, fat, carbs, na: na >= 0 ? na : null, sugar: sugar >= 0 ? sugar : null,
+        portion: serving > 0 ? serving : 100, source: 'barcode' });
       return;
     }
     const fields = 'product_name,product_name_zh,brands,serving_quantity,nutriments';
@@ -1094,6 +1222,8 @@ async function onBarcode(code) {
       _name: name + (p.brands ? ` (${p.brands})` : ''),
       kcal, protein: p.nutriments.proteins_100g || 0, fat: p.nutriments.fat_100g || 0,
       carbs: p.nutriments.carbohydrates_100g || 0,
+      na: typeof p.nutriments.sodium_100g === 'number' ? p.nutriments.sodium_100g * 1000 : null,
+      sugar: typeof p.nutriments.sugars_100g === 'number' ? p.nutriments.sugars_100g : null,
       portion: Number(p.serving_quantity) > 0 ? Number(p.serving_quantity) : 100,
       source: 'off',
     });
@@ -1114,11 +1244,25 @@ function openTeach(code) {
       <input id="tF" type="number" inputmode="decimal" placeholder="${T.fat}g" style="width:90px">
       <input id="tC" type="number" inputmode="decimal" placeholder="${T.carbs}g" style="width:90px">
     </div>
+    <label for="tLabelFile" class="primary" id="tLabelL" style="display:block;text-align:center;cursor:pointer;margin-top:8px;background:var(--chip);color:var(--ink)">${T.teachLabel}</label>
+    <input type="file" id="tLabelFile" accept="image/*" hidden>
     <button class="primary" id="tAI" style="margin-top:8px;background:var(--chip);color:var(--ink)">${T.teachAI}</button>
     <a href="https://www.gds.org.cn/#/barcodeList/index?type=barcode&keyword=${encodeURIComponent(code)}" target="_blank" rel="noopener"
        style="display:block;text-align:center;margin-top:8px;color:var(--accent);font-size:13px">${T.gs1}</a>`;
   $('shGrams').value = 100; sheetTeachMode(code);
   wrap.hidden = false;
+  $('tLabelFile').addEventListener('change', async (ev) => {
+    const file = ev.target.files && ev.target.files[0]; ev.target.value = '';
+    if (!file) return;
+    $('tLabelL').textContent = T.labelBusy;
+    try {
+      const f = await readLabel(file);
+      if (!$('tName').value.trim() && f.name) $('tName').value = f.name;
+      $('tK').value = f.kcal; $('tP').value = f.protein; $('tF').value = f.fat; $('tC').value = f.carbs;
+      $('shGrams').value = f.portion;
+    } catch (e) { toast(String((e && e.message) || e).slice(0, 90)); }
+    $('tLabelL').textContent = T.teachLabel;
+  });
   $('tAI').addEventListener('click', async () => {
     const name = $('tName').value.trim(); if (!name) return;
     $('tAI').disabled = true; $('tAI').textContent = T.aiBusy;
@@ -1149,22 +1293,66 @@ function resetSheetAdd() {
   const add = $('shAdd');
   const fresh = add.cloneNode(true); add.replaceWith(fresh);
   fresh.textContent = T.add;
-  fresh.addEventListener('click', () => {
-    const f = S.sheetFood; const g = parseFloat($('shGrams').value);
-    if (!f || !(g > 0)) return;
-    addEntry({ date: S.date, name: f._name, grams: g,
-      kcal: f.kcal * g / 100, protein: (f.protein || 0) * g / 100, fat: (f.fat || 0) * g / 100,
-      carbs: (f.carbs || 0) * g / 100, source: f.source || 'custom', created_at: Date.now() });
-    closeSheet(); setView('today');
-  });
+  fresh.addEventListener('click', logFromSheet);
+}
+
+/* ---------- building entries (sodium & sugar travel with every food) ---------- */
+function per100(v) { const n = parseFloat(v); return Number.isFinite(n) && n >= 0 ? n : null; }
+function entryFromFood(f, g) {
+  const na = per100(f.na), sug = per100(f.sugar);
+  return {
+    date: S.date, name: f._name, grams: g,
+    kcal: f.kcal * g / 100, protein: (f.protein || 0) * g / 100, fat: (f.fat || 0) * g / 100,
+    carbs: (f.carbs || 0) * g / 100,
+    sodium_mg: na === null ? null : Math.round(na * g / 100), sugar_g: sug === null ? null : r1(sug * g / 100),
+    source: f.source || 'custom', created_at: Date.now(),
+  };
+}
+function logFromSheet() {
+  const f = S.sheetFood; const g = parseFloat($('shGrams').value);
+  if (!f || !(g > 0)) return;
+  if (Math.abs(g - (S.sheetDefault || g)) / (S.sheetDefault || g) > 0.1) rememberPortion('serv:' + f._name, g);
+  addEntry(entryFromFood(f, g));
+  closeSheet(); setView('today');
+}
+
+/* ---------- "your usual portions" memory ---------- */
+function pkey(name) {
+  return String(name || '').toLowerCase().replace(/\(.*?\)|（.*?）/g, '').replace(/[^\p{L}\p{N} ]/gu, ' ')
+    .replace(/\s+/g, ' ').trim().slice(0, 80);
+}
+function lsPortions() { try { return JSON.parse(localStorage.getItem('ps-portions')) || {}; } catch { return {}; } }
+function usualPortion(kind, name) {
+  const m = S.portions[kind + ':' + pkey(name)];
+  return m && m.grams > 0 ? m.grams : null;
+}
+async function rememberPortion(kindName, grams) {
+  const [kind, ...rest] = kindName.split(':');
+  const name = rest.join(':');
+  if (!(grams > 0) || !name || /[:：]/.test(name)) return; // skip composite meal names
+  const key = kind + ':' + pkey(name);
+  const old = S.portions[key];
+  const n = old ? Math.min(old.n, 4) : 0; // recent corrections weigh most
+  const avg = old ? (old.grams * n + grams) / (n + 1) : grams;
+  S.portions[key] = { grams: Math.round(avg * 10) / 10, n: (old ? old.n : 0) + 1 };
+  try { localStorage.setItem('ps-portions', JSON.stringify(S.portions)); } catch {}
+  if (!LOCAL && S.sb) {
+    await S.sb.from('portion_memory').upsert({ key, grams: S.portions[key].grams, n: S.portions[key].n,
+      updated_at: Date.now() }, { onConflict: 'user_id,key' });
+  }
 }
 
 /* ---------- add sheet ---------- */
 function openSheet(f) {
   S.sheetFood = f;
   $('shName').textContent = f._name;
-  $('shPer100').textContent = `${Math.round(f.kcal)} ${T.kcal} · ${T.protein} ${r1(f.protein)}g · ${T.fat} ${r1(f.fat)}g · ${T.carbs} ${r1(f.carbs)}g (${T.per100})`;
-  $('shGrams').value = f.portion || 100;
+  const extra = [per100(f.na) !== null ? `${T.sodium} ${Math.round(f.na)}mg` : '', per100(f.sugar) !== null ? `${T.sugar} ${r1(f.sugar)}g` : '']
+    .filter(Boolean).join(' · ');
+  const usual = usualPortion('serv', f._name);
+  $('shPer100').textContent = `${Math.round(f.kcal)} ${T.kcal} · ${T.protein} ${r1(f.protein)}g · ${T.fat} ${r1(f.fat)}g · ${T.carbs} ${r1(f.carbs)}g${extra ? ' · ' + extra : ''} (${T.per100})`
+    + (usual ? ` · ${T.usual}` : '');
+  S.sheetDefault = usual || f.portion || 100;
+  $('shGrams').value = S.sheetDefault;
   $('shMult').innerHTML = [0.5, 1, 1.5, 2].map(m => `<button data-m="${m}">${m}×</button>`).join('');
   $('shMult').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
     $('shGrams').value = Math.round((f.portion || 100) * parseFloat(b.dataset.m)); sheetKcal();
@@ -1231,6 +1419,16 @@ function renderToday() {
       ${tgt ? `<div class="bar"><i style="width:${Math.min(100, v / tgt * 100)}%;background:var(--${c})"></i></div>` : ''}
     </div>`).join('');
   const meals = es.filter((e) => e.source !== 'water');
+  const withNa = meals.filter((e) => e.sodium_mg != null), withSu = meals.filter((e) => e.sugar_g != null);
+  const na = withNa.reduce((a, e) => a + e.sodium_mg, 0), su = withSu.reduce((a, e) => a + e.sugar_g, 0);
+  const lim = [['fat', T.naLimit, withNa.length ? Math.round(na).toLocaleString() + ' mg' : '—', na / 2000],
+    ['carb', T.sugarLimit, withSu.length ? Math.round(su) + ' g' : '—', su / 50]];
+  $('limitRow').innerHTML = lim.map(([c, l, v, frac]) => `
+    <div class="macro">
+      <div class="lbl">${l}</div>
+      <div class="val num" style="${frac > 1 ? 'color:var(--danger)' : ''}">${v}</div>
+      <div class="bar"><i style="width:${Math.min(100, frac * 100)}%;background:${frac > 1 ? 'var(--danger)' : `var(--${c})`}"></i></div>
+    </div>`).join('');
   $('mealsHint').hidden = !meals.length;
   $('entryList').innerHTML = meals.map(e => `
     <div class="entry" data-k="${e._key}">
@@ -1299,6 +1497,7 @@ function rescaleEdit() {
   const g = parseFloat($('edGrams').value);
   if (!(g > 0) || !(editOrig.grams > 0)) return;
   const k = g / editOrig.grams;
+  editOrig.k = k;
   $('edKcal').value = Math.round(editOrig.kcal * k);
   $('edPro').value = r1(editOrig.protein * k); $('edFat').value = r1(editOrig.fat * k); $('edCarb').value = r1(editOrig.carbs * k);
 }
@@ -1307,6 +1506,10 @@ async function saveEdit() {
   if (!name || !(grams > 0) || !(kcal >= 0)) return;
   const patch = { name, grams, kcal, protein: parseFloat($('edPro').value) || 0, fat: parseFloat($('edFat').value) || 0,
     carbs: parseFloat($('edCarb').value) || 0, date: $('edDate').value || editOrig.date };
+  const k = editOrig.grams > 0 ? grams / editOrig.grams : 1;
+  if (editOrig.sodium_mg != null) patch.sodium_mg = Math.round(editOrig.sodium_mg * k);
+  if (editOrig.sugar_g != null) patch.sugar_g = r1(editOrig.sugar_g * k);
+  if (Math.abs(k - 1) > 0.1 && editOrig.source !== 'vlm') rememberPortion('serv:' + name, grams);
   $('editSheet').hidden = true;
   await updateEntry(editKey, patch);
 }
