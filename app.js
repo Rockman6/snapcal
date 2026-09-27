@@ -37,6 +37,9 @@ const T = ZH ? {
   tdee:'实测维持热量：约 {t} 千卡/天（基于 {d} 天饮食记录、{w} 次称重）', tdeeNeed:'再记录 {d} 天饮食、称重 {w} 次（跨度 ≥10 天），即可算出你真实的维持热量。',
   tdeeUse:'把目标设为 {t} 千卡（{why}）', whyCut:'减脂：维持热量 −500', whyGain:'增重：维持热量 +250', whyKeep:'维持体重',
   sEat:'运动消耗是否加回热量目标', sEat0:'不加', sEat50:'加一半', sEat100:'全部加回', wFromHealth:'{h} 毫升来自 Apple 健康', ebWorkout:'运动',
+  dataTitle:'你的数据', exportJson:'⬇️ 下载我的全部数据（JSON）', exportCsv:'⬇️ 下载饮食记录（CSV，可用 Excel 打开）', delOpen:'删除我的账户…',
+  delWarn:'这会永久删除你的全部记录和账户，无法恢复。你贡献到公共食物库和条码库的条目会保留（不含个人信息）。输入 DELETE 确认：',
+  delGo:'永久删除账户', delDone:'账户已删除', delFail:'删除失败，请稍后再试',
   sodium:'钠', sugar:'糖', usual:'你的常用份量', readLabel:'📷 拍营养成分表读取', labelBusy:'正在读取营养成分表…',
   labelFail:'没读出能量数值——请拍清楚整个营养成分表', labelFood:'扫描的标签', teachLabel:'📷 拍营养成分表自动填写',
   readScale:'📷 从体脂秤截图读取（可多选）', scaleBusy:'正在读取第 {i}/{n} 张截图…', scaleDone:'已填入 {n} 项——核对无误后点保存',
@@ -88,6 +91,9 @@ const T = ZH ? {
   tdee:'Measured maintenance: about {t} kcal/day (from {d} logged days and {w} weigh-ins)', tdeeNeed:'Log food on {d} more days and weigh in {w} more times (over 10+ days) to measure your real maintenance calories.',
   tdeeUse:'Set target to {t} kcal ({why})', whyCut:'lose fat: maintenance −500', whyGain:'gain: maintenance +250', whyKeep:'maintain',
   sEat:'Add exercise calories to the target', sEat0:'No', sEat50:'Half', sEat100:'All', wFromHealth:'{h} ml from Apple Health', ebWorkout:'Workout',
+  dataTitle:'Your data', exportJson:'⬇️ Download all my data (JSON)', exportCsv:'⬇️ Download my meal log (CSV, opens in Excel)', delOpen:'Delete my account…',
+  delWarn:'This permanently deletes all your records and your account; it cannot be undone. Items you contributed to the shared food and barcode catalogs stay (they hold no personal info). Type DELETE to confirm:',
+  delGo:'Delete my account permanently', delDone:'Account deleted', delFail:'Delete failed, please try again later',
   sodium:'Sodium', sugar:'Sugar', usual:'your usual portion', readLabel:'📷 Read a nutrition label', labelBusy:'Reading the label…',
   labelFail:'Could not read the energy value — photograph the whole nutrition panel clearly', labelFood:'Scanned label', teachLabel:'📷 Fill in from a photo of the label',
   readScale:'📷 Read from scale screenshots (pick several)', scaleBusy:'Reading screenshot {i} of {n}…', scaleDone:'Filled {n} values — check them, then Save',
@@ -393,6 +399,13 @@ function buildStatic() {
   });
   $('weekTitle').textContent = T.week; $('mealsTitle').textContent = T.meals;
   $('mealsHint').textContent = T.mealsHint;
+  $('dataTitle').textContent = T.dataTitle; $('exportJson').textContent = T.exportJson; $('exportCsv').textContent = T.exportCsv;
+  $('delOpen').textContent = T.delOpen; $('delWarn').textContent = T.delWarn; $('delGo').textContent = T.delGo;
+  $('exportJson').addEventListener('click', exportJson);
+  $('exportCsv').addEventListener('click', exportCsv);
+  $('delOpen').hidden = LOCAL;
+  $('delOpen').addEventListener('click', () => { $('delBox').hidden = !$('delBox').hidden; });
+  $('delGo').addEventListener('click', deleteAccount);
   $('wkCoach').addEventListener('click', runCoach);
   $('sEatL').textContent = T.sEat; $('sEat0').textContent = T.sEat0; $('sEat50').textContent = T.sEat50; $('sEat100').textContent = T.sEat100;
   $('labelPickL').textContent = T.readLabel;
@@ -615,6 +628,7 @@ async function ensureModel() {
   if (vlmTier() === 'off') $('modelNote').textContent = T.modelLoading;
   try {
     ort.env.wasm.numThreads = 1;
+    ort.env.wasm.wasmPaths = new URL('vendor/ort/', location.href).href; // self-hosted: CDNs are unreliable in mainland China
     const meta = await fetch('model/model-meta.json', { cache: 'no-cache' }).then(r => r.json());
     // Permanent storage: the 38MB model lives in Cache Storage under its version;
     // it re-downloads ONLY when model-meta.json announces a new version.
@@ -1570,6 +1584,47 @@ async function runCoach() {
     try { localStorage.setItem('ps-coach', JSON.stringify({ day: todayISO(), text })); } catch {}
   } catch (e) { toast(String((e && e.message) || e).slice(0, 90)); }
   $('wkCoach').disabled = false; $('wkCoach').textContent = T.wkCoach;
+}
+
+/* ---------- export & account deletion ---------- */
+function downloadFile(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+function exportJson() {
+  const data = {
+    exported_at: new Date().toISOString(), app: 'SnapCal', profile: S.profile, targets: S.targets,
+    entries: S.entries.map(({ _key, ...e }) => e), weights: S.weights, health: S.health,
+    custom_foods: S.custom, usual_portions: S.portions,
+  };
+  downloadFile(`snapcal-${todayISO()}.json`, JSON.stringify(data, null, 2), 'application/json');
+}
+function exportCsv() {
+  const cols = ['date', 'name', 'grams', 'kcal', 'protein', 'fat', 'carbs', 'sodium_mg', 'sugar_g', 'source'];
+  const cell = (v) => { const t = v == null ? '' : String(typeof v === 'number' ? Math.round(v * 10) / 10 : v); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+  const rows = [...S.entries].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.created_at || 0) - (b.created_at || 0)))
+    .map((e) => cols.map((c) => cell(e[c])).join(','));
+  downloadFile(`snapcal-meals-${todayISO()}.csv`, '﻿' + [cols.join(','), ...rows].join('\n'), 'text/csv'); // BOM: Excel reads Chinese correctly
+}
+async function deleteAccount() {
+  if ($('delType').value.trim() !== 'DELETE' || LOCAL) return;
+  $('delGo').disabled = true;
+  try {
+    const { data } = await S.sb.auth.getSession();
+    const token = data && data.session && data.session.access_token;
+    const r = await fetch(PS_CONFIG.SUPABASE_URL + '/functions/v1/account', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token, apikey: PS_CONFIG.SUPABASE_ANON_KEY },
+      body: JSON.stringify({ action: 'delete', confirm: 'DELETE' }),
+    });
+    if (!r.ok) throw new Error('delete');
+    try { localStorage.removeItem(LS_KEY); localStorage.removeItem('ps-portions'); localStorage.removeItem('ps-coach'); } catch {}
+    toast(T.delDone);
+    await S.sb.auth.signOut();
+    setTimeout(() => location.reload(), 1200);
+  } catch { toast(T.delFail); $('delGo').disabled = false; }
 }
 
 /* ---------- water ---------- */
