@@ -469,19 +469,38 @@ function shiftDate(n) {
 }
 
 /* ---------- camera: photo recognition ---------- */
+// One camera stream shared by the Photo and Scan tabs. Browsers (iPhone Safari especially)
+// may re-ask permission on every getUserMedia call, so ask once and reuse the stream.
+let camRelease = null;
+async function getCam() {
+  const live = S.camStream && S.camStream.getVideoTracks().some((t) => t.readyState === 'live');
+  if (live) return S.camStream;
+  S.camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+  return S.camStream;
+}
 async function startCam(videoEl) {
+  clearTimeout(camRelease);
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-    S.camStream = stream; videoEl.srcObject = stream; await videoEl.play();
+    const stream = await getCam();
+    if (videoEl.srcObject !== stream) videoEl.srcObject = stream;
+    await videoEl.play().catch(() => {});
     return true;
   } catch { toast(T.camDenied); return false; }
 }
+function releaseCam() {
+  clearTimeout(camRelease);
+  if (S.camStream) { S.camStream.getTracks().forEach((t) => t.stop()); S.camStream = null; }
+}
 function stopCam() {
   if (S.zxReader) { try { S.zxReader.reset(); } catch {} S.zxReader = null; }
-  if (S.camStream) { S.camStream.getTracks().forEach(t => t.stop()); S.camStream = null; }
-  $('photoVideo').srcObject = null; $('scanVideo').srcObject = null;
+  $('photoVideo').pause(); $('scanVideo').pause();
   $('guessList').hidden = true; $('photoShoot').hidden = false;
+  // Keep the camera briefly so hopping between tabs doesn't trigger a new permission prompt.
+  clearTimeout(camRelease);
+  if (S.camStream) camRelease = setTimeout(releaseCam, 90000);
 }
+// Never keep the camera (and its indicator light) on while the app is in the background.
+document.addEventListener('visibilitychange', () => { if (document.hidden) releaseCam(); });
 async function startPhoto() {
   paintVlmIntro();
   await startCam($('photoVideo'));
@@ -953,15 +972,13 @@ function showGuesses(gs) {
 /* ---------- camera: barcode ---------- */
 async function startScan() {
   loadCnPack(); loadBcLearned();
+  if (!(await startCam($('scanVideo')))) return;
   try {
     S.zxReader = new ZXing.BrowserMultiFormatReader();
     const cb = (result) => { if (result) onBarcode(result.getText()); };
-    if (typeof S.zxReader.decodeFromConstraints === 'function') {
-      await S.zxReader.decodeFromConstraints({ video: { facingMode: 'environment' }, audio: false }, $('scanVideo'), cb);
-    } else {
-      await S.zxReader.decodeFromVideoDevice(undefined, $('scanVideo'), cb);
-    }
-  } catch (e) { toast(T.camDenied); $('scanNote').textContent = T.scanNote + ' (' + (e.message || e) + ')'; }
+    // A clone of the shared stream: the scanner's reset() then stops only its own copy.
+    await S.zxReader.decodeFromStream(S.camStream.clone(), $('scanVideo'), cb);
+  } catch (e) { $('scanNote').textContent = T.scanNote + ' (' + (e.message || e) + ')'; }
 }
 // Worldwide barcode pack: millions of OFF products, sharded by 4-digit barcode
 // prefix — one ~30 KB fetch per prefix, then cached for the session.
