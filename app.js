@@ -27,7 +27,7 @@ const T = ZH ? {
   modelIdle:'首次使用会下载识别模型（约 33MB），之后缓存在本地。', modelLoading:'正在加载模型…',
   modelReady:'模型已就绪——在设备上离线识别，照片不会上传。', camDenied:'需要相机权限。请在浏览器设置中允许。',
   scanHint:'将条形码对准相机', scanNote:'先查本地全球库，再查在线，最后可自己补充。', notFound:'未找到该商品，请用搜索添加。',
-  teach:'没有找到——教会它！', teachName:'商品名称', teachSave:'保存到公共条码库', taught:'已保存！所有用户扫这个条码都能直接用了 🎉', teachAI:'🧠 让 AI 按名称估算',
+  teach:'没有找到——教会它！', teachName:'商品名称', teachSave:'保存到公共条码库', taught:'已保存！所有用户扫这个条码都能直接用了 🎉', teachAI:'🧠 让 AI 按名称估算', gs1:'🔎 到 GS1 官网查此条码（自动填名）',
   noResults:'没有找到，试试别的关键词，或添加自定义食物。', online:'🌐 在线查找并学习',
   onlineBusy:'在线查找中…', onlineNone:'在线没有找到。', learned:'已学习并存入公共数据库 ✓',
   ai:'🧠 本地 AI 估算', aiLoad:'首次使用需下载本地 AI 模型（约 1GB，只下载一次，永久缓存）', aiBusy:'AI 思考中…', aiNoGpu:'此浏览器不支持 WebGPU，无法运行本地 AI（试试较新的 iPhone/Chrome/Safari）', aiTag:'AI 估算·仅供参考',
@@ -607,7 +607,18 @@ function openTeach(code) {
       <input id="tF" type="number" inputmode="decimal" placeholder="${T.fat}g" style="width:90px">
       <input id="tC" type="number" inputmode="decimal" placeholder="${T.carbs}g" style="width:90px">
     </div>
-    <button class="primary" id="tAI" style="margin-top:8px;background:var(--chip);color:var(--ink)">${T.teachAI}</button>`;
+    <button class="primary" id="tAI" style="margin-top:8px;background:var(--chip);color:var(--ink)">${T.teachAI}</button>
+    <a href="https://www.gds.org.cn/#/barcodeList/index?type=barcode&keyword=${encodeURIComponent(code)}" target="_blank" rel="noopener"
+       style="display:block;text-align:center;margin-top:8px;color:var(--accent);font-size:13px">${T.gs1}</a>`;
+  // optional relay (Supabase Edge Function, if deployed): auto-prefill the product name
+  if (!LOCAL) {
+    fetch(PS_CONFIG.SUPABASE_URL + '/functions/v1/gtin?code=' + encodeURIComponent(code), {
+      headers: { Authorization: 'Bearer ' + PS_CONFIG.SUPABASE_ANON_KEY, apikey: PS_CONFIG.SUPABASE_ANON_KEY },
+    }).then(r => r.ok ? r.json() : null).then(j => {
+      const el = $('tName');
+      if (j && j.name && el && !el.value) el.value = j.name + (j.brand ? ` (${j.brand})` : '');
+    }).catch(() => {});
+  }
   $('shGrams').value = 100; sheetTeachMode(code);
   wrap.hidden = false;
   $('tAI').addEventListener('click', async () => {
