@@ -655,7 +655,7 @@ async function cloudAnalyze(canvas, hint) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json', Authorization: 'Bearer ' + token,
-      apikey: PS_CONFIG.SUPABASE_ANON_KEY, 'x-region': 'us-east-1', // Gemini is not offered in every region
+      apikey: PS_CONFIG.SUPABASE_ANON_KEY, 'x-region': 'ap-northeast-1', // Tokyo: next to the database and close to Zhipu's servers
     },
     body: JSON.stringify({ image, hint: hint || '' }),
   });
