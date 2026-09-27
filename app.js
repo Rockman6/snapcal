@@ -18,7 +18,7 @@ const T = ZH ? {
   sTitle:'每日目标', sKcal:'热量目标（千卡）', sPro:'蛋白质目标（克）', sGoal:'目标体重 (kg)',
   cfTitle:'＋ 自定义食物', cfName:'名称', cfPor:'常见份量（克）',
   saved:'已保存', added:'已添加', deleted:'已删除', del:'删除',
-  online:'✓ 数据保存在你自己的 Supabase 数据库。', local:'⚠ 未配置 Supabase——数据仅保存在此浏览器。',
+  storedOnline:'✓ 数据保存在你自己的 Supabase 数据库。', local:'⚠ 未配置 Supabase——数据仅保存在此浏览器。',
   login:'登录', register:'注册', loginHint:'登录后你的数据会在线保存，任何设备可访问。', logout:'退出登录', badLogin:'邮箱或密码不正确。',
   toReg:'新用户？点这里注册', toLogin:'已有账号？点这里登录', welcome:'邮箱已确认，欢迎使用 SnapCal！',
   sgTitle:'下一餐建议', sgBtn:'换一批', sgRemain:'今日剩余', sgDone:'今天的目标已完成 🎉', sgP:'蛋白质',
@@ -29,9 +29,14 @@ const T = ZH ? {
   vlmIntroText:'视觉 AI 会像人一样看照片：找出每一样食物、数清个数、估算克数，热量再按营养数据库计算。在服务器上运行（第三方 AI：智谱 GLM 或 Google Gemini），手机不用下载模型、不耗电。照片仅用于识别，SnapCal 不保存；免费版服务商可能会用提交内容改进模型。',
   vlmEnable:'开启智能识别', vlmLoading:'正在加载视觉 AI…', vlmReady:'智能识别已就绪 · 照片不会离开你的设备',
   vlmDl:'正在下载视觉 AI：{p}%（{l}/{t} MB）· 仅此一次', vlmThinking:'AI 正在仔细看这张照片…',
-  vlmFail:'AI 没能给出清楚的结果——可以换个角度再拍，或用搜索添加。', quick:'快速分类器猜测', meal:'这一餐',
+  vlmFail:'AI 没能给出清楚的结果——可以换个角度再拍，或用搜索添加。', quickGuess:'快速分类器猜测', meal:'这一餐',
   matched:'数据库', aiKcal:'AI 估算热量', noMatch:'数据库里没有——可改名或删除', total:'合计', noItems:'没有识别到食物',
   plateLog:'记录这一餐 · {k} 千卡', plateAdd:'漏了什么？输入名称添加（如：酸奶）',
+  water:'💧 饮水', w250:'＋250 毫升 · 一杯', w500:'＋500 毫升 · 一瓶', wCustom:'自定义', wUndo:'撤销上一次',
+  wFromDrinks:'其中 {d} 毫升来自饮品', wLeft:'还差 {r} 毫升', wDone:'今日饮水目标已完成 🎉', wName:'水', wAdded:'已记录 💧',
+  sWater:'饮水目标（毫升，留空 = 按体重自动）', mealsHint:'点一条记录可修改或删除',
+  edTitle:'修改这条记录', edName:'名称', edGrams:'克数（会按比例换算热量）', edKcal:'热量（千卡）', edDate:'日期',
+  edSave:'保存修改', edDelete:'删除这条记录', edConfirm:'再点一次确认删除', edit:'修改',
   sVlmCloud:'智能 · 云端（推荐，手机不耗电）', cloudReady:'智能识别（云端）已就绪 · 手机无需下载模型',
   cloudNeedsLogin:'云端识别需要先登录', cloudLimit:'今天的云端识别次数已用完，明天再来（或在设置里改用本地模式）', cloudBusy:'云端 AI 暂时繁忙，请稍后再试',
   sVlmTitle:'拍照 AI', sVlmL:'识别模式', sVlmOff:'快速（仅分类器）', sVlmLite:'智能 Lite · 约 0.85 GB（手机）', sVlmPro:'智能 Pro · 约 1.8 GB（电脑，更准）',
@@ -55,7 +60,7 @@ const T = ZH ? {
   sTitle:'Daily targets', sKcal:'Calorie target (kcal)', sPro:'Protein target (g)', sGoal:'Goal weight (kg)',
   cfTitle:'＋ Custom food', cfName:'Name', cfPor:'Typical portion (g)',
   saved:'Saved', added:'Added', deleted:'Deleted', del:'Delete',
-  online:'✓ Data lives in your own Supabase database.', local:'⚠ Supabase not configured — data stays in this browser only.',
+  storedOnline:'✓ Data lives in your own Supabase database.', local:'⚠ Supabase not configured — data stays in this browser only.',
   login:'Sign in', register:'Create account', loginHint:'Sign in and your data is stored online, reachable from any device.', logout:'Sign out', badLogin:'Wrong email or password.',
   toReg:'New here? Create an account', toLogin:'Have an account? Sign in', welcome:'Email confirmed — welcome to SnapCal!',
   sgTitle:'Next-meal ideas', sgBtn:'Shuffle', sgRemain:'Remaining today', sgDone:'Targets met for today 🎉', sgP:'protein',
@@ -66,9 +71,14 @@ const T = ZH ? {
   vlmIntroText:'A vision AI looks at the photo like a person: finds every item, counts pieces and estimates grams — calories then come from the nutrition database. It runs on the server (a third-party AI: Zhipu GLM or Google Gemini), so your phone downloads nothing and does no AI work. Photos are used only for recognition and SnapCal does not store them; free-tier providers may use submissions to improve their models.',
   vlmEnable:'Turn on smart recognition', vlmLoading:'Loading vision AI…', vlmReady:'Smart recognition ready · photos never leave your device',
   vlmDl:'Downloading vision AI: {p}% ({l}/{t} MB) · one time only', vlmThinking:'AI is looking closely at the photo…',
-  vlmFail:'The AI could not give a clear answer — try another angle, or add it via search.', quick:'Quick classifier guess', meal:'Meal',
+  vlmFail:'The AI could not give a clear answer — try another angle, or add it via search.', quickGuess:'Quick classifier guess', meal:'Meal',
   matched:'database', aiKcal:'AI calorie estimate', noMatch:'not in the database — rename or remove', total:'Total', noItems:'No food items found',
   plateLog:'Log this meal · {k} kcal', plateAdd:'Missed something? Type a name to add (e.g. yogurt)',
+  water:'💧 Water', w250:'+250 ml · cup', w500:'+500 ml · bottle', wCustom:'Custom', wUndo:'Undo last',
+  wFromDrinks:'{d} ml of it from drinks', wLeft:'{r} ml to go', wDone:'Daily water goal reached 🎉', wName:'Water', wAdded:'Logged 💧',
+  sWater:'Water target (ml, blank = auto from weight)', mealsHint:'Tap an entry to edit or delete it',
+  edTitle:'Edit entry', edName:'Name', edGrams:'Grams (rescales the calories)', edKcal:'Calories (kcal)', edDate:'Date',
+  edSave:'Save changes', edDelete:'Delete this entry', edConfirm:'Tap again to delete', edit:'Edit',
   sVlmCloud:'Smart · Cloud (recommended, no phone compute)', cloudReady:'Smart recognition (cloud) ready · nothing to download',
   cloudNeedsLogin:'Cloud recognition needs you to sign in', cloudLimit:'Today\'s cloud photo limit is used up — try tomorrow, or switch to an on-device mode in Settings', cloudBusy:'The cloud AI is busy — try again in a moment',
   sVlmTitle:'Photo AI', sVlmL:'Mode', sVlmOff:'Fast (classifier only)', sVlmLite:'Smart Lite · ~0.85 GB (phones)', sVlmPro:'Smart Pro · ~1.8 GB (computers, more accurate)',
@@ -131,6 +141,9 @@ First fill "seen" with one short sentence describing what is really in the photo
 Shape (fill every <...> with your own values):
 {"seen":"<one short sentence>","meal":"<overall name in English>","meal_zh":"<中文名称>","items":[{"name":"<specific food in English>","name_zh":"<中文名>","count":<number of pieces>,"grams":<total edible grams of this item>,"kcal_100g":<calories per 100 g>}]}`;
 let vlm = null, vlmLoad = null;
+// Drinks logged as food also count toward water (tea, coffee, milk, juice, bottled water…).
+const DRINK_RE = /\b(water|tea|coffee|americano|latte|cappuccino|espresso|juice|milk|soda|cola|sprite|lemonade|kombucha|smoothie|sparkling)\b|茶|咖啡|饮用水|天然水|山泉水|矿泉水|纯净水|气泡水|苏打水|果汁|牛奶|豆浆|奶茶|可乐|汽水|饮料|ジュース|コーヒー|牛乳|お茶|주스|커피|우유|水$/i;
+const NOT_DRINK_RE = /watermelon|chestnut|tea ?cake|milk ?chocolate|奶酪|茶叶蛋|西瓜|水果|水饺|奶糖|奶片|chocolate|cookie|biscuit|cake|bread|powder|粉/i;
 
 /* ---------- state & utils ---------- */
 const S = {
@@ -189,7 +202,8 @@ async function loadAll() {
   S.entries = (e.data || []).map(r => ({ ...r, _key: r.device_id + '/' + r.local_id }));
   S.weights = w.data || [];
   S.custom = c.data || [];
-  if (t.data) S.targets = { kcal: t.data.kcal ?? 2000, protein: t.data.protein ?? 120, goal: t.data.goal };
+  if (t.data) S.targets = { kcal: t.data.kcal ?? 2000, protein: t.data.protein ?? 120, goal: t.data.goal, water_ml: t.data.water_ml ?? localWater() };
+  else S.targets.water_ml = localWater();
   if (p.data) S.profile = p.data;
   S.learned = ln.data || [];
   S.health = hd.data || [];
@@ -214,6 +228,18 @@ async function removeEntry(key) {
   }
   toast(T.deleted); renderToday();
 }
+async function updateEntry(key, patch) {
+  const e = S.entries.find((x) => x._key === key);
+  if (!e) return;
+  if (LOCAL) { Object.assign(e, patch); lsSave(); }
+  else {
+    const [d, l] = key.split('/');
+    const { error } = await S.sb.from('entries').update(patch).eq('device_id', d).eq('local_id', +l);
+    if (error) return toast(error.message);
+    Object.assign(e, patch);
+  }
+  toast(T.saved); renderToday();
+}
 async function saveWeight(w) {
   if (LOCAL) { S.weights = S.weights.filter(x => x.date !== w.date); S.weights.push(w); lsSave(); }
   else {
@@ -223,10 +249,18 @@ async function saveWeight(w) {
   }
   toast(T.saved); renderWeight();
 }
+function localWater() {
+  try { const v = parseFloat(localStorage.getItem('ps-water-target')); return v > 0 ? v : null; } catch { return null; }
+}
 async function saveTargets() {
+  try { localStorage.setItem('ps-water-target', S.targets.water_ml || ''); } catch {}
   if (LOCAL) lsSave();
   else {
-    const { error } = await S.sb.from('settings').upsert({ ...S.targets }, { onConflict: 'user_id' });
+    let { error } = await S.sb.from('settings').upsert({ ...S.targets }, { onConflict: 'user_id' });
+    if (error && /water_ml/.test(error.message)) { // column not added yet (v9 SQL): keep the target on this device
+      const { water_ml, ...rest } = S.targets;
+      ({ error } = await S.sb.from('settings').upsert(rest, { onConflict: 'user_id' }));
+    }
     if (error) return toast(error.message);
   }
   toast(T.saved); renderToday(); renderWeight();
@@ -258,7 +292,7 @@ async function init() {
     S.foods = j.rows.map(r => Object.fromEntries(c.map((k, i) => [k, r[i]])));
     renderQuick(); renderResults();
   }).catch(() => {});
-  $('storageNote').textContent = LOCAL ? T.local : T.online;
+  $('storageNote').textContent = LOCAL ? T.local : T.storedOnline;
   if (LOCAL) { showApp(); return; }
   S.sb = supabase.createClient(PS_CONFIG.SUPABASE_URL, PS_CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
   const fromEmail = /access_token=|type=signup/.test(location.hash);
@@ -289,6 +323,7 @@ async function showApp() {
   $('login').hidden = true; $('appRoot').hidden = false;
   await loadAll().catch(err => toast(err.message || 'load error'));
   $('sKcal').value = S.targets.kcal || ''; $('sPro').value = S.targets.protein || ''; $('sGoal').value = S.targets.goal || '';
+  $('sWater').value = S.targets.water_ml || '';
   paintProfile();
   renderToday(); renderWeight(); renderResults();
 }
@@ -322,6 +357,24 @@ function buildStatic() {
     setView(b.dataset.v);
   });
   $('weekTitle').textContent = T.week; $('mealsTitle').textContent = T.meals;
+  $('mealsHint').textContent = T.mealsHint;
+  $('waterTitle').textContent = T.water; $('w250').textContent = T.w250; $('w500').textContent = T.w500;
+  $('wCustomBtn').textContent = T.wCustom; $('wUndo').textContent = T.wUndo;
+  $('w250').addEventListener('click', () => addWater(250));
+  $('w500').addEventListener('click', () => addWater(500));
+  $('wCustomBtn').addEventListener('click', () => { $('wCustomRow').hidden = !$('wCustomRow').hidden; $('wCustomMl').focus(); });
+  $('wCustomAdd').addEventListener('click', () => { addWater(parseFloat($('wCustomMl').value)); $('wCustomMl').value = ''; $('wCustomRow').hidden = true; });
+  $('wUndo').addEventListener('click', undoWater);
+  $('sWaterL').textContent = T.sWater;
+  $('edTitle').textContent = T.edTitle; $('edNameL').textContent = T.edName; $('edGramsL').textContent = T.edGrams;
+  $('edKcalL').textContent = T.edKcal; $('edProL').textContent = T.protein + ' (g)'; $('edFatL').textContent = T.fat + ' (g)';
+  $('edCarbL').textContent = T.carbs + ' (g)'; $('edDateL').textContent = T.edDate;
+  $('edSave').textContent = T.edSave; $('edCancel').textContent = T.cancel;
+  $('edGrams').addEventListener('input', rescaleEdit);
+  $('edSave').addEventListener('click', saveEdit);
+  $('edDelete').addEventListener('click', deleteEdit);
+  $('edCancel').addEventListener('click', () => { $('editSheet').hidden = true; });
+  $('editSheet').addEventListener('click', (ev) => { if (ev.target === $('editSheet')) $('editSheet').hidden = true; });
   $('sgTitle').textContent = T.sgTitle; $('sgBtn').textContent = T.sgBtn;
   $('sgBtn').addEventListener('click', () => renderSuggest(true));
   $('openAdd').textContent = T.addFood;
@@ -411,7 +464,8 @@ function buildStatic() {
   $('sTitle').textContent = T.sTitle; $('sKcalL').textContent = T.sKcal;
   $('sProL').textContent = T.sPro; $('sGoalL').textContent = T.sGoal; $('sSave').textContent = T.save;
   $('sSave').addEventListener('click', () => {
-    S.targets = { kcal: parseFloat($('sKcal').value) || 2000, protein: parseFloat($('sPro').value) || 0,
+    S.targets = { water_ml: parseFloat($('sWater').value) || null,
+      kcal: parseFloat($('sKcal').value) || 2000, protein: parseFloat($('sPro').value) || 0,
       goal: parseFloat($('sGoal').value) || null };
     saveTargets();
   });
@@ -821,7 +875,7 @@ async function runSmart(canvas, quick) {
   $('plateItems').innerHTML = ''; $('plateTotals').innerHTML = '';
   $('plateLog').hidden = true; $('plateAddRow').hidden = true;
   const top = quick && quick[0];
-  $('plateStatus').textContent = top ? `${T.quick}: ${labelToTerm(top.label)} · ${Math.round(top.prob * 100)}%` : '';
+  $('plateStatus').textContent = top ? `${T.quickGuess}: ${labelToTerm(top.label)} · ${Math.round(top.prob * 100)}%` : '';
   const think = $('plateThink'); think.hidden = false; think.textContent = '…';
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
   let res = null, err = null;
@@ -1176,18 +1230,92 @@ function renderToday() {
       <div class="val num">${Math.round(v)}g${tgt ? `<span class="muted small"> /${Math.round(tgt)}</span>` : ''}</div>
       ${tgt ? `<div class="bar"><i style="width:${Math.min(100, v / tgt * 100)}%;background:var(--${c})"></i></div>` : ''}
     </div>`).join('');
-  $('entryList').innerHTML = es.map(e => `
-    <div class="entry">
+  const meals = es.filter((e) => e.source !== 'water');
+  $('mealsHint').hidden = !meals.length;
+  $('entryList').innerHTML = meals.map(e => `
+    <div class="entry" data-k="${e._key}">
       <div class="grow"><div class="name">${esc(e.name)}</div>
       <div class="sub num">${Math.round(e.grams)} ${T.grams} · ${Math.round(e.kcal)} ${T.kcal}</div></div>
-      <button class="del" data-k="${e._key}">${T.del}</button>
+      <button class="edit">${T.edit}</button>
     </div>`).join('');
-  $('entryList').querySelectorAll('.del').forEach(b => b.addEventListener('click', () => removeEntry(b.dataset.k)));
-  $('quickChips').hidden = es.length > 0;
+  $('entryList').querySelectorAll('.entry').forEach((row) => {
+    const open = () => openEdit(row.dataset.k);
+    row.querySelector('.grow').addEventListener('click', open);
+    row.querySelector('.edit').addEventListener('click', open);
+  });
+  $('quickChips').hidden = meals.length > 0;
+  renderWater(es);
   renderEnergy(tot.kcal);
   renderSuggest(false);
   drawWeek();
 }
+/* ---------- water ---------- */
+function waterTarget() {
+  if (S.targets.water_ml > 0) return S.targets.water_ml;
+  const w = [...S.weights].sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+  const auto = w ? Math.round(w.weight * 35 / 50) * 50 : 2000; // ~35 ml per kg body weight
+  return Math.min(4000, Math.max(1500, auto));
+}
+function isDrinkEntry(e) {
+  if (e.source === 'water' || !e.grams) return false;
+  const per100 = e.kcal / e.grams * 100;
+  return per100 <= 130 && DRINK_RE.test(e.name || '') && !NOT_DRINK_RE.test(e.name || '');
+}
+function renderWater(es) {
+  const plain = es.filter((e) => e.source === 'water').reduce((a, e) => a + (e.grams || 0), 0);
+  const drinks = es.filter(isDrinkEntry).reduce((a, e) => a + (e.grams || 0), 0);
+  const total = Math.round(plain + drinks), target = waterTarget();
+  $('waterNow').textContent = `${total.toLocaleString()} / ${target.toLocaleString()} ml`;
+  $('waterBar').style.width = Math.min(100, total / target * 100) + '%';
+  const bits = [total >= target ? T.wDone : T.wLeft.replace('{r}', (target - total).toLocaleString())];
+  if (drinks > 0) bits.push(T.wFromDrinks.replace('{d}', Math.round(drinks).toLocaleString()));
+  $('waterSub').textContent = bits.join(' · ');
+  $('wUndo').hidden = plain <= 0;
+}
+async function addWater(ml) {
+  if (!(ml > 0) || ml > 5000) return;
+  await addEntry({ date: S.date, name: T.wName, grams: Math.round(ml), kcal: 0, protein: 0, fat: 0, carbs: 0,
+    source: 'water', created_at: Date.now() });
+}
+function undoWater() {
+  const last = S.entries.filter((e) => e.date === S.date && e.source === 'water')
+    .sort((a, b) => (b.created_at || 0) - (a.created_at || 0))[0];
+  if (last) removeEntry(last._key);
+}
+
+/* ---------- edit / delete a logged entry ---------- */
+let editKey = null, editOrig = null, delArmed = false;
+function openEdit(key) {
+  const e = S.entries.find((x) => x._key === key);
+  if (!e) return;
+  editKey = key; editOrig = { ...e }; delArmed = false;
+  $('edName').value = e.name; $('edGrams').value = Math.round(e.grams);
+  $('edKcal').value = Math.round(e.kcal); $('edPro').value = r1(e.protein);
+  $('edFat').value = r1(e.fat); $('edCarb').value = r1(e.carbs); $('edDate').value = e.date;
+  $('edDelete').textContent = T.edDelete;
+  $('editSheet').hidden = false;
+}
+function rescaleEdit() {
+  const g = parseFloat($('edGrams').value);
+  if (!(g > 0) || !(editOrig.grams > 0)) return;
+  const k = g / editOrig.grams;
+  $('edKcal').value = Math.round(editOrig.kcal * k);
+  $('edPro').value = r1(editOrig.protein * k); $('edFat').value = r1(editOrig.fat * k); $('edCarb').value = r1(editOrig.carbs * k);
+}
+async function saveEdit() {
+  const name = $('edName').value.trim(), grams = parseFloat($('edGrams').value), kcal = parseFloat($('edKcal').value);
+  if (!name || !(grams > 0) || !(kcal >= 0)) return;
+  const patch = { name, grams, kcal, protein: parseFloat($('edPro').value) || 0, fat: parseFloat($('edFat').value) || 0,
+    carbs: parseFloat($('edCarb').value) || 0, date: $('edDate').value || editOrig.date };
+  $('editSheet').hidden = true;
+  await updateEntry(editKey, patch);
+}
+async function deleteEdit() {
+  if (!delArmed) { delArmed = true; $('edDelete').textContent = T.edConfirm; return; }
+  $('editSheet').hidden = true;
+  await removeEntry(editKey);
+}
+
 function renderQuick() {
   const ids = ['rice-white', 'egg-boiled', 'banana', 'milk-whole', 'ramen', 'kimchi', 'apple', 'chicken-breast'];
   const picks = ids.map(id => S.foods.find(f => f.id === id)).filter(Boolean);

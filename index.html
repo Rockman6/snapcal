@@ -146,6 +146,9 @@ footer{margin-top:26px; color:var(--ink2); font-size:12px; text-align:center}
 pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 0 0; font-family:inherit; background:var(--chip); border-radius:10px; padding:8px 10px}
 .progress{height:6px; border-radius:4px; background:var(--chip); overflow:hidden; margin-top:8px}
 .progress i{display:block; height:100%; background:var(--accent); width:0}
+.bar.water i{background:var(--carb)}
+.entry .edit{border:1px solid var(--line); background:var(--chip); color:var(--ink); border-radius:8px; padding:5px 11px; font-size:13px}
+.entry .grow{cursor:pointer}
 #login{max-width:400px; margin:8vh auto 0}
 #login input{width:100%; margin-top:10px}
 .err{color:var(--danger); font-size:13px; margin-top:8px; min-height:1em}
@@ -187,6 +190,21 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
       <div class="bar"><i id="kcalBar" style="width:0%"></i></div>
       <div class="macros" id="macroRow"></div>
     </div>
+    <div class="card" id="waterCard">
+      <div class="row"><h2 style="font-size:16px" class="grow" id="waterTitle"></h2><span class="num" style="font-weight:700" id="waterNow"></span></div>
+      <div class="bar water"><i id="waterBar" style="width:0%"></i></div>
+      <p class="muted small" id="waterSub"></p>
+      <div class="chips" id="waterBtns">
+        <button data-ml="250" id="w250"></button>
+        <button data-ml="500" id="w500"></button>
+        <button id="wCustomBtn"></button>
+        <button id="wUndo"></button>
+      </div>
+      <div class="row" id="wCustomRow" style="gap:8px;margin-top:8px" hidden>
+        <input id="wCustomMl" type="number" inputmode="numeric" placeholder="ml" style="width:120px">
+        <button id="wCustomAdd" style="border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:10px;padding:8px 14px">＋</button>
+      </div>
+    </div>
     <div class="card" id="ebCard">
       <h2 style="font-size:16px" id="ebTitle"></h2>
       <div class="macros" id="ebRow"></div>
@@ -205,6 +223,7 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
     </div>
     <div class="card">
       <h2 style="font-size:16px" id="mealsTitle"></h2>
+      <p class="muted small" id="mealsHint" style="margin:2px 0 4px"></p>
       <div id="entryList"></div>
       <div class="chips" id="quickChips" hidden></div>
       <button class="primary" id="openAdd"></button>
@@ -311,6 +330,7 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
       <div class="field"><label id="sKcalL"></label><input id="sKcal" type="number" inputmode="numeric"></div>
       <div class="field"><label id="sProL"></label><input id="sPro" type="number" inputmode="numeric"></div>
       <div class="field"><label id="sGoalL"></label><input id="sGoal" type="number" step="0.1" inputmode="decimal"></div>
+      <div class="field"><label id="sWaterL"></label><input id="sWater" type="number" inputmode="numeric"></div>
       <button class="primary" id="sSave"></button>
     </div>
     <div class="card">
@@ -345,6 +365,22 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
     <div class="mult" id="shMult"></div>
     <button class="add" id="shAdd"></button>
     <button class="cancel" id="shCancel"></button>
+  </div>
+</div>
+
+<div class="sheetwrap" id="editSheet" hidden>
+  <div class="sheet">
+    <h3 id="edTitle"></h3>
+    <div class="field"><label id="edNameL"></label><input id="edName" style="width:62%"></div>
+    <div class="field"><label id="edGramsL"></label><input id="edGrams" type="number" inputmode="decimal"></div>
+    <div class="field"><label id="edKcalL"></label><input id="edKcal" type="number" inputmode="decimal"></div>
+    <div class="field"><label id="edProL"></label><input id="edPro" type="number" inputmode="decimal"></div>
+    <div class="field"><label id="edFatL"></label><input id="edFat" type="number" inputmode="decimal"></div>
+    <div class="field"><label id="edCarbL"></label><input id="edCarb" type="number" inputmode="decimal"></div>
+    <div class="field"><label id="edDateL"></label><input id="edDate" type="date"></div>
+    <button class="add" id="edSave"></button>
+    <button class="add" id="edDelete" style="background:none;color:var(--danger);border:1px solid var(--danger);margin-top:10px"></button>
+    <button class="cancel" id="edCancel"></button>
   </div>
 </div>
 
