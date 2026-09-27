@@ -26,14 +26,16 @@ const T = ZH ? {
   photoHint:'拍摄你的餐食', shoot:'拍照识别', analyzing:'识别中…', notThese:'都不是——去搜索',
   modelIdle:'首次使用会下载识别模型（约 38MB），之后缓存在本地。', modelLoading:'正在加载模型…',
   pick:'📁 从相册选一张照片', vlmIntroTitle:'智能识别（推荐开启）',
-  vlmIntroText:'本地视觉 AI 会像人一样看照片：找出每一样食物、数清个数、估算克数，热量再按营养数据库计算。完全在你的设备上运行，免费，照片不上传。首次需下载约 {size}（建议 Wi-Fi），之后永久缓存。',
+  vlmIntroText:'视觉 AI 会像人一样看照片：找出每一样食物、数清个数、估算克数，热量再按营养数据库计算。在服务器上运行（Google Gemini），手机不用下载模型、不耗电。照片仅用于识别，SnapCal 不保存。',
   vlmEnable:'开启智能识别', vlmLoading:'正在加载视觉 AI…', vlmReady:'智能识别已就绪 · 照片不会离开你的设备',
   vlmDl:'正在下载视觉 AI：{p}%（{l}/{t} MB）· 仅此一次', vlmThinking:'AI 正在仔细看这张照片…',
   vlmFail:'AI 没能给出清楚的结果——可以换个角度再拍，或用搜索添加。', quick:'快速分类器猜测', meal:'这一餐',
   matched:'数据库', aiKcal:'AI 估算热量', noMatch:'数据库里没有——可改名或删除', total:'合计', noItems:'没有识别到食物',
   plateLog:'记录这一餐 · {k} 千卡', plateAdd:'漏了什么？输入名称添加（如：酸奶）',
+  sVlmCloud:'智能 · 云端（推荐，手机不耗电）', cloudReady:'智能识别（云端）已就绪 · 手机无需下载模型',
+  cloudNeedsLogin:'云端识别需要先登录', cloudLimit:'今天的云端识别次数已用完，明天再来（或在设置里改用本地模式）', cloudBusy:'云端 AI 暂时繁忙，请稍后再试',
   sVlmTitle:'拍照 AI', sVlmL:'识别模式', sVlmOff:'快速（仅分类器）', sVlmLite:'智能 Lite · 约 0.85 GB（手机）', sVlmPro:'智能 Pro · 约 1.8 GB（电脑，更准）',
-  sVlmNote:'智能模式在设备上运行视觉语言模型（Qwen3.5 / Qwen3-VL）：逐项识别、计数、估算克数，热量来自营养数据库。',
+  sVlmNote:'云端：由 Google Gemini 在服务器识别，最准、手机零负担（Gemini 免费版条款允许 Google 用提交内容改进产品）。本地 Lite/Pro：在设备上运行 Qwen 视觉模型，照片完全不离开手机，但需下载模型、耗电、准确度较低。',
   modelReady:'模型已就绪——在设备上离线识别，照片不会上传。', camDenied:'需要相机权限。请在浏览器设置中允许。',
   scanHint:'将条形码对准相机', scanNote:'先查本地全球库，再查在线，最后可自己补充。', notFound:'未找到该商品，请用搜索添加。',
   teach:'没有找到——教会它！', teachName:'商品名称', teachSave:'保存到公共条码库', taught:'已保存！所有用户扫这个条码都能直接用了 🎉', teachAI:'🧠 让 AI 按名称估算', gs1:'🔎 到 GS1 官网查此条码（自动填名）',
@@ -61,14 +63,16 @@ const T = ZH ? {
   photoHint:'Photograph your meal', shoot:'Identify', analyzing:'Analyzing…', notThese:'None of these — search instead',
   modelIdle:'First use downloads the recognition model (~38 MB); it is cached after that.', modelLoading:'Loading model…',
   pick:'📁 Choose a photo from your library', vlmIntroTitle:'Smart recognition (recommended)',
-  vlmIntroText:'A local vision AI looks at the photo like a person: finds every item, counts pieces and estimates grams — calories then come from the nutrition database. Runs entirely on your device, free, photos never uploaded. One-time download of about {size} (Wi-Fi recommended), cached after that.',
+  vlmIntroText:'A vision AI looks at the photo like a person: finds every item, counts pieces and estimates grams — calories then come from the nutrition database. It runs on the server (Google Gemini), so your phone downloads nothing and does no AI work. Photos are used only for recognition; SnapCal does not store them.',
   vlmEnable:'Turn on smart recognition', vlmLoading:'Loading vision AI…', vlmReady:'Smart recognition ready · photos never leave your device',
   vlmDl:'Downloading vision AI: {p}% ({l}/{t} MB) · one time only', vlmThinking:'AI is looking closely at the photo…',
   vlmFail:'The AI could not give a clear answer — try another angle, or add it via search.', quick:'Quick classifier guess', meal:'Meal',
   matched:'database', aiKcal:'AI calorie estimate', noMatch:'not in the database — rename or remove', total:'Total', noItems:'No food items found',
   plateLog:'Log this meal · {k} kcal', plateAdd:'Missed something? Type a name to add (e.g. yogurt)',
+  sVlmCloud:'Smart · Cloud (recommended, no phone compute)', cloudReady:'Smart recognition (cloud) ready · nothing to download',
+  cloudNeedsLogin:'Cloud recognition needs you to sign in', cloudLimit:'Today\'s cloud photo limit is used up — try tomorrow, or switch to an on-device mode in Settings', cloudBusy:'The cloud AI is busy — try again in a moment',
   sVlmTitle:'Photo AI', sVlmL:'Mode', sVlmOff:'Fast (classifier only)', sVlmLite:'Smart Lite · ~0.85 GB (phones)', sVlmPro:'Smart Pro · ~1.8 GB (computers, more accurate)',
-  sVlmNote:'Smart modes run a vision-language model (Qwen3.5 / Qwen3-VL) on your device: itemizes, counts and estimates grams; calories come from the nutrition database.',
+  sVlmNote:'Cloud: Google Gemini recognizes the photo on the server — most accurate, zero load on the phone (Gemini\'s free-tier terms let Google use submissions to improve its products). On-device Lite/Pro: a Qwen vision model runs on your device, photos never leave it, but it downloads a model, uses battery and is less accurate.',
   modelReady:'Model ready — runs on your device, photos never leave it.', camDenied:'Camera permission needed — allow it in your browser settings.',
   scanHint:'Point the camera at a barcode', scanNote:'Checked against the local worldwide pack, then online, then you can teach it.', notFound:'Product not found — add it via search.',
   teach:'Not found — teach it!', teachName:'Product name', teachSave:'Save to the shared barcode base', taught:'Saved — every user scanning this code gets it now 🎉', teachAI:'🧠 AI estimate from the name',
@@ -118,11 +122,14 @@ const UNIT_G = {
   'chicken wing': 45, meatball: 25, shrimp: 12, prawn: 15, 'spring roll': 50, walnut: 5, almond: 1.2,
   macaron: 12, 'slice of bread': 30, 'slice of pizza': 110, 'rice ball': 110, onigiri: 110,
 };
-const PLATE_PROMPT = `Look at this food photo carefully.
-Step 1: write ONE line that starts with "Seen:" listing every separate food or drink and how many pieces you count (for example "Seen: 1 peach, 8 grapes and 1 mango on a plate").
-Step 2: output ONLY this JSON:
-{"meal":"overall name in English, e.g. fruit plate","meal_zh":"中文名称","items":[{"name":"English name","name_zh":"中文名","count":1,"grams":150,"kcal_100g":60}]}
-Rules: every distinct food is its own item. count = number of pieces. grams = total edible weight of that item (a dinner plate is about 26 cm wide, a rice bowl about 12 cm, a cup about 350 ml). kcal_100g = calories per 100 g.`;
+const PLATE_PROMPT = `Look carefully at this food photo and answer with ONLY one JSON object.
+First fill "seen" with one short sentence describing what is really in the photo, then list the foods.
+- Use SPECIFIC food names ("dragon fruit", "banana", "granola", "shrimp", "fried egg"), never vague words like "dessert", "salad", "topping" or "garnish".
+- One prepared dish (pizza, burger, sandwich, noodle soup, curry, fried rice) is ONE item, e.g. a bowl of shrimp noodle soup is one item "shrimp noodle soup": do not also list its ingredients.
+- Separate foods you can see or count (fruit pieces, sushi, dumplings, side dishes, drinks, toppings on a bowl) are separate items, AND always include the base they sit on (the yogurt under the toppings, the rice under the curry).
+- Size guide: a dinner plate is about 26 cm wide, a rice bowl about 12 cm, a cup about 350 ml.
+Shape (fill every <...> with your own values):
+{"seen":"<one short sentence>","meal":"<overall name in English>","meal_zh":"<中文名称>","items":[{"name":"<specific food in English>","name_zh":"<中文名>","count":<number of pieces>,"grams":<total edible grams of this item>,"kcal_100g":<calories per 100 g>}]}`;
 let vlm = null, vlmLoad = null;
 
 /* ---------- state & utils ---------- */
@@ -336,7 +343,7 @@ function buildStatic() {
   });
   $('vlmIntroTitle').textContent = T.vlmIntroTitle; $('vlmEnable').textContent = T.vlmEnable;
   $('vlmEnable').addEventListener('click', () => {
-    setVlmTier(IS_MOBILE ? 'lite' : 'pro'); $('sVlm').value = vlmTier();
+    setVlmTier(LOCAL ? (IS_MOBILE ? 'lite' : 'pro') : 'cloud'); $('sVlm').value = vlmTier();
     paintVlmIntro(); warmVLM();
   });
   $('plateAddName').placeholder = T.plateAdd;
@@ -344,7 +351,7 @@ function buildStatic() {
   $('plateAddName').addEventListener('keydown', (e) => { if (e.key === 'Enter') addPlateItem(); });
   $('plateLog').addEventListener('click', logPlate);
   $('sVlmTitle').textContent = T.sVlmTitle; $('sVlmL').textContent = T.sVlmL;
-  $('sVlmOff').textContent = T.sVlmOff; $('sVlmLite').textContent = T.sVlmLite; $('sVlmPro').textContent = T.sVlmPro;
+  $('sVlmCloud').textContent = T.sVlmCloud; $('sVlmOff').textContent = T.sVlmOff; $('sVlmLite').textContent = T.sVlmLite; $('sVlmPro').textContent = T.sVlmPro;
   $('sVlmNote').textContent = T.sVlmNote;
   $('sVlm').value = vlmTier();
   $('sVlm').addEventListener('change', () => {
@@ -559,7 +566,7 @@ async function analyzeCanvas(canvas) {
 
 /* ---------- smart photo AI: local vision-language model ---------- */
 function vlmChoice() {
-  try { const v = localStorage.getItem('ps-vlm'); return v === 'off' || v === 'lite' || v === 'pro' ? v : null; }
+  try { const v = localStorage.getItem('ps-vlm'); return v === 'off' || v === 'cloud' || v === 'lite' || v === 'pro' ? v : null; }
   catch { return null; }
 }
 function vlmTier() { return vlmChoice() || 'off'; }
@@ -593,7 +600,7 @@ function vlmProgress(loaded, total) {
 }
 async function ensureVLM() {
   const tier = vlmTier();
-  if (tier === 'off') throw new Error('off');
+  if (tier === 'off' || tier === 'cloud') throw new Error('not a local tier');
   if (vlm && vlm.tier === tier) return vlm;
   if (!navigator.gpu) throw new Error(T.aiNoGpu);
   if (vlmLoad && vlmLoad.tier === tier) return vlmLoad.p;
@@ -623,6 +630,7 @@ async function ensureVLM() {
 }
 async function warmVLM() {
   if (vlmTier() === 'off') return;
+  if (vlmTier() === 'cloud') { $('modelNote').textContent = T.cloudReady; return; }
   if (!navigator.gpu) { $('modelNote').textContent = T.aiNoGpu; return; }
   if (vlm && vlm.tier === vlmTier()) { $('modelNote').textContent = T.vlmReady; return; }
   $('modelNote').textContent = T.vlmLoading;
@@ -632,6 +640,32 @@ async function warmVLM() {
   } catch (e) {
     $('modelNote').textContent = String((e && e.message) || e).slice(0, 160);
   }
+}
+async function cloudAnalyze(canvas, hint) {
+  if (LOCAL || !S.sb) throw new Error(T.cloudNeedsLogin);
+  const { data } = await S.sb.auth.getSession();
+  const token = data && data.session && data.session.access_token;
+  if (!token) throw new Error(T.cloudNeedsLogin);
+  const s = Math.min(1, 768 / Math.max(canvas.width, canvas.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(canvas.width * s); c.height = Math.round(canvas.height * s);
+  c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
+  const image = c.toDataURL('image/jpeg', 0.85).split(',')[1];
+  const r = await fetch(PS_CONFIG.SUPABASE_URL + '/functions/v1/analyze-meal', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json', Authorization: 'Bearer ' + token,
+      apikey: PS_CONFIG.SUPABASE_ANON_KEY, 'x-region': 'us-east-1', // Gemini is not offered in every region
+    },
+    body: JSON.stringify({ image, hint: hint || '' }),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    if (j.error === 'daily_limit') throw new Error(T.cloudLimit);
+    if (j.error === 'sign_in_required') throw new Error(T.cloudNeedsLogin);
+    throw new Error(T.cloudBusy + (j.error ? ` (${j.error})` : ''));
+  }
+  return parsePlate(j.text);
 }
 async function vlmAnalyze(m, canvas, hint, onText) {
   const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.92));
@@ -650,7 +684,7 @@ async function vlmAnalyze(m, canvas, hint, onText) {
     skip_prompt: true, skip_special_tokens: true,
     callback_function: (t) => { streamed += t; if (onText) onText(streamed); },
   });
-  const out = await m.model.generate({ ...inputs, max_new_tokens: 450, do_sample: false, streamer });
+  const out = await m.model.generate({ ...inputs, max_new_tokens: 420, do_sample: false, repetition_penalty: 1.1, streamer });
   let decoded = streamed;
   try {
     decoded = m.processor.batch_decode(out.slice(null, [inputs.input_ids.dims.at(-1), null]),
@@ -660,7 +694,7 @@ async function vlmAnalyze(m, canvas, hint, onText) {
 }
 function parsePlate(text) {
   const t = String(text || '').replace(/<\/?think>/g, '');
-  let start = t.search(/\{\s*"meal"/);
+  let start = t.search(/\{\s*"(seen|meal)"/);
   if (start < 0) start = t.indexOf('{');
   if (start < 0) return null;
   let depth = 0, inStr = false, escp = false, end = -1;
@@ -690,7 +724,7 @@ function parsePlate(text) {
     meal: String(obj.meal || '').slice(0, 60),
     meal_zh: String(obj.meal_zh || '').slice(0, 40),
     items,
-    reasoning: t.slice(0, start).replace(/```(json)?/g, '').trim(),
+    reasoning: String(obj.seen || '').slice(0, 240) || t.slice(0, start).replace(/```(json)?/g, '').trim(),
   };
 }
 function unitWeight(name) {
@@ -702,23 +736,39 @@ function unitWeight(name) {
   }
   return best ? UNIT_G[best] : null;
 }
-const PROCESSED = /\b(juice|nectar|syrup|canned|pie|babyfood|dried|frozen|jam|jelly|sauce|drink|flavou?red|candied)\b/i;
+const PROCESSED = /\b(juice|nectar|syrup|canned|pie|babyfood|dried|frozen|jam|jelly|sauce|drink|flavou?red|candied|tea|coffee|latte|soda|smoothie|wine|beer|liquor|mix|powder|instant|dehydrated|substitute|imitation|analog)\b/i;
+// Category words the AI sometimes uses: never force these onto a specific database row.
+const DIET = /\b(nonfat|non-fat|fat free|low ?fat|lowfat|reduced fat|light|lite|skim|diet|sugar free|unsweetened)\b/i;
+const GENERIC = /^(dessert|desserts|salad|meal|dish|dishes|food|snack|snacks|fruit|fruits|vegetable|vegetables|greens|soup|sauce|topping|toppings|dressing|garnish|side)$/i;
 function matchPlateFood(it) {
-  const qs = [it.name, it.name_zh].filter(Boolean).map((s) => s.toLowerCase().trim());
+  if (GENERIC.test(String(it.name || '').trim())) return null;
+  const base = [it.name, it.name_zh].filter(Boolean).map((s) => s.toLowerCase().trim());
+  const qs = [...new Set(base.flatMap((q) => [q, q.replace(/ies$/, 'y'), q.replace(/y$/, 'ies'),
+    q.replace(/(es|s)$/, ''), q + 's', q + 'es']))].filter((q) => q.length >= 2);
   const wantsProcessed = qs.some((q) => PROCESSED.test(q));
+  const wantsDiet = qs.some((q) => DIET.test(q));
   let best = null;
+  const stem = (w) => w.replace(/ies$/, 'y').replace(/(es|s)$/, '');
+  const qWords = base.length ? base[0].split(/[^a-z]+/).filter((w) => w.length >= 3).map(stem) : [];
   const consider = (f, bonus) => {
+    if (f.source === 'tw-fda' || f.source === 'off') return; // branded products: for barcode/search, not photo items
     let s = 0;
+    if (qWords.length >= 2 && f.en) { // every query word present, any order: "granola cereal" ~ "cereals, granola"
+      const fw = new Set(f.en.toLowerCase().split(/[^a-z]+/).filter(Boolean).map(stem));
+      if (qWords.every((w) => fw.has(w))) s = 0.86 - Math.min(0.1, fw.size / 100);
+    }
     for (const q of qs) {
       s = Math.max(s, fuzzy(f.en, q), fuzzy(f.zh, q));
       const en = f.en && f.en.toLowerCase();
       if (en && en.length >= 4 && q.includes(en)) s = Math.max(s, 0.8);
     }
-    if (s < 0.6) return;
+    if (s < 0.72) return; // substring & word-overlap matches score >=0.75; weaker letter-pair look-alikes (e.g. "diced red fruit" vs "fried rice") are rejected
     s += bonus;
     if (f.source === 'seed') s += 0.06;
     if (f.en && /\braw\b/i.test(f.en)) s += 0.05;
     if (!wantsProcessed && f.en && PROCESSED.test(f.en)) s -= 0.06;
+    if (!wantsDiet && f.en && DIET.test(f.en)) s -= 0.05;
+    if (f.en && /\b[A-Z]{4,}\b/.test(f.en)) s -= 0.07; // USDA brand names are ALL CAPS (CHOBANI, SILK…)
     if (!best || s > best.s) best = { f, s };
   };
   for (const f of S.foods) consider(f, 0);
@@ -736,7 +786,9 @@ function buildPlateItem(it) {
   }
   const food = matchPlateFood(it);
   if (!g && food && food.portion) g = food.portion * it.count;
-  g = Math.round(g || 100);
+  const k100 = food ? food.kcal : it.kcal_100g;
+  if (k100 > 350) g = Math.min(g || 100, 100); // granola, nuts, cheese, chocolate: rarely >100 g per meal
+  g = Math.round(Math.min(g || 100, 1500));
   return {
     ...it, grams: g, per: g / Math.max(1, it.count), food,
     k100: food ? food.kcal : it.kcal_100g,
@@ -754,11 +806,15 @@ async function runSmart(canvas, quick) {
   const think = $('plateThink'); think.hidden = false; think.textContent = '…';
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
   let res = null, err = null;
+  const hint = top && top.prob >= 0.5 ? labelToTerm(top.label) : null;
   try {
-    const m = await ensureVLM();
-    $('modelNote').textContent = T.vlmReady;
-    res = await vlmAnalyze(m, canvas, top && top.prob >= 0.5 ? labelToTerm(top.label) : null,
-      (txt) => { think.textContent = txt; });
+    if (vlmTier() === 'cloud') {
+      res = await cloudAnalyze(canvas, hint);
+    } else {
+      const m = await ensureVLM();
+      $('modelNote').textContent = T.vlmReady;
+      res = await vlmAnalyze(m, canvas, hint, (txt) => { think.textContent = txt; });
+    }
   } catch (e) { err = e; }
   if (!res || !res.items.length) {
     $('plateTitle').textContent = T.vlmFail;
@@ -767,7 +823,14 @@ async function runSmart(canvas, quick) {
     return;
   }
   think.textContent = res.reasoning || think.textContent;
-  S.plate = { meal: res.meal, meal_zh: res.meal_zh, items: res.items.map(buildPlateItem) };
+  const merged = [];
+  for (const it of res.items) {
+    const same = merged.find((m) => m.name.toLowerCase() === it.name.toLowerCase());
+    if (same) { same.count += it.count; same.grams = (same.grams || 0) + (it.grams || 0) || null; }
+    else merged.push({ ...it });
+  }
+  const real = merged.filter((it) => !GENERIC.test(it.name.trim()));
+  S.plate = { meal: res.meal, meal_zh: res.meal_zh, items: (real.length ? real : res.items).map(buildPlateItem) };
   renderPlate();
 }
 function plateTotals(items) {
@@ -836,6 +899,7 @@ function addPlateItem() {
   const name = $('plateAddName').value.trim();
   if (!name || !S.plate) return;
   const it = buildPlateItem({ name, name_zh: '', count: 1, grams: null, kcal_100g: null });
+  if (it.food && it.food.portion > 0 && it.grams < it.food.portion) { it.grams = Math.round(it.food.portion); it.per = it.grams; }
   S.plate.items.push(it);
   $('plateAddName').value = '';
   renderPlate();
@@ -1173,7 +1237,7 @@ function bigrams(s) {
 function fuzzy(name, q) {
   if (!name || !q) return 0;
   const n = String(name).toLowerCase();
-  if (n.includes(q)) return 1 - Math.min(0.3, n.length / 400); // substring is king
+  if (n.includes(q)) return 0.75 + 0.25 * Math.min(1, q.length / n.length); // substring, weighted by coverage
   if (q.length < 3) return 0;
   const a = bigrams(n), b = bigrams(q);
   if (!a.size || !b.size) return 0;
