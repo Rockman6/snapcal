@@ -44,6 +44,7 @@ const T = ZH ? {
   dataTitle:'你的数据', exportJson:'⬇️ 下载我的全部数据（JSON）', exportCsv:'⬇️ 下载饮食记录（CSV，可用 Excel 打开）', delOpen:'删除我的账户…',
   delWarn:'这会永久删除你的全部记录和账户，无法恢复。你贡献到公共食物库和条码库的条目会保留（不含个人信息）。输入 DELETE 确认：',
   delGo:'永久删除账户', delDone:'账户已删除', delFail:'删除失败，请稍后再试',
+  restL:'📍 在哪吃的', restAny:'在家 / 其他', restAll:'全部食物', perServing:'每份', servings:'份', oneServing:'1 份',
   sodium:'钠', sugar:'糖', usual:'你的常用份量', readLabel:'📷 拍营养成分表读取', labelBusy:'正在读取营养成分表…',
   labelFail:'没读出能量数值——请拍清楚整个营养成分表', labelFood:'扫描的标签', teachLabel:'📷 拍营养成分表自动填写',
   readScale:'📷 从体脂秤截图读取（可多选）', scaleBusy:'正在读取第 {i}/{n} 张截图…', scaleDone:'已填入 {n} 项——核对无误后点保存',
@@ -55,6 +56,19 @@ const T = ZH ? {
   edSave:'保存修改', edDelete:'删除这条记录', edConfirm:'再点一次确认删除', edit:'修改',
   sVlmCloud:'智能 · 云端（推荐，手机不耗电）', cloudReady:'智能识别（云端）已就绪 · 手机无需下载模型',
   cloudNeedsLogin:'云端识别需要先登录', cloudLimit:'今天的云端识别次数已用完，明天再来（或在设置里改用本地模式）', cloudBusy:'云端 AI 暂时繁忙，请稍后再试',
+  bowlL:'🥣 用的碗/盘', bowlNone:'未设置（AI 估算大小）', bowlAddOpt:'＋ 添加我的碗…',
+  measureTip:'想估得更准：选一个量过的碗；或者放在厨房秤上称；或者在画面里放一双筷子/一张银行卡作参照。斜 45° 拍，让碗沿和食物表面都能看到。',
+  fillL:'装了多满', fillSet:'拖动设置',
+  mBowl:'{b}：满碗 {v} 毫升，装到 {f}% 高 → 食物约 {m} 毫升，按每样食物的密度换算成克数',
+  mRef:'按{r}估算：碗约 {d} 厘米宽、{h} 厘米深，装到 {f}% 高 → 约 {m} 毫升（与 AI 直接估计取平均）',
+  mScaleSeen:'⚖ 画面里有厨房秤——输入屏幕上的数字最准（AI 读不准液晶数字）', weighL:'⚖ 称过了？输入食物克数',
+  mScaleTare:'减去空碗 {t} 克', mScaleDone:'⚖ 称得食物 {g} 克，已按比例分到碗里的每样食物', mScaleBad:'读数减去碗重后不到 0，请检查',
+  tagScale:'⚖ 称重', tagBowl:'🥣 按碗容量', tagRef:'📏 按参照物',
+  bowlTitle:'我的碗和盘子', bowlEmpty:'还没有。先添加最常用的饭碗和面碗。', bowlAddT:'＋ 添加 / 修改', bowlSave:'保存', bowlDel:'删除',
+  bowlHelp:'每个碗量一次，拍照估重就准得多。用尺子量碗口内径和深度；或者把碗装满水到碗沿，再量这些水（放厨房秤上：1 克 = 1 毫升）。填了空碗重量，用厨房秤称的时候就不用先去皮。',
+  bNameL:'名称', bKindL:'类型', bKbowl:'碗', bKplate:'盘子', bKcup:'杯子', bKbox:'饭盒',
+  bRimL:'碗口内径（厘米）', bDepthL:'深度（厘米）', bMlL:'装满容量（毫升）', bTareL:'空碗重量（克）',
+  bCalc:'按尺寸算：装满约 {v} 毫升', bNeed:'请至少填「内径 + 深度」或「容量」', bFull:'满', bEmptyW:'空重',
   sVlmTitle:'拍照 AI', sVlmL:'识别模式', sVlmOff:'快速（仅分类器）', sVlmLite:'智能 Lite · 约 0.85 GB（手机）', sVlmPro:'智能 Pro · 约 1.8 GB（电脑，更准）',
   sVlmNote:'云端：由第三方 AI（智谱 GLM 或 Google Gemini）在服务器识别，最准、手机零负担（免费版服务商可能用提交内容改进模型）。本地 Lite/Pro：在设备上运行 Qwen 视觉模型，照片完全不离开手机，但需下载模型、耗电、准确度较低。',
   modelReady:'模型已就绪——在设备上离线识别，照片不会上传。', camDenied:'需要相机权限。请在浏览器设置中允许。',
@@ -102,6 +116,7 @@ const T = ZH ? {
   dataTitle:'Your data', exportJson:'⬇️ Download all my data (JSON)', exportCsv:'⬇️ Download my meal log (CSV, opens in Excel)', delOpen:'Delete my account…',
   delWarn:'This permanently deletes all your records and your account; it cannot be undone. Items you contributed to the shared food and barcode catalogs stay (they hold no personal info). Type DELETE to confirm:',
   delGo:'Delete my account permanently', delDone:'Account deleted', delFail:'Delete failed, please try again later',
+  restL:'📍 Where did you eat', restAny:'Home / other', restAll:'All foods', perServing:'per serving', servings:'servings', oneServing:'1 serving',
   sodium:'Sodium', sugar:'Sugar', usual:'your usual portion', readLabel:'📷 Read a nutrition label', labelBusy:'Reading the label…',
   labelFail:'Could not read the energy value — photograph the whole nutrition panel clearly', labelFood:'Scanned label', teachLabel:'📷 Fill in from a photo of the label',
   readScale:'📷 Read from scale screenshots (pick several)', scaleBusy:'Reading screenshot {i} of {n}…', scaleDone:'Filled {n} values — check them, then Save',
@@ -113,6 +128,19 @@ const T = ZH ? {
   edSave:'Save changes', edDelete:'Delete this entry', edConfirm:'Tap again to delete', edit:'Edit',
   sVlmCloud:'Smart · Cloud (recommended, no phone compute)', cloudReady:'Smart recognition (cloud) ready · nothing to download',
   cloudNeedsLogin:'Cloud recognition needs you to sign in', cloudLimit:'Today\'s cloud photo limit is used up — try tomorrow, or switch to an on-device mode in Settings', cloudBusy:'The cloud AI is busy — try again in a moment',
+  bowlL:'🥣 Bowl / plate', bowlNone:'Not set (AI judges the size)', bowlAddOpt:'＋ Add my bowl…',
+  measureTip:'For better grams: pick a bowl you measured, or weigh it on a kitchen scale, or keep chopsticks or a bank card in the frame. Shoot from about 45° so the rim and the food surface both show.',
+  fillL:'How full', fillSet:'drag to set',
+  mBowl:'{b}: {v} ml when full, filled {f}% of the way up → about {m} ml of food, turned into grams with each food\'s density',
+  mRef:'Sized from {r}: bowl about {d} cm wide and {h} cm deep, filled {f}% up → about {m} ml (averaged with the AI\'s direct guess)',
+  mScaleSeen:'⚖ A kitchen scale is in the photo — type the number on its display (AI can\'t read LCD digits reliably)', weighL:'⚖ Weighed it? Food weight in grams',
+  mScaleTare:'Subtract empty bowl {t} g', mScaleDone:'⚖ {g} g of food weighed, split across the items in the bowl', mScaleBad:'Reading minus bowl weight is below 0 — please check',
+  tagScale:'⚖ weighed', tagBowl:'🥣 from your bowl', tagRef:'📏 sized from photo',
+  bowlTitle:'My bowls & plates', bowlEmpty:'None yet. Start with your everyday rice bowl and noodle bowl.', bowlAddT:'＋ Add or edit', bowlSave:'Save', bowlDel:'Delete',
+  bowlHelp:'Measure each bowl once and photo weights get much more accurate. Measure the inside rim width and depth with a ruler, or fill the bowl with water to the rim and measure that water (on a kitchen scale 1 g = 1 ml). With the empty weight saved, you can weigh meals without pressing tare.',
+  bNameL:'Name', bKindL:'Type', bKbowl:'Bowl', bKplate:'Plate', bKcup:'Cup / mug', bKbox:'Lunch box',
+  bRimL:'Inside rim width (cm)', bDepthL:'Depth (cm)', bMlL:'Full to rim (ml)', bTareL:'Empty weight (g)',
+  bCalc:'From the size: about {v} ml when full', bNeed:'Enter rim width + depth, or the volume', bFull:'full', bEmptyW:'empty',
   sVlmTitle:'Photo AI', sVlmL:'Mode', sVlmOff:'Fast (classifier only)', sVlmLite:'Smart Lite · ~0.85 GB (phones)', sVlmPro:'Smart Pro · ~1.8 GB (computers, more accurate)',
   sVlmNote:'Cloud: a third-party AI (Zhipu GLM or Google Gemini) recognizes the photo on the server — most accurate, zero load on the phone (free-tier providers may use submissions to improve their models). On-device Lite/Pro: a Qwen vision model runs on your device, photos never leave it, but it downloads a model, uses battery and is less accurate.',
   modelReady:'Model ready — runs on your device, photos never leave it.', camDenied:'Camera permission needed — allow it in your browser settings.',
@@ -173,6 +201,20 @@ First fill "seen" with one short sentence describing what is really in the photo
 Shape (fill every <...> with your own values):
 {"seen":"<one short sentence>","meal":"<overall name in English>","meal_zh":"<中文名称>","items":[{"name":"<specific food in English>","name_zh":"<中文名>","count":<number of pieces>,"grams":<total edible grams of this item>,"kcal_100g":<calories per 100 g>}]}`;
 let vlm = null, vlmLoad = null;
+// Restaurant chains with published nutrition. mcd-cn: McDonald's China's own product pages
+// (per serving); the others: USDA lab data for the US chains (per 100 g).
+const CHAINS = [
+  { id: 'mcd-cn', zh: '麦当劳（中国）', en: "McDonald's (China)", src: 'chain-mcd-cn' },
+  { id: 'mcd-us', zh: '麦当劳（美国）', en: "McDonald's (US)", prefix: "McDONALD'S" },
+  { id: 'kfc-us', zh: '肯德基（美国）', en: 'KFC (US)', prefix: 'KFC' },
+  { id: 'bk', zh: '汉堡王', en: 'Burger King', prefix: 'BURGER KING' },
+  { id: 'pizzahut', zh: '必胜客', en: 'Pizza Hut', prefix: 'PIZZA HUT' },
+  { id: 'dominos', zh: '达美乐', en: "Domino's", prefix: "DOMINO'S" },
+  { id: 'subway', zh: '赛百味', en: 'Subway', prefix: 'SUBWAY' },
+  { id: 'popeyes', zh: 'Popeyes', en: 'Popeyes', prefix: 'POPEYES' },
+  { id: 'wendys', zh: '温蒂汉堡', en: "Wendy's", prefix: "WENDY'S" },
+  { id: 'tacobell', zh: '塔可贝尔', en: 'Taco Bell', prefix: 'TACO BELL' },
+];
 // Drinks logged as food also count toward water (tea, coffee, milk, juice, bottled water…).
 const DRINK_RE = /\b(water|tea|coffee|americano|latte|cappuccino|espresso|juice|milk|soda|cola|sprite|lemonade|kombucha|smoothie|sparkling)\b|茶|咖啡|饮用水|天然水|山泉水|矿泉水|纯净水|气泡水|苏打水|果汁|牛奶|豆浆|奶茶|可乐|汽水|饮料|ジュース|コーヒー|牛乳|お茶|주스|커피|우유|水$/i;
 const NOT_DRINK_RE = /watermelon|chestnut|tea ?cake|milk ?chocolate|奶酪|茶叶蛋|西瓜|水果|水饺|奶糖|奶片|chocolate|cookie|biscuit|cake|bread|powder|粉/i;
@@ -237,6 +279,7 @@ async function loadAll() {
   S.custom = c.data || [];
   if (t.data) S.targets = { kcal: t.data.kcal ?? 2000, protein: t.data.protein ?? 120, goal: t.data.goal, water_ml: t.data.water_ml ?? localWater() };
   else S.targets.water_ml = localWater();
+  S.targets.bowls = t.data && Array.isArray(t.data.bowls) ? t.data.bowls : localBowls();
   if (p.data) S.profile = p.data;
   S.learned = ln.data || [];
   S.health = hd.data || [];
@@ -303,8 +346,13 @@ async function saveWeight(w) {
 function localWater() {
   try { const v = parseFloat(localStorage.getItem('ps-water-target')); return v > 0 ? v : null; } catch { return null; }
 }
+// Device copy of "My bowls", used until the settings.bowls column exists (v10 SQL).
+function localBowls() {
+  try { const b = JSON.parse(localStorage.getItem('ps-bowls') || '[]'); return Array.isArray(b) ? b : []; } catch { return []; }
+}
 async function saveTargets() {
   try { localStorage.setItem('ps-water-target', S.targets.water_ml || ''); } catch {}
+  try { localStorage.setItem('ps-bowls', JSON.stringify(S.targets.bowls || [])); } catch {}
   if (LOCAL) lsSave();
   else {
     const { error } = await sbSafe((r) => S.sb.from('settings').upsert(r, { onConflict: 'user_id' }), { ...S.targets });
@@ -374,6 +422,7 @@ async function showApp() {
   $('sEat').value = String(S.targets.eat_back || 0);
   paintTDEE();
   paintProfile();
+  renderBowls(); fillBowlSelect();
   renderToday(); renderWeight(); renderResults();
 }
 
@@ -407,6 +456,33 @@ function buildStatic() {
   });
   $('weekTitle').textContent = T.week; $('mealsTitle').textContent = T.meals;
   $('mealsHint').textContent = T.mealsHint;
+  $('restL').textContent = T.restL;
+  for (const [id, first] of [['restSel', T.restAll], ['plateRest', T.restAny]]) {
+    $(id).innerHTML = `<option value="">${first}</option>` + CHAINS.map((c) => `<option value="${c.id}">${esc(chainLabel(c))}</option>`).join('');
+    $(id).addEventListener('change', (ev) => {
+      S.rest = ev.target.value || null;
+      $('restSel').value = S.rest || ''; $('plateRest').value = S.rest || '';
+      renderResults();
+    });
+  }
+  try { S.bowlSel = localStorage.getItem('ps-bowl-sel') || ''; } catch { S.bowlSel = ''; }
+  $('bowlL').textContent = T.bowlL; $('measureTip').textContent = T.measureTip;
+  $('plateBowl').addEventListener('change', (ev) => {
+    if (ev.target.value === '__add') {
+      ev.target.value = S.bowlSel || '';
+      setView('settings'); $('bowlForm').open = true;
+      $('bowlCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    S.bowlSel = ev.target.value;
+    try { localStorage.setItem('ps-bowl-sel', S.bowlSel); } catch {}
+    if (S.plate) { applyMeasure(); renderPlate(); }
+  });
+  $('bowlTitle').textContent = T.bowlTitle; $('bowlHelp').textContent = T.bowlHelp; $('bowlAddT').textContent = T.bowlAddT;
+  for (const k of ['bNameL', 'bKindL', 'bRimL', 'bDepthL', 'bMlL', 'bTareL', 'bKbowl', 'bKplate', 'bKcup', 'bKbox']) $(k).textContent = T[k];
+  $('bSave').textContent = T.bowlSave;
+  $('bSave').addEventListener('click', saveBowl);
+  for (const id of ['bRim', 'bDepth', 'bKind']) $(id).addEventListener('input', paintBowlCalc);
   $('remTitle').textContent = T.remTitle; $('remWaterL').textContent = T.remWaterL; $('remMealsL').textContent = T.remMealsL;
   try { const rp = JSON.parse(localStorage.getItem('ps-rem') || '{}'); $('remWater').checked = rp.water !== false; $('remMeals').checked = rp.meals !== false; } catch {}
   $('remBtn').addEventListener('click', toggleReminders);
@@ -548,7 +624,7 @@ function buildStatic() {
   $('sSave').addEventListener('click', () => {
     S.targets = { water_ml: parseFloat($('sWater').value) || null, eat_back: parseFloat($('sEat').value) || 0,
       kcal: parseFloat($('sKcal').value) || 2000, protein: parseFloat($('sPro').value) || 0,
-      goal: parseFloat($('sGoal').value) || null };
+      goal: parseFloat($('sGoal').value) || null, bowls: S.targets.bowls || [] };
     saveTargets();
   });
   $('logout').textContent = T.logout;
@@ -819,7 +895,9 @@ async function cloudCall(body) {
   return String(j.text || '');
 }
 async function cloudAnalyze(canvas, hint) {
-  return parsePlate(await cloudCall({ task: 'meal', image: canvasB64(canvas, 768), hint: hint || '' }));
+  const b = userBowl();
+  const bowl = b ? { kind: b.kind, rim_cm: b.rim, depth_cm: b.depth, ml: b.ml } : undefined;
+  return parsePlate(await cloudCall({ task: 'meal', image: canvasB64(canvas, 1024), hint: hint || '', bowl }));
 }
 // First complete JSON object in a model reply (models sometimes add text after it).
 function firstJson(text) {
@@ -907,9 +985,11 @@ async function vlmAnalyze(m, canvas, hint, onText) {
   const s = VLM_TIERS[m.tier].side / Math.max(img.width, img.height);
   const r28 = (v) => Math.max(56, Math.round(v * s / 28) * 28);
   img = await img.resize(r28(img.width), r28(img.height));
-  const prompt = hint
+  const b = userBowl(), v = vessel(b);
+  const prompt = (hint
     ? PLATE_PROMPT + `\nHint from a fast classifier that only knows single dishes (it may be wrong): "${hint}".`
-    : PLATE_PROMPT;
+    : PLATE_PROMPT) + (v ? `\nThe food is in a ${b.kind} that holds ${Math.round(v.V)} ml when full.` +
+      ` Also add "fill": how high the food reaches up its inside wall (0.5 = halfway, 1 = level with the rim).` : '');
   const conversation = [{ role: 'user', content: [{ type: 'image' }, { type: 'text', text: prompt }] }];
   const text = m.processor.apply_chat_template(conversation, { add_generation_prompt: true, enable_thinking: false });
   const inputs = await m.processor(text, img);
@@ -947,6 +1027,7 @@ function parsePlate(text) {
   }
   if (!obj) return null;
   const num = (v, lo, hi) => { const n = parseFloat(v); return Number.isFinite(n) && n >= lo && n <= hi ? n : null; };
+  const bool = (v) => (v === true || v === 'true' ? true : v === false || v === 'false' ? false : null);
   const items = (Array.isArray(obj.items) ? obj.items : []).map((it) => ({
     name: String(it.name || it.name_zh || '').trim().slice(0, 60),
     name_zh: String(it.name_zh || '').trim().slice(0, 40),
@@ -955,10 +1036,21 @@ function parsePlate(text) {
     kcal_100g: num(it.kcal_100g, 0, 900),
     sodium_mg_100g: num(it.sodium_mg_100g, 0, 10000),
     sugar_g_100g: num(it.sugar_g_100g, 0, 100),
+    in_bowl: bool(it.in_bowl),
+    g_per_ml: num(it.g_per_ml, 0.05, 1.3),
   })).filter((it) => it.name);
+  const c = obj.container && typeof obj.container === 'object' ? obj.container : {};
+  const kind = String(c.kind || '').toLowerCase();
+  const ref = String(c.ref || '').trim().slice(0, 40);
   return {
     meal: String(obj.meal || '').slice(0, 60),
     meal_zh: String(obj.meal_zh || '').slice(0, 40),
+    scale_g: num(obj.scale_g, 1, 20000),
+    container: {
+      kind: ['bowl', 'plate', 'cup', 'box'].find((k) => kind.includes(k)) || null,
+      rim: num(c.rim_cm, 4, 50), depth: num(c.depth_cm, 1, 30), fill: num(c.fill ?? obj.fill, 0.05, 1.5),
+      ref: /^(none|no|null|n\/?a|unknown)?$/i.test(ref) ? '' : ref,
+    },
     items,
     reasoning: String(obj.seen || '').slice(0, 240) || t.slice(0, start).replace(/```(json)?/g, '').trim(),
   };
@@ -975,6 +1067,9 @@ function unitWeight(name) {
 const PROCESSED = /\b(juice|nectar|syrup|canned|pie|babyfood|dried|frozen|jam|jelly|sauce|drink|flavou?red|candied|tea|coffee|latte|soda|smoothie|wine|beer|liquor|mix|powder|instant|dehydrated|substitute|imitation|analog)\b/i;
 // Category words the AI sometimes uses: never force these onto a specific database row.
 const DIET = /\b(nonfat|non-fat|fat free|low ?fat|lowfat|reduced fat|light|lite|skim|diet|sugar free|unsweetened)\b/i;
+// Forms nobody eats as served: photos show cooked food, so these lose unless the name asks for them.
+const DRYFORM = /\b(dry|dried|dehydrated|uncooked|powder|condensed|cubed|granules?|concentrate|undiluted|unprepared)\b/i;
+const STAPLE = /\b(noodles?|rice|pasta|spaghetti|macaroni|oats?|flour|barley|millet|quinoa|buckwheat|vermicelli|couscous|bulgur|lentils?|beans?|peas|chickpeas?)\b/i;
 const GENERIC = /^(dessert|desserts|salad|meal|dish|dishes|food|snack|snacks|fruit|fruits|vegetable|vegetables|greens|soup|sauce|topping|toppings|dressing|garnish|side)$/i;
 function matchPlateFood(it) {
   if (GENERIC.test(String(it.name || '').trim())) return null;
@@ -983,35 +1078,51 @@ function matchPlateFood(it) {
     q.replace(/(es|s)$/, ''), q + 's', q + 'es']))].filter((q) => q.length >= 2);
   const wantsProcessed = qs.some((q) => PROCESSED.test(q));
   const wantsDiet = qs.some((q) => DIET.test(q));
+  const wantsDry = qs.some((q) => /\b(dry|dried|instant|powder|uncooked|raw|jerky)\b|即食|粉末|（干）/.test(q));
   let best = null;
   const stem = (w) => w.replace(/ies$/, 'y').replace(/(es|s)$/, '');
   const qWords = base.length ? base[0].split(/[^a-z]+/).filter((w) => w.length >= 3).map(stem) : [];
+  const rest = chainById(S.rest);
   const consider = (f, bonus) => {
     if (f.source === 'tw-fda' || f.source === 'off') return; // branded products: for barcode/search, not photo items
+    const chainItem = rest && inChain(f, rest);
+    if (isServing(f) && !chainItem) return; // per-serving menus only when you're at that restaurant
     let s = 0;
     if (qWords.length >= 2 && f.en) { // every query word present, any order: "granola cereal" ~ "cereals, granola"
       const fw = new Set(f.en.toLowerCase().split(/[^a-z]+/).filter(Boolean).map(stem));
       if (qWords.every((w) => fw.has(w))) s = 0.86 - Math.min(0.1, fw.size / 100);
     }
     for (const q of qs) {
-      s = Math.max(s, fuzzy(f.en, q), fuzzy(f.zh, q));
+      s = Math.max(s, fuzzy(f.en, q, true), fuzzy(f.zh, q, true));
       const en = f.en && f.en.toLowerCase();
       if (en && en.length >= 4 && q.includes(en)) s = Math.max(s, 0.8);
+      const zc = f.zh && f.zh.replace(/[（(［\[].*$/, '').trim(); // "兰州牛肉面" contains the dish "牛肉面"
+      if (zc && zc.length >= 3 && q.includes(zc)) s = Math.max(s, 0.8);
     }
     if (s < 0.72) return; // substring & word-overlap matches score >=0.75; weaker letter-pair look-alikes (e.g. "diced red fruit" vs "fried rice") are rejected
     s += bonus;
     if (f.source === 'seed') s += 0.06;
-    if (f.en && /\braw\b/i.test(f.en)) s += 0.05;
+    if (f.en && /\braw\b/i.test(f.en) && !STAPLE.test(f.en)) s += 0.05;
+    if (!wantsDry && f.en && (DRYFORM.test(f.en) || (STAPLE.test(f.en) && /\braw\b/i.test(f.en)))) s -= 0.15;
+    // The AI's own kcal for the dish as served: a row 3x away is the wrong form (dry powder vs soup).
+    if (it.kcal_100g > 0 && f.kcal > 0 && !chainItem && Math.abs(f.kcal - it.kcal_100g) > 40) {
+      const r = Math.max(f.kcal / it.kcal_100g, it.kcal_100g / f.kcal);
+      if (r >= 2.8) return;
+      if (r > 2) s -= 0.07;
+    }
     if (!wantsProcessed && f.en && PROCESSED.test(f.en)) s -= 0.06;
     if (!wantsDiet && f.en && DIET.test(f.en)) s -= 0.05;
-    if (f.en && /\b[A-Z]{4,}\b/.test(f.en)) s -= 0.07; // USDA brand names are ALL CAPS (CHOBANI, SILK…)
+    if (f.en && /\b[A-Z]{4,}\b/.test(f.en) && !chainItem) s -= 0.07; // USDA brand names are ALL CAPS (CHOBANI, SILK…)
+    if (chainItem) s += 0.3; // you told us where you ate: that menu wins over generic foods
+    if (f.en && /\b(removed|without skin|skin not eaten|meat only)\b/i.test(f.en)
+      && !qs.some((q) => /removed|without|skinless|meat only/.test(q))) s -= 0.08; // lab-only variants nobody orders
     if (!best || s > best.s) best = { f, s };
   };
   for (const f of S.foods) consider(f, 0);
   for (const c of [...S.learned, ...S.custom]) {
     consider({ en: c.name, kcal: c.kcal, protein: c.protein, fat: c.fat, carbs: c.carbs, portion: c.portion, source: 'learned' }, 0.02);
   }
-  return best ? best.f : null;
+  return best && best.s >= 0.58 ? best.f : null; // nothing convincing: keep the AI's own kcal
 }
 function buildPlateItem(it) {
   const unit = unitWeight(it.name);
@@ -1024,17 +1135,210 @@ function buildPlateItem(it) {
   }
   const food = matchPlateFood(it);
   if (!g && food && food.portion) g = food.portion * it.count;
+  if (food && isServing(food)) { // menu item priced per serving: convert via this plate's grams
+    const grams = g || 100 * it.count, per = grams / Math.max(1, it.count), k = 100 / per;
+    return { ...it, grams: Math.round(grams), base: Math.round(grams), per, food,
+      k100: food.kcal * k, p100: (food.protein || 0) * k, f100: (food.fat || 0) * k, c100: (food.carbs || 0) * k,
+      na100: per100(food.na) !== null ? food.na * k : null, s100: null };
+  }
   const k100 = food ? food.kcal : it.kcal_100g;
   if (k100 > 350) g = Math.min(g || 100, 100); // granola, nuts, cheese, chocolate: rarely >100 g per meal
   g = Math.round(Math.min(g || 100, 1500));
   return {
-    ...it, grams: g, per: g / Math.max(1, it.count), food,
+    ...it, grams: g, base: g, per: g / Math.max(1, it.count), food,
     k100: food ? food.kcal : it.kcal_100g,
     p100: food ? (food.protein || 0) : 0, f100: food ? (food.fat || 0) : 0, c100: food ? (food.carbs || 0) : 0,
     na100: food && per100(food.na) !== null ? food.na : it.sodium_mg_100g ?? null,
     s100: food && per100(food.sugar) !== null ? food.sugar : it.sugar_g_100g ?? null,
   };
 }
+/* ---------- portion measuring: your bowls, fill level, kitchen scale ---------- */
+// k = base width / rim width, a = depth / rim width (used when only some sizes are known).
+const VESSEL = { bowl: { k: 0.5, a: 0.45 }, cup: { k: 0.8, a: 1.1 }, box: { k: 0.9, a: 0.4 } };
+function vessel(b) {
+  if (!b || !VESSEL[b.kind]) return null; // a plate has no depth to fill
+  const { k, a } = VESSEL[b.kind];
+  let R = b.rim > 0 ? b.rim / 2 : null, H = b.depth > 0 ? b.depth : null;
+  if (R && !H) H = a * 2 * R;
+  if (!R && H) R = H / a / 2;
+  if (!R && b.ml > 0) { R = Math.cbrt(3 * b.ml / (Math.PI * 2 * a * (1 + k + k * k))); H = 2 * a * R; }
+  if (!R) return null;
+  const cone = Math.PI * H * R * R * (1 + k + k * k) / 3;
+  return { R, H, k, cone, V: b.ml > 0 ? b.ml : cone };
+}
+// ml of food when it reaches t of the way up the inside wall (t > 1: heaped above the rim).
+function fillMl(v, t) {
+  const k = v.k;
+  if (t <= 1) return v.V * (Math.pow(k + (1 - k) * t, 3) - k ** 3) / (1 - k ** 3);
+  const h = (t - 1) * v.H;
+  return v.V * (1 + Math.PI * h * (3 * v.R * v.R + h * h) / 6 / v.cone);
+}
+// Grams per ml of bowl space as served; the AI's own value wins when it gave one.
+const DENSITY = [
+  [/soup|broth|porridge|congee|stew|curry|chowder|milk|yogurt|juice|drink|smoothie|latte|\btea\b|coffee|ramen|pho\b|laksa|汤|湯|粥|羹|咖喱|奶|饮|咖啡|豆浆|スープ|국|탕|찌개/i, 1.0],
+  [/fried rice|炒饭|炒飯|볶음밥/i, 0.65],
+  [/noodle|pasta|spaghetti|udon|soba|lo mein|chow mein|面|麵|麺|粉|米线|국수|냉면/i, 0.6],
+  [/rice|risotto|biryani|饭|飯|밥/i, 0.75],
+  [/salad|lettuce|greens|spinach|沙拉|生菜|サラダ|샐러드/i, 0.2],
+  [/cereal|flakes|popcorn|chips|crisps|麦片|薯片/i, 0.15],
+  [/fruit|berr|melon|apple|mango|grape|水果|果/i, 0.6],
+  [/vegetable|broccoli|stir|菜|野菜|채소/i, 0.5],
+];
+function densityOf(it) {
+  if (it.g_per_ml > 0) return it.g_per_ml;
+  const s = `${it.name} ${it.name_zh || ''}`;
+  for (const [re, v] of DENSITY) if (re.test(s)) return v;
+  return 0.7;
+}
+function userBowl() { return (S.targets.bowls || []).find((b) => b.id === S.bowlSel) || null; }
+function plateVessel(P) {
+  const b = userBowl();
+  if (b) return { v: vessel(b), trusted: true, b };
+  const c = P.cont || {};
+  return c.kind && c.rim ? { v: vessel({ kind: c.kind, rim: c.rim, depth: c.depth }), trusted: false, c } : { v: null };
+}
+// Items the measurement covers: what's in the bowl (or on the scale), never per-serving menu items.
+function measurePool(P) {
+  return P.items.filter((it) => it.in_bowl !== false && !(it.food && isServing(it.food)));
+}
+function applyMeasure() {
+  const P = S.plate; if (!P) return;
+  const M = P.m, pool = measurePool(P);
+  for (const it of P.items) {
+    if (it.edited || !(it.base > 0)) continue;
+    it.grams = it.base; it.per = it.base / Math.max(1, it.count); it.measured = null;
+  }
+  M.info = '';
+  const free = pool.filter((it) => !it.edited && it.base > 0);
+  if (!free.length) return;
+  const fixedG = pool.filter((it) => it.edited).reduce((a, it) => a + it.grams, 0);
+  const set = (it, g, how) => { it.grams = Math.max(1, Math.round(g)); it.per = it.grams / Math.max(1, it.count); it.measured = how; };
+  const bowl = userBowl();
+  if (M.weighed > 0) {
+    const tare = bowl && bowl.tare > 0 && M.subTare ? bowl.tare : 0;
+    const rest = M.weighed - tare - fixedG;
+    if (rest <= 0) { M.info = T.mScaleBad; return; }
+    const sum = free.reduce((a, it) => a + it.base, 0);
+    for (const it of free) set(it, it.base * rest / sum, 'scale');
+    M.info = T.mScaleDone.replace('{g}', Math.round(M.weighed - tare));
+    return;
+  }
+  const pv = plateVessel(P);
+  const fill = M.fill ?? (P.cont && P.cont.fill);
+  if (!pv.v || !(fill > 0)) return;
+  const foodMl = fillMl(pv.v, fill);
+  const fixedMl = pool.filter((it) => it.edited).reduce((a, it) => a + it.grams / densityOf(it), 0);
+  const freeMl = free.reduce((a, it) => a + it.base / densityOf(it), 0);
+  let s = (foodMl - fixedMl) / freeMl;
+  if (!(s > 0)) return;
+  // The AI's own container size is a guess too: only average with its direct gram estimate,
+  // and ignore it when the two disagree wildly.
+  if (!pv.trusted && (s > 4 || s < 0.25)) return;
+  s = Math.min(6, Math.max(1 / 6, s));
+  const w = pv.trusted ? 1 : 0.5;
+  for (const it of free) set(it, it.base * Math.pow(s, w), pv.trusted ? 'bowl' : 'ref');
+  const fmt = (x) => String(Math.round(x));
+  M.info = pv.trusted
+    ? T.mBowl.replace('{b}', pv.b.name).replace('{v}', fmt(pv.v.V)).replace('{f}', fmt(fill * 100)).replace('{m}', fmt(foodMl))
+    : T.mRef.replace('{r}', pv.c.ref || 'AI').replace('{d}', fmt(pv.c.rim)).replace('{h}', fmt(pv.v.H))
+      .replace('{f}', fmt(fill * 100)).replace('{m}', fmt(foodMl));
+}
+function bowlSvg(fill, unknown) {
+  const y = 30 - Math.min(1, fill) * 24;
+  const dome = fill > 1 ? `<ellipse cx="28" cy="6" rx="24" ry="${Math.min(10, (fill - 1) * 24).toFixed(1)}" fill="var(--accent)" opacity=".55"/>` : '';
+  return `<svg width="56" height="36" viewBox="0 -6 56 42" aria-hidden="true"><defs><clipPath id="bowlClip"><path d="M4,6 Q6,30 28,30 Q50,30 52,6 Z"/></clipPath></defs>${dome}` +
+    `<rect x="0" y="${y.toFixed(1)}" width="56" height="40" clip-path="url(#bowlClip)" fill="var(--accent)" opacity="${unknown ? 0.2 : 0.55}"/>` +
+    `<path d="M4,6 Q6,30 28,30 Q50,30 52,6" fill="none" stroke="var(--ink2)" stroke-width="2"/>` +
+    `<line x1="1" y1="6" x2="55" y2="6" stroke="var(--ink2)" stroke-width="1" stroke-dasharray="2 2"/></svg>`;
+}
+function renderMeasure() {
+  const P = S.plate, M = P.m, box = $('plateMeasure');
+  const pv = plateVessel(P), bowl = userBowl();
+  const fill = M.fill ?? (P.cont && P.cont.fill) ?? null;
+  let html = '';
+  if (pv.v && !(M.weighed > 0)) {
+    const pct = Math.round((fill ?? 0.8) * 100);
+    html += `<div class="fillrow"><span class="small">${T.fillL}</span><span id="fillSvg">${bowlSvg(fill ?? 0.8, fill == null)}</span>` +
+      `<input type="range" id="fillRange" min="10" max="140" step="5" value="${pct}" aria-label="${T.fillL}">` +
+      `<span class="num small" id="fillVal">${fill != null ? pct + '%' : T.fillSet}</span></div>`;
+  }
+  html += `<div class="weighrow"><label for="weighIn" class="small grow">${P.scaleSeen ? T.mScaleSeen : T.weighL}</label>` +
+    `<input id="weighIn" type="number" inputmode="decimal" value="${M.weighed || ''}" placeholder="g"></div>`;
+  if (bowl && bowl.tare > 0 && M.weighed > 0) {
+    html += `<label class="small weighrow"><input type="checkbox" id="weighTare" ${M.subTare ? 'checked' : ''}> ${T.mScaleTare.replace('{t}', bowl.tare)}</label>`;
+  }
+  html += `<p class="muted small" id="measureInfo" style="margin:0">${esc(M.info || '')}</p>`;
+  box.innerHTML = html; box.hidden = false;
+  const range = $('fillRange');
+  if (range) range.addEventListener('input', () => {
+    M.fill = range.value / 100;
+    $('fillVal').textContent = range.value + '%';
+    $('fillSvg').innerHTML = bowlSvg(M.fill, false);
+    applyMeasure(); renderPlateBody();
+    $('measureInfo').textContent = M.info || '';
+  });
+  $('weighIn').addEventListener('change', (ev) => {
+    const g = parseFloat(ev.target.value);
+    M.weighed = g > 0 ? g : null;
+    applyMeasure(); renderPlate();
+  });
+  if ($('weighTare')) $('weighTare').addEventListener('change', (ev) => { M.subTare = ev.target.checked; applyMeasure(); renderPlate(); });
+}
+function fillBowlSelect() {
+  const sel = $('plateBowl'); if (!sel) return;
+  const bowls = S.targets.bowls || [];
+  if (S.bowlSel && !bowls.some((b) => b.id === S.bowlSel)) S.bowlSel = '';
+  const size = (b) => { const v = vessel(b); return v ? `${Math.round(v.V)} ml` : b.rim ? `${b.rim} cm` : ''; };
+  sel.innerHTML = `<option value="">${T.bowlNone}</option>` +
+    bowls.map((b) => `<option value="${esc(b.id)}">${esc([b.name, size(b)].filter(Boolean).join(' · '))}</option>`).join('') +
+    `<option value="__add">${T.bowlAddOpt}</option>`;
+  sel.value = S.bowlSel || '';
+}
+function bowlDesc(b) {
+  const v = vessel(b);
+  return [T['bK' + b.kind] || b.kind, b.rim && b.depth ? `${b.rim} × ${b.depth} cm` : b.rim ? `${b.rim} cm` : '',
+    v ? `${Math.round(v.V)} ml ${T.bFull}` : '', b.tare > 0 ? `${T.bEmptyW} ${b.tare} g` : ''].filter(Boolean).join(' · ');
+}
+function renderBowls() {
+  const bowls = S.targets.bowls || [];
+  $('bowlList').innerHTML = bowls.length ? bowls.map((b) => `<div class="entry">
+      <div class="grow" data-edit="${esc(b.id)}"><div class="name">${esc(b.name)}</div><div class="sub num">${esc(bowlDesc(b))}</div></div>
+      <button class="del" data-del="${esc(b.id)}">${T.bowlDel}</button></div>`).join('')
+    : `<p class="muted small">${T.bowlEmpty}</p>`;
+  $('bowlList').querySelectorAll('[data-edit]').forEach((el) => el.addEventListener('click', () => {
+    const b = bowls.find((x) => x.id === el.dataset.edit); if (!b) return;
+    S.bowlEdit = b.id;
+    $('bName').value = b.name; $('bKind').value = b.kind; $('bRim').value = b.rim || ''; $('bDepth').value = b.depth || '';
+    $('bMl').value = b.ml || ''; $('bTare').value = b.tare || '';
+    $('bowlForm').open = true; paintBowlCalc();
+  }));
+  $('bowlList').querySelectorAll('[data-del]').forEach((el) => el.addEventListener('click', () => {
+    S.targets.bowls = bowls.filter((x) => x.id !== el.dataset.del);
+    saveTargets(); renderBowls(); fillBowlSelect();
+  }));
+}
+function bowlFromForm() {
+  const n = (id) => { const v = parseFloat($(id).value); return v > 0 ? v : null; };
+  return { name: $('bName').value.trim(), kind: $('bKind').value, rim: n('bRim'), depth: n('bDepth'), ml: n('bMl'), tare: n('bTare') };
+}
+function paintBowlCalc() {
+  const b = bowlFromForm();
+  const v = b.rim && b.depth ? vessel({ ...b, ml: null }) : null;
+  $('bCalc').textContent = v ? T.bCalc.replace('{v}', Math.round(v.V)) : '';
+}
+function saveBowl() {
+  const b = bowlFromForm();
+  if (!((b.rim && b.depth) || b.ml)) return toast(T.bNeed);
+  b.name = b.name || T['bK' + b.kind];
+  b.id = S.bowlEdit || 'b' + Date.now().toString(36);
+  const bowls = (S.targets.bowls || []).filter((x) => x.id !== b.id);
+  S.targets.bowls = [...bowls, b];
+  S.bowlEdit = null;
+  ['bName', 'bRim', 'bDepth', 'bMl', 'bTare'].forEach((id) => { $(id).value = ''; });
+  $('bCalc').textContent = ''; $('bowlForm').open = false;
+  saveTargets(); renderBowls(); fillBowlSelect();
+}
+
 async function runSmart(canvas, quick) {
   $('guessList').hidden = true; $('photoShoot').hidden = false;
   const card = $('plateCard'); card.hidden = false;
@@ -1046,7 +1350,9 @@ async function runSmart(canvas, quick) {
   const think = $('plateThink'); think.hidden = false; think.textContent = '…';
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
   let res = null, err = null;
-  const hint = top && top.prob >= 0.5 ? labelToTerm(top.label) : null;
+  const rest = chainById(S.rest);
+  const hint = rest ? `this meal is from ${rest.en}; use its menu item names`
+    : (top && top.prob >= 0.5 ? labelToTerm(top.label) : null);
   try {
     if (vlmTier() === 'cloud') {
       res = await cloudAnalyze(canvas, hint);
@@ -1070,7 +1376,9 @@ async function runSmart(canvas, quick) {
     else merged.push({ ...it });
   }
   const real = merged.filter((it) => !GENERIC.test(it.name.trim()));
-  S.plate = { meal: res.meal, meal_zh: res.meal_zh, items: (real.length ? real : res.items).map(buildPlateItem) };
+  S.plate = { meal: res.meal, meal_zh: res.meal_zh, items: (real.length ? real : res.items).map(buildPlateItem),
+    cont: res.container || null, scaleSeen: res.scale_g != null, m: { fill: null, weighed: null, subTare: true, info: '' } };
+  applyMeasure();
   renderPlate();
 }
 function plateTotals(items) {
@@ -1084,11 +1392,18 @@ function plateMealName(P) { return (ZH ? (P.meal_zh || P.meal) : (P.meal || P.me
 function renderPlate() {
   const P = S.plate; if (!P) return;
   $('plateTitle').textContent = plateMealName(P);
+  renderMeasure();
+  renderPlateBody();
+}
+function renderPlateBody() {
+  const P = S.plate; if (!P) return;
+  const tags = { scale: T.tagScale, bowl: T.tagBowl, ref: T.tagRef };
   $('plateItems').innerHTML = P.items.map((it, i) => {
     const nm = ZH ? (it.name_zh || it.name) : it.name;
     const alt = ZH ? it.name : it.name_zh;
     const kcal = it.k100 != null ? Math.round(it.k100 * it.grams / 100) : null;
-    const src = (it.usual ? `${T.usual} · ` : '') + (it.food ? `${T.matched}: ${esc(nameOf(it.food))}` : (it.k100 != null ? T.aiKcal : T.noMatch));
+    const src = (it.measured ? `${tags[it.measured]} · ` : it.usual ? `${T.usual} · ` : '') +
+      (it.food ? `${T.matched}: ${esc(nameOf(it.food))}` : (it.k100 != null ? T.aiKcal : T.noMatch));
     return `<div class="plate-row" data-i="${i}">
       <div class="name">${esc(nm)}${alt && alt !== nm ? ` <span class="muted small">${esc(alt)}</span>` : ''}</div>
       <div class="muted small">${src}${it.k100 != null ? ` · ${Math.round(it.k100)} ${T.kcal}/100g` : ''}</div>
@@ -1103,15 +1418,15 @@ function renderPlate() {
   $('plateItems').querySelectorAll('.plate-row').forEach((row) => {
     const it = P.items[+row.dataset.i];
     row.querySelector('[data-a="dec"]').onclick = () => {
-      if (it.count > 1) { it.count--; it.grams = Math.round(it.per * it.count); it.edited = true; renderPlate(); }
+      if (it.count > 1) { it.count--; it.grams = Math.round(it.per * it.count); it.edited = true; applyMeasure(); renderPlate(); }
     };
-    row.querySelector('[data-a="inc"]').onclick = () => { it.count++; it.grams = Math.round(it.per * it.count); it.edited = true; renderPlate(); };
+    row.querySelector('[data-a="inc"]').onclick = () => { it.count++; it.grams = Math.round(it.per * it.count); it.edited = true; applyMeasure(); renderPlate(); };
     row.querySelector('[data-a="g"]').onchange = (e) => {
       const g = parseFloat(e.target.value);
       if (g > 0) { it.grams = Math.round(g); it.per = g / it.count; it.edited = true; }
-      renderPlate();
+      applyMeasure(); renderPlate();
     };
-    row.querySelector('[data-a="rm"]').onclick = () => { P.items.splice(P.items.indexOf(it), 1); renderPlate(); };
+    row.querySelector('[data-a="rm"]').onclick = () => { P.items.splice(P.items.indexOf(it), 1); applyMeasure(); renderPlate(); };
   });
   const tot = plateTotals(P.items);
   $('plateTotals').innerHTML = [
@@ -1134,7 +1449,8 @@ function logPlate() {
     kcal: tot.k, protein: tot.p, fat: tot.fa, carbs: tot.c, source: 'vlm', created_at: Date.now(),
     sodium_mg: tot.hasNa ? Math.round(tot.na) : null, sugar_g: tot.hasSu ? r1(tot.su) : null,
   });
-  for (const it of P.items) if (it.edited) rememberPortion('piece:' + it.name, it.per);
+  // Weighed or hand-corrected portions are real: remember them for next time.
+  for (const it of P.items) if (it.edited || it.measured === 'scale') rememberPortion('piece:' + it.name, it.per);
   S.plate = null; $('plateCard').hidden = true;
   setView('today');
 }
@@ -1143,9 +1459,10 @@ function addPlateItem() {
   if (!name || !S.plate) return;
   const it = buildPlateItem({ name, name_zh: '', count: 1, grams: null, kcal_100g: null });
   if (it.food && it.food.portion > 0 && it.grams < it.food.portion) { it.grams = Math.round(it.food.portion); it.per = it.grams; }
+  it.base = it.grams;
   S.plate.items.push(it);
   $('plateAddName').value = '';
-  renderPlate();
+  applyMeasure(); renderPlate();
 }
 function labelToTerm(label) {
   let name = label.includes(':') ? label.split(':').slice(1).join(':') : label;
@@ -1338,15 +1655,27 @@ function resetSheetAdd() {
   fresh.addEventListener('click', logFromSheet);
 }
 
+/* ---------- restaurant chains ---------- */
+function chainById(id) { return CHAINS.find((c) => c.id === id) || null; }
+function inChain(f, c) {
+  if (!c || !f) return false;
+  if (c.src) return f.source === c.src;
+  const up = f.en ? f.en.toUpperCase() : '', p = c.prefix.toUpperCase();
+  return up.startsWith(p) && /[ ,]/.test(up.charAt(p.length)); // "PIZZA HUT, …" or "PIZZA HUT 14\" …"
+}
+function isServing(f) { return !!f && (f.unit === 'serving' || f.source === 'chain-mcd-cn'); }
+function chainLabel(c) { return ZH ? c.zh : c.en; }
+
 /* ---------- building entries (sodium & sugar travel with every food) ---------- */
 function per100(v) { const n = parseFloat(v); return Number.isFinite(n) && n >= 0 ? n : null; }
 function entryFromFood(f, g) {
   const na = per100(f.na), sug = per100(f.sugar);
+  const serv = isServing(f), k = serv ? g : g / 100;
   return {
-    date: S.date, name: f._name, grams: g,
-    kcal: f.kcal * g / 100, protein: (f.protein || 0) * g / 100, fat: (f.fat || 0) * g / 100,
-    carbs: (f.carbs || 0) * g / 100,
-    sodium_mg: na === null ? null : Math.round(na * g / 100), sugar_g: sug === null ? null : r1(sug * g / 100),
+    date: S.date, name: serv && g !== 1 ? `${f._name} ×${g}` : f._name, grams: serv ? null : g,
+    kcal: f.kcal * k, protein: (f.protein || 0) * k, fat: (f.fat || 0) * k,
+    carbs: (f.carbs || 0) * k,
+    sodium_mg: na === null ? null : Math.round(na * k), sugar_g: sug === null ? null : r1(sug * k),
     source: f.source || 'custom', created_at: Date.now(),
   };
 }
@@ -1393,11 +1722,13 @@ function openSheet(f) {
   const usual = usualPortion('serv', f._name);
   $('shPer100').textContent = `${Math.round(f.kcal)} ${T.kcal} · ${T.protein} ${r1(f.protein)}g · ${T.fat} ${r1(f.fat)}g · ${T.carbs} ${r1(f.carbs)}g${extra ? ' · ' + extra : ''} (${T.per100})`
     + (usual ? ` · ${T.usual}` : '');
-  S.sheetDefault = usual || f.portion || 100;
+  S.sheetDefault = isServing(f) ? (usual || 1) : (usual || f.portion || 100);
   $('shGrams').value = S.sheetDefault;
+  $('shGramsL').textContent = isServing(f) ? T.servings : T.grams;
+  if (isServing(f)) $('shPer100').textContent = $('shPer100').textContent.replace(`(${T.per100})`, `(${T.perServing})`);
   $('shMult').innerHTML = [0.5, 1, 1.5, 2].map(m => `<button data-m="${m}">${m}×</button>`).join('');
   $('shMult').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-    $('shGrams').value = Math.round((f.portion || 100) * parseFloat(b.dataset.m)); sheetKcal();
+    $('shGrams').value = isServing(f) ? parseFloat(b.dataset.m) : Math.round((f.portion || 100) * parseFloat(b.dataset.m)); sheetKcal();
   }));
   sheetKcal();
   $('sheet').hidden = false;
@@ -1406,7 +1737,7 @@ function closeSheet() { $('sheet').hidden = true; resetSheetAdd(); }
 function sheetKcal() {
   const f = S.sheetFood; if (!f) return;
   const g = parseFloat($('shGrams').value) || 0;
-  $('shKcal').textContent = Math.round(f.kcal * g / 100) + ' ' + T.kcal;
+  $('shKcal').textContent = Math.round(f.kcal * (isServing(f) ? g : g / 100)) + ' ' + T.kcal;
 }
 
 /* ---------- daily calorie target (+ optional exercise eat-back from Apple Watch) ---------- */
@@ -1485,7 +1816,7 @@ function renderToday() {
   $('entryList').innerHTML = meals.map(e => `
     <div class="entry" data-k="${e._key}">
       <div class="grow"><div class="name">${esc(e.name)}</div>
-      <div class="sub num">${Math.round(e.grams)} ${T.grams} · ${Math.round(e.kcal)} ${T.kcal}</div></div>
+      <div class="sub num">${e.grams ? Math.round(e.grams) + ' ' + T.grams : T.oneServing} · ${Math.round(e.kcal)} ${T.kcal}</div></div>
       <button class="edit">${T.edit}</button>
     </div>`).join('');
   $('entryList').querySelectorAll('.entry').forEach((row) => {
@@ -1735,7 +2066,7 @@ function openEdit(key) {
   const e = S.entries.find((x) => x._key === key);
   if (!e) return;
   editKey = key; editOrig = { ...e }; delArmed = false;
-  $('edName').value = e.name; $('edGrams').value = Math.round(e.grams);
+  $('edName').value = e.name; $('edGrams').value = e.grams ? Math.round(e.grams) : '';
   $('edKcal').value = Math.round(e.kcal); $('edPro').value = r1(e.protein);
   $('edFat').value = r1(e.fat); $('edCarb').value = r1(e.carbs); $('edDate').value = e.date;
   $('edDelete').textContent = T.edDelete;
@@ -1750,11 +2081,12 @@ function rescaleEdit() {
   $('edPro').value = r1(editOrig.protein * k); $('edFat').value = r1(editOrig.fat * k); $('edCarb').value = r1(editOrig.carbs * k);
 }
 async function saveEdit() {
-  const name = $('edName').value.trim(), grams = parseFloat($('edGrams').value), kcal = parseFloat($('edKcal').value);
-  if (!name || !(grams > 0) || !(kcal >= 0)) return;
+  const name = $('edName').value.trim(), kcal = parseFloat($('edKcal').value);
+  const grams = editOrig.grams ? parseFloat($('edGrams').value) : null; // per-serving entries have no grams
+  if (!name || (editOrig.grams && !(grams > 0)) || !(kcal >= 0)) return;
   const patch = { name, grams, kcal, protein: parseFloat($('edPro').value) || 0, fat: parseFloat($('edFat').value) || 0,
     carbs: parseFloat($('edCarb').value) || 0, date: $('edDate').value || editOrig.date };
-  const k = editOrig.grams > 0 ? grams / editOrig.grams : 1;
+  const k = editOrig.grams > 0 && grams > 0 ? grams / editOrig.grams : 1;
   if (editOrig.sodium_mg != null) patch.sodium_mg = Math.round(editOrig.sodium_mg * k);
   if (editOrig.sugar_g != null) patch.sugar_g = r1(editOrig.sugar_g * k);
   if (Math.abs(k - 1) > 0.1 && editOrig.source !== 'vlm') rememberPortion('serv:' + name, grams);
@@ -1830,10 +2162,17 @@ function bigrams(s) {
   for (let i = 0; i < s.length - 1; i++) out.add(s.slice(i, i + 2));
   return out;
 }
-function fuzzy(name, q) {
+// whole: a Latin query must match whole words ("pho" is not in "phoenix"); search-as-you-type keeps prefixes.
+function fuzzy(name, q, whole) {
   if (!name || !q) return 0;
-  const n = String(name).toLowerCase();
-  if (n.includes(q)) return 0.75 + 0.25 * Math.min(1, q.length / n.length); // substring, weighted by coverage
+  let n = String(name).toLowerCase();
+  if (whole) n = n.replace(/\s*[（(［\[][^）)］\]]*[）)］\]]/g, '').trim() || n; // "面条（煮）" is just 面条
+  const i = n.indexOf(q);
+  // Chinese puts the head noun last: 牦牛肉 is beef, 牛肉面 is noodles.
+  const isWord = () => (/[a-z]/.test(q)
+    ? !/[a-z]/.test(n[i - 1] || '') && !/[a-z]/.test(n[i + q.length] || '')
+    : !/[\u3400-\u9fff]/.test(n[i + q.length] || ''));
+  if (i >= 0 && (!whole || isWord())) return 0.75 + 0.25 * Math.min(1, q.length / n.length); // substring, weighted by coverage
   if (q.length < 3) return 0;
   const a = bigrams(n), b = bigrams(q);
   if (!a.size || !b.size) return 0;
@@ -1938,7 +2277,13 @@ function renderResults() {
     .filter(c => !q || c.name.toLowerCase().includes(q) || fuzzy(c.name, q) > 0.5)
     .map(c => ({ ...c, _name: c.name, _custom: true }));
   let rows;
-  if (q) {
+  const rest = chainById(S.rest);
+  if (rest) {
+    rows = S.foods.filter((f) => inChain(f, rest))
+      .map((f) => ({ f, s: q ? Math.max(fuzzy(f.en, q), fuzzy(f.zh, q)) : 1 }))
+      .filter((x) => !q || x.s > 0.45).sort((a, b) => b.s - a.s || nameOf(a.f).localeCompare(nameOf(b.f)))
+      .slice(0, 80).map((x) => x.f);
+  } else if (q) {
     // typo-tolerant: substring first; if thin, fall back to fuzzy over every name
     rows = S.foods
       .map(f => ({ f, s: Math.max(fuzzy(f.en, q), fuzzy(f.zh, q), fuzzy(f.ja, q), fuzzy(f.ko, q)) }))
@@ -1954,7 +2299,7 @@ function renderResults() {
   let html = all.map((f, i) => `
     <button class="result" data-i="${i}">
       <span><span class="n">${esc(f._name)}</span>${f._custom ? '' : ` <span class="alt">${esc(altOf(f))}</span>`}</span>
-      <span class="k num">${Math.round(f.kcal)} ${T.kcal}/100g</span>
+      <span class="k num">${Math.round(f.kcal)} ${T.kcal}/${isServing(f) ? T.oneServing : '100g'}</span>
     </button>`).join('');
   if (!all.length) html = `<p class="muted small" style="margin-top:10px">${T.noResults}</p>`;
   if (q.length >= 3 && all.length < 4) {

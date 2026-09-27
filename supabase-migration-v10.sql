@@ -1,11 +1,12 @@
 -- SnapCal v10: sodium & sugar per entry, "your usual portions" memory, Apple Health water &
--- workouts, exercise eat-back, water target, reminder subscriptions.
+-- workouts, exercise eat-back, water target, reminder subscriptions, "My bowls" for photo portions.
 -- Run once in Supabase → SQL Editor. Additive; safe to run repeatedly. (Includes v9.)
 
 alter table public.entries      add column if not exists sodium_mg   double precision;
 alter table public.entries      add column if not exists sugar_g     double precision;
 alter table public.settings     add column if not exists water_ml    double precision;
 alter table public.settings     add column if not exists eat_back    double precision;
+alter table public.settings     add column if not exists bowls       jsonb;
 alter table public.health_daily add column if not exists water_ml    double precision;
 alter table public.health_daily add column if not exists workout_min double precision;
 

@@ -147,6 +147,13 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
 .progress{height:6px; border-radius:4px; background:var(--chip); overflow:hidden; margin-top:8px}
 .progress i{display:block; height:100%; background:var(--accent); width:0}
 .bar.water i{background:var(--carb)}
+.measure{background:var(--chip); border-radius:12px; padding:10px 12px; margin-top:10px; display:flex; flex-direction:column; gap:8px}
+.fillrow{display:flex; align-items:center; gap:10px}
+.fillrow input[type=range]{flex:1; min-width:0; accent-color:var(--accent); padding:0; border:none; background:none}
+.fillrow svg{display:block; flex:none}
+.weighrow{display:flex; align-items:center; gap:8px}
+.weighrow input[type=number]{width:90px; text-align:right; padding:6px 8px; flex:none}
+.weighrow input[type=checkbox]{accent-color:var(--accent); padding:0}
 .entry .edit{border:1px solid var(--line); background:var(--chip); color:var(--ink); border-radius:8px; padding:5px 11px; font-size:13px}
 .entry .grow{cursor:pointer}
 #login{max-width:400px; margin:8vh auto 0}
@@ -248,6 +255,9 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
         <div class="guesses" id="guessList" hidden></div>
       </div>
     </div>
+    <div class="field" style="padding:0"><label id="restL"></label><select id="plateRest" style="font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 10px;max-width:46%;max-width:60%"></select></div>
+    <div class="field" style="padding:0"><label id="bowlL" for="plateBowl"></label><select id="plateBowl" style="font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 10px;max-width:60%"></select></div>
+    <p class="muted small" id="measureTip" style="margin:0"></p>
     <label for="photoFile" class="primary" id="photoPickL" style="display:block;margin-top:0;text-align:center;cursor:pointer;background:var(--chip);color:var(--ink)"></label>
     <input type="file" id="photoFile" accept="image/*" hidden>
     <p class="modelnote" id="modelNote"></p>
@@ -261,6 +271,7 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
       <h2 style="font-size:17px" id="plateTitle"></h2>
       <p class="muted small" id="plateStatus"></p>
       <pre class="think" id="plateThink" hidden></pre>
+      <div class="measure" id="plateMeasure" hidden></div>
       <div id="plateItems"></div>
       <div class="row" id="plateAddRow" style="gap:8px;margin-top:10px" hidden>
         <input id="plateAddName" class="grow" autocomplete="off">
@@ -311,7 +322,7 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
 
   <section id="view-foods" class="stack" hidden>
     <div class="card">
-      <div class="searchrow"><input id="q" autocomplete="off"></div>
+      <div class="searchrow"><input id="q" autocomplete="off"><select id="restSel" style="font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 10px;max-width:46%"></select></div>
       <div id="results"></div>
       <details class="custom">
         <summary id="cfTitle"></summary>
@@ -366,6 +377,26 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
       </div>
       <p class="muted small" id="sVlmNote"></p>
     </div>
+    <div class="card" id="bowlCard">
+      <h2 style="font-size:16px" id="bowlTitle"></h2>
+      <p class="muted small" id="bowlHelp"></p>
+      <div id="bowlList"></div>
+      <details class="custom" id="bowlForm">
+        <summary id="bowlAddT"></summary>
+        <div class="field"><label id="bNameL" for="bName"></label><input id="bName" style="width:180px" autocomplete="off"></div>
+        <div class="field"><label id="bKindL" for="bKind"></label>
+          <select id="bKind" style="font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;width:150px">
+            <option value="bowl" id="bKbowl"></option><option value="plate" id="bKplate"></option><option value="cup" id="bKcup"></option><option value="box" id="bKbox"></option>
+          </select>
+        </div>
+        <div class="field"><label id="bRimL" for="bRim"></label><input id="bRim" type="number" step="0.1" inputmode="decimal" placeholder="16"></div>
+        <div class="field"><label id="bDepthL" for="bDepth"></label><input id="bDepth" type="number" step="0.1" inputmode="decimal" placeholder="7"></div>
+        <div class="field"><label id="bMlL" for="bMl"></label><input id="bMl" type="number" inputmode="numeric" placeholder="—"></div>
+        <div class="field"><label id="bTareL" for="bTare"></label><input id="bTare" type="number" inputmode="numeric" placeholder="—"></div>
+        <p class="muted small num" id="bCalc"></p>
+        <button class="primary" id="bSave"></button>
+      </details>
+    </div>
     <div class="card">
       <h2 style="font-size:16px" id="remTitle"></h2>
       <label class="field" style="justify-content:flex-start;gap:10px"><input type="checkbox" id="remWater"> <span id="remWaterL"></span></label>
@@ -389,7 +420,7 @@ pre.think{white-space:pre-wrap; font-size:12.5px; color:var(--ink2); margin:8px 
   </section>
 </main>
 
-<footer>SnapCal · 12,095 foods (USDA · MEXT · 中国食物成分表 · curated) · model: MobileNetV4 · 1,011 dishes · 11 cuisines</footer>
+<footer>SnapCal · 20,668 foods (USDA · MEXT · 中国食物成分表 · 台湾食药署 · McDonald's China · curated) · model: MobileNetV4 · 1,011 dishes · 11 cuisines</footer>
 </div>
 
 <div class="sheetwrap" id="sheet" hidden>
